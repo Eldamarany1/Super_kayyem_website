@@ -32,7 +32,7 @@ function Login({ onSwitchToSignup, onClose }) {
         
         <div className="auth-header">
           <div className="auth-logo">
-            سوبر<p> </p>قيم
+          <i className="fa-solid fa-wand-magic-sparkles"></i> سوبر <span>قيّم</span>
           </div>
           <h1>مرحباً بعودتك</h1>
           <p>سجل دخولك للمتابعة</p>

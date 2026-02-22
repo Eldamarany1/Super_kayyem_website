@@ -44,7 +44,7 @@ function PaymentModal({ onClose, onOpenUserData }) {
             <i className="fa-regular fa-credit-card" style={{ color: 'blue' }}></i> بطاقة بنكية
           </div>
         </div>
-        <button className="btn-main" onClick={handleNext}>
+        <button className="btn-main" onClick={handleNext} disabled={!selectedMethod}>
           التالي ➡️
         </button>
       </div>

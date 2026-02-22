@@ -44,7 +44,7 @@ export const books = [
     id: 4, 
     title: "حكايات جدتي", 
     price: 3, 
-    desc: "مجموعة من أحلى الحكايات الشعبية التي توارثناهاgeneration.",
+    desc: "مجموعة من أحلى الحكايات الشعبية التي توارثناها.",
     images: [
       "https://img.freepik.com/free-vector/grandmother-telling-story-children_1308-35128.jpg",
       "https://img.freepik.com/free-vector/bedtime-story-concept_1308-103287.jpg"

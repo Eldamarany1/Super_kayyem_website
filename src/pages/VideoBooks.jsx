@@ -25,6 +25,17 @@ const sampleVideos = [
     category: 'تعليمي'
   },
   {
+    id: 3,
+    title: 'أسعد طفل في العالم',
+    description: 'قصة ملهمة عن طفل اكتشف سر السعادة في مساعدة الآخرين',
+    thumbnail: 'https://images.unsplash.com/photo-1491212045917-77ec71a1f0cb?w=400&h=250&fit=crop',
+    videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+    duration: '15:20',
+    views: 1560,
+    author: 'منى أحمد',
+    category: 'قصص خيالية'
+  },
+  {
     id: 4,
     title: 'رحلة إلى القمر',
     description: 'انضم إلى رحلة الفضاء المثيرة مع فريق من الرواد الصغار',
@@ -230,6 +241,16 @@ function VideoBooks({ isAdmin, onBack }) {
                 <span><i className="fa-solid fa-user"></i> {selectedVideo.author}</span>
                 <span><i className="fa-solid fa-clock"></i> {selectedVideo.duration}</span>
               </div>
+              {selectedVideo.videoUrl && (
+                <a 
+                  href={selectedVideo.videoUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="video-source-btn"
+                >
+                  <i className="fa-solid fa-link"></i> فتح المصدر
+                </a>
+              )}
             </div>
           </div>
         </div>

@@ -32,6 +32,7 @@ function Signup({ onSwitchToLogin, onClose }) {
   };
 
   return (
+
     <div className="auth-page">
       <div className="auth-container">
         <button className="auth-close-btn" onClick={onClose}>
@@ -40,10 +41,10 @@ function Signup({ onSwitchToLogin, onClose }) {
         
         <div className="auth-header">
           <div className="auth-logo">
-            سوبر<p> </p>قيم
+          <i className="fa-solid fa-wand-magic-sparkles"></i> سوبر <span>قيّم</span>
           </div>
           <h1>إنشاء حساب جديد</h1>
-          <p>انضم إلى عائلة سو كييم</p>
+          <p>انضم إلى عائلة سوبر قيم</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
