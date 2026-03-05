@@ -973,8 +973,9 @@ footer {
   background: var(--blue);  
   color: white;  
   padding: 8px 18px;
-  border-radius: 50px;  
-  font-weight: 700;  
+  border-radius: 25px;
+  font-weight: 700;
+  font-size: 14px;
   text-decoration: none;  
   margin-top: 15px;  
   transition: var(--transition);  
