@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Qem | سوبر قيم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* ==============================
+           1. CSS VARIABLES & THEMES
+           ============================== */
+        :root {
+            /* Light Mode (Warm & Calm) */
+            --bg-color: #ffffff;
+            --bg-secondary: #f0f7ff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --primary-blue: #2563eb;
+            --primary-blue-hover: #1d4ed8;
+            --primary-yellow: #fbbf24;
+            --primary-yellow-hover: #f59e0b;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            --gradient-hero: linear-gradient(135deg, #e0f2fe 0%, #fef3c7 100%);
+        }
+
+        [data-theme="dark"] {
+            /* Dark Mode (Soft Night Sky) */
+            --bg-color: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --primary-blue: #3b82f6;
+            --primary-blue-hover: #60a5fa;
+            --primary-yellow: #f59e0b;
+            --primary-yellow-hover: #fbbf24;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            --gradient-hero: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+        }
+
+        /* ==============================
+           2. GLOBAL STYLES & RESET
+           ============================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            line-height: 1.6;
+        }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        button { font-family: inherit; cursor: pointer; border: none; outline: none; }
+
+        /* Typography */
+        h1, h2, h3 { color: var(--text-primary); margin-bottom: 1rem; }
+        p { color: var(--text-secondary); margin-bottom: 1rem; }
+
+        /* Shared Components */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .btn {
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        .btn-primary { background-color: var(--primary-blue); color: white; }
+        .btn-primary:hover { background-color: var(--primary-blue-hover); transform: translateY(-2px); }
+        .btn-yellow { background-color: var(--primary-yellow); color: #1e293b; }
+        .btn-yellow:hover { background-color: var(--primary-yellow-hover); transform: translateY(-2px); }
+        .btn-outline { border: 2px solid var(--primary-blue); color: var(--primary-blue); background: transparent;}
+        
+        .tag {
+            background: var(--bg-secondary); color: var(--primary-blue);
+            padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        .floating { animation: float 6s ease-in-out infinite; }
+        .page-view { display: none; animation: fadeIn 0.5s ease; }
+        .page-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Image Placeholders (Dreamy Style) */
+        .img-placeholder {
+            background: linear-gradient(45deg, var(--bg-secondary), var(--border-color));
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-secondary); font-weight: 600; text-align: center; border-radius: 16px;
+        }
+
+        /* ==============================
+           3. NAVIGATION BAR
+           ============================== */
+        nav {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky; top: 0; z-index: 100;
+            padding: 15px 0;
+        }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; font-weight: 800; color: var(--primary-blue); cursor: pointer; }
+        .logo span { color: var(--primary-yellow); }
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-links li { cursor: pointer; font-weight: 600; color: var(--text-secondary); transition: color 0.3s; }
+        .nav-links li:hover, .nav-links li.active { color: var(--primary-blue); }
+        .theme-toggle { background: var(--bg-secondary); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--primary-yellow); font-size: 1.2rem; }
+
+        /* ==============================
+           4. PAGES LAYOUTS
+           ============================== */
+
+        /* HOMEPAGE */
+        .hero { background: var(--gradient-hero); padding: 80px 0; border-radius: 0 0 40px 40px; text-align: center; overflow: hidden; position: relative; }
+        .hero h1 { font-size: 3rem; color: var(--primary-blue); }
+        .hero p { font-size: 1.2rem; max-width: 600px; margin: 0 auto 30px; }
+        .hero-graphics { height: 250px; margin: 40px auto 0; position: relative; width: 100%; max-width: 800px; }
+        .cloud, .island { position: absolute; border-radius: 50%; background: white; opacity: 0.8; }
+        
+        .section-title { text-align: center; font-size: 2rem; margin: 60px 0 30px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .card { background: var(--card-bg); border-radius: 20px; padding: 20px; box-shadow: var(--shadow); transition: transform 0.3s; cursor: pointer; }
+        .card:hover { transform: translateY(-10px); }
+        .card .img-placeholder { height: 180px; margin-bottom: 15px; }
+        .card h3 { font-size: 1.4rem; margin-bottom: 5px; }
+
+        .bassem-section { background: var(--bg-secondary); padding: 60px 20px; border-radius: 30px; display: flex; align-items: center; gap: 40px; margin: 60px 0; }
+        .bassem-avatar { width: 200px; height: 200px; border-radius: 50%; background: var(--primary-yellow); flex-shrink: 0; box-shadow: var(--shadow); border: 8px solid white; }
+        .bassem-content h2 { color: var(--primary-blue); }
+
+        /* STORY PAGE */
+        .story-header { display: flex; gap: 40px; margin-top: 40px; background: var(--card-bg); padding: 30px; border-radius: 30px; box-shadow: var(--shadow); }
+        .story-banner { flex: 1; height: 350px; border-radius: 20px; }
+        .story-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .story-meta { display: flex; gap: 10px; margin-bottom: 20px; }
+        .ratings { color: var(--primary-yellow); margin-bottom: 15px; font-size: 1.2rem; }
+        .story-actions { display: flex; gap: 15px; margin-top: 20px; }
+
+        /* LIBRARY PAGE */
+        .dashboard-header { margin: 40px 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .progress-bar { width: 100%; background: var(--bg-secondary); height: 8px; border-radius: 10px; margin-top: 15px; overflow: hidden; }
+        .progress-fill { background: var(--primary-blue); height: 100%; border-radius: 10px; }
+
+        /* READER PAGE */
+        .reader-container { max-width: 1000px; margin: 40px auto; background: var(--card-bg); box-shadow: var(--shadow); border-radius: 20px; overflow: hidden; }
+        .reader-toolbar { padding: 15px 30px; background: var(--bg-secondary); display: flex; justify-content: space-between; align-items: center; }
+        .book-spread { display: flex; height: 600px; background: #fffaf0; /* Warm paper color */ }
+        .book-page { flex: 1; padding: 40px; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        [dir="rtl"] .book-page { border-left: 1px solid #e2e8f0; border-right: none; }
+        .book-page:last-child { border: none; }
+        .page-text { font-size: 1.4rem; line-height: 2; color: #333; text-align: justify; }
+
+        /* ACCOUNT PAGE */
+        .profile-container { max-width: 800px; margin: 40px auto; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+        .form-group input { width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; background: var(--bg-color); color: var(--text-primary); }
+
+        /* ==============================
+           5. REWARD POPUP (MODAL)
+           ============================== */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal {
+            background: var(--card-bg); padding: 40px; border-radius: 30px; text-align: center;
+            max-width: 400px; width: 90%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease; position: relative;
+        }
+        .modal h2 { color: var(--primary-yellow); font-size: 2rem; margin-top: 20px; }
+        .modal-mascot { width: 120px; height: 120px; background: var(--bg-secondary); border-radius: 50%; margin: -80px auto 20px; display: flex; align-items: center; justify-content: center; border: 5px solid var(--card-bg); font-size: 3rem; }
+
+        /* Footer */
+        footer { background: var(--bg-secondary); padding: 40px 0; text-align: center; margin-top: 80px; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .story-header { flex-direction: column; }
+            .bassem-section { flex-direction: column; text-align: center; }
+            .book-spread { flex-direction: column; height: auto; }
+            .book-page { border: none !important; border-bottom: 1px solid #e2e8f0 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <div class="container nav-container">
+            <div class="logo" onclick="navigateTo('home')">سوبر <span>قيم</span></div>
+            <ul class="nav-links">
+                <li onclick="navigateTo('home')" id="nav-home" class="active">الرئيسية</li>
+                <li onclick="navigateTo('library')" id="nav-library">مكتبتي</li>
+                <li onclick="navigateTo('account')" id="nav-account">حسابي</li>
+            </ul>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <button class="theme-toggle" onclick="toggleTheme()" title="تغيير المظهر">🌙</button>
+                <button class="btn btn-primary" onclick="navigateTo('home')">ابدأ المغامرة</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN APP CONTAINER -->
+    <main id="app">
+
+        <!-- ==============================
+             1. HOMEPAGE VIEW
+             ============================== -->
+        <section id="home" class="page-view active">
+            <!-- Hero Section -->
+            <div class="hero">
+                <div class="container">
+                    <h1>مغامرات تصنع القيم</h1>
+                    <p>عالم رقمي آمن يجمع بين سحر القصص وتنمية القيم الأخلاقية لدى الأطفال، صُمم خصيصاً للآباء الباحثين عن محتوى راقي.</p>
+                    <button class="btn btn-yellow" style="font-size: 1.2rem; padding: 15px 35px;" onclick="document.getElementById('stories').scrollIntoView({behavior: 'smooth'})">استكشف القصص</button>
+                    
+                    <!-- CSS Art for Dreamy Sky Placeholder -->
+                    <div class="hero-graphics">
+                        <div class="img-placeholder floating" style="width: 200px; height: 80px; border-radius: 40px; position: absolute; top: 20px; left: 10%;">☁️ جزيرة طافية</div>
+                        <div class="img-placeholder floating" style="width: 150px; height: 60px; border-radius: 40px; position: absolute; top: 60px; right: 15%; animation-delay: 2s;">☁️ غيوم ناعمة</div>
+                        <div class="img-placeholder floating" style="width: 300px; height: 120px; border-radius: 60px; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); animation-delay: 1s;">✨ مدينة الخيال ✨</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container" id="stories">
+                <!-- Meet Bassem Section -->
+                <div class="bassem-section">
+                    <div class="bassem-avatar img-placeholder floating">صورة باسم<br>(بطل المغامرات)</div>
+                    <div class="bassem-content">
+                        <h2>مرحباً! أنا باسم</h2>
+                        <p>أنا صديق أطفالكم الجديد. أحب استكشاف الفضاء، وحل الألغاز العلمية، والسفر عبر الجزر الطافية! في كل قصة نعيشها معاً، نتعلم قيمة جديدة تجعلنا أبطالاً حقيقيين في عالمنا.</p>
+                        <button class="btn btn-outline" onclick="navigateTo('story')">اقرأ مغامرتي الأولى</button>
+                    </div>
+                </div>
+
+                <!-- Stories Grid: Adventure -->
+                <h2 class="section-title">مغامرات شيقة</h2>
+                <div class="grid">
+                    <div class="card" onclick="navigateTo('story')">
+                        <div class="img-placeholder">غلاف القصة: الفضاء</div>
+                        <h3>باسم ومسبار الأمل</h3>
+                        <p>رحلة فضائية مذهلة لاكتشاف الكواكب.</p>
+                        <span class="tag">التعاون</span> <span class="tag">٦-٨ سنوات</span>
+                    </div>
+                    <div class="card" onclick="navigateTo('story')">
+                        <div class="img-placeholder">غلاف القصة: المحيط</div>
+                        <h3>سر اللؤلؤة الزرقاء</h3>
+                        <p>مغامرة في أعماق البحر مع الكائنات البحرية.</p>
+                        <span class="tag">الشجاعة</span> <span class="tag">٤-٦ سنوات</span>
+                    </div>
+                    <div class="card" onclick="navigateTo('story')">
+                        <div class="img-placeholder">غلاف القصة: الغابة</div>
+                        <h3>خريطة الشجرة العتيقة</h3>
+                        <p>لغز مثير داخل الغابة السحرية.</p>
+                        <span class="tag">الصدق</span> <span class="tag">٨-١٠ سنوات</span>
+                    </div>
+                </div>
+
+                <!-- Parents Section -->
+                <h2 class="section-title">ركن الآباء والمربين</h2>
+                <div class="grid">
+                    <div class="card" style="background: var(--bg-secondary);">
+                        <h3>كيف نغرس الصدق؟</h3>
+                        <p>مقال تربوي قصير عن أهمية القراءة في بناء الشخصية.</p>
+                        <a href="#" style="color: var(--primary-blue); font-weight: 600;">اقرأ المزيد ←</a>
+                    </div>
+                    <div class="card" style="background: var(--bg-secondary);">
+                        <h3>وقت النوم الهادئ</h3>
+                        <p>نصائح لاختيار قصص ما قبل النوم المناسبة لطفلك.</p>
+                        <a href="#" style="color: var(--primary-blue); font-weight: 600;">اقرأ المزيد ←</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==============================
+             2. STORY PAGE VIEW
+             ============================== -->
+        <section id="story" class="page-view">
+            <div class="container">
+                <div class="story-header">
+                    <div class="story-banner img-placeholder">
+                        تصميم سينمائي ناعم للمغامرة: باسم بملابس رائد فضاء يطفو بين النجوم المضيئة.
+                    </div>
+                    <div class="story-info">
+                        <h1>باسم ومسبار الأمل</h1>
+                        <div class="story-meta">
+                            <span class="tag">الفئة العمرية: ٦-٨ سنوات</span>
+                            <span class="tag">القيمة: التعاون</span>
+                            <span class="tag">مدة القراءة: ١٠ دقائق</span>
+                        </div>
+                        <div class="ratings">⭐⭐⭐⭐⭐ (٤.٨ / ٥)</div>
+                        <p style="font-size: 1.1rem; margin-bottom: 20px;">
+                            ينطلق باسم مع أصدقائه في رحلة خيالية لإنقاذ كوكب صغير فقد نوره. من خلال هذه القصة المليئة بالخيال والألوان الدافئة، يتعلم الأطفال أن العمل الجماعي يضيء حتى أظلم الأماكن.
+                        </p>
+                        <div class="story-actions">
+                            <!-- Trigger Reward system on purchase -->
+                            <button class="btn btn-primary" onclick="purchaseStory()">شراء القصة (١٥ ر.س)</button>
+                            <button class="btn btn-outline" onclick="navigateTo('reader')">معاينة مجانية</button>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="section-title" style="text-align: right; margin-top: 60px;">قصص مشابهة قد تعجبك</h2>
+                <div class="grid">
+                    <div class="card" onclick="navigateTo('story')">
+                        <div class="img-placeholder" style="height: 120px;">غلاف</div>
+                        <h3>بطل المجرة</h3>
+                        <span class="tag">المسؤولية</span>
+                    </div>
+                    <div class="card" onclick="navigateTo('story')">
+                        <div class="img-placeholder" style="height: 120px;">غلاف</div>
+                        <h3>أصدقاء القمر</h3>
+                        <span class="tag">الصداقة</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==============================
+             3. LIBRARY PAGE VIEW
+             ============================== -->
+        <section id="library" class="page-view">
+            <div class="container">
+                <div class="dashboard-header">
+                    <h1>مكتبتي الخاصة</h1>
+                    <button class="btn btn-outline">تحميل كل القصص (PDF)</button>
+                </div>
+                
+                <h2 style="margin-top: 30px;">متابعة القراءة</h2>
+                <div class="grid">
+                    <div class="card">
+                        <div style="display: flex; gap: 15px;">
+                            <div class="img-placeholder" style="width: 80px; height: 80px; border-radius: 10px;">غلاف</div>
+                            <div style="flex: 1;">
+                                <h3 style="margin-bottom: 5px; font-size: 1.2rem;">سر اللؤلؤة الزرقاء</h3>
+                                <p style="margin-bottom: 0; font-size: 0.9rem;">الصفحة ٨ من ١٥</p>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 60%;"></div></div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%; margin-top: 15px; padding: 8px;" onclick="navigateTo('reader')">أكمل القراءة</button>
+                    </div>
+                </div>
+
+                <h2 style="margin-top: 40px;">القصص المكتملة والمفضلة</h2>
+                <div class="grid">
+                    <div class="card">
+                        <div class="img-placeholder" style="height: 150px;">غلاف</div>
+                        <h3>باسم ومسبار الأمل</h3>
+                        <button class="btn btn-yellow" style="width: 100%; padding: 8px;" onclick="navigateTo('reader')">اقرأ مرة أخرى</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==============================
+             4. READER PAGE VIEW
+             ============================== -->
+        <section id="reader" class="page-view">
+            <div class="container">
+                <div class="reader-container">
+                    <div class="reader-toolbar">
+                        <button class="btn btn-outline" onclick="navigateTo('library')">إغلاق وتخزين</button>
+                        <h3 style="margin: 0;">باسم ومسبار الأمل</h3>
+                        <div>
+                            <button class="btn btn-outline" title="حفظ علامة">🔖</button>
+                            <button class="btn btn-primary" title="تحميل PDF">⬇️ PDF</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Horizontal 2-page book spread -->
+                    <div class="book-spread">
+                        <div class="book-page">
+                            <div class="img-placeholder" style="height: 200px; margin-bottom: 30px; border-radius: 10px; background: #e0f2fe;">رسمة ناعمة للسماء والنجوم</div>
+                            <p class="page-text">في ليلة هادئة، وتحت ضوء قمر فضي ناعم، كان باسم يجلس في غرفته متأملاً السماء من نافذته الصنبورة. كان يحلم دائماً بأن يصبح رائد فضاء يكتشف الكواكب البعيدة والمجرات المجهولة.</p>
+                            <p class="page-text">فجأة، لمح شهاباً لامعاً يهبط ببطء نحو حديقة منزله. ارتدى باسم خوذته البلاستيكية وخرج بشجاعة ليستكشف الأمر.</p>
+                            <div style="margin-top: auto; text-align: left; color: #94a3b8;">١</div>
+                        </div>
+                        <div class="book-page">
+                            <p class="page-text">عندما اقترب من الحديقة، وجد مركبة صغيرة تلمع بلون أزرق دافئ. انفتح باب المركبة، وخرج منها كائن لطيف يشبه النجمة الساطعة.</p>
+                            <p class="page-text">قال الكائن بصوت يشبه جرس الموسيقى: "مرحباً يا باسم، أنا 'نور'. كوكبي فقد طاقته، وأحتاج إلى بطل شجاع ومتعاون مثلك لمساعدتي!"</p>
+                            <div class="img-placeholder" style="height: 150px; margin-top: 20px; border-radius: 10px; background: #fef3c7;">رسمة باسم والنجمة المضيئة</div>
+                            <div style="margin-top: auto; text-align: right; color: #94a3b8;">٢</div>
+                        </div>
+                    </div>
+                    
+                    <div class="reader-toolbar" style="justify-content: center; gap: 20px;">
+                        <button class="btn btn-primary">الصفحة السابقة</button>
+                        <span style="font-weight: 600;">١ / ١٠</span>
+                        <button class="btn btn-primary">الصفحة التالية</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==============================
+             5. ACCOUNT PAGE VIEW
+             ============================== -->
+        <section id="account" class="page-view">
+            <div class="container">
+                <div class="profile-container">
+                    <h1 style="text-align: center; margin-bottom: 40px;">إعدادات الحساب</h1>
+                    
+                    <div class="card" style="margin-bottom: 30px;">
+                        <h2>ملف ولي الأمر</h2>
+                        <div class="form-group">
+                            <label>الاسم الكامل</label>
+                            <input type="text" value="أحمد عبدالله">
+                        </div>
+                        <div class="form-group">
+                            <label>البريد الإلكتروني</label>
+                            <input type="email" value="ahmed@example.com">
+                        </div>
+                        <button class="btn btn-primary">حفظ التعديلات</button>
+                    </div>
+
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2>ملفات الأطفال</h2>
+                            <button class="btn btn-yellow">+ إضافة طفل</button>
+                        </div>
+                        
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                            <div style="background: var(--bg-secondary); padding: 20px; border-radius: 20px; text-align: center; width: 150px;">
+                                <div class="img-placeholder" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 10px; background: var(--primary-blue); color: white;">👦</div>
+                                <h3>عمر</h3>
+                                <p style="margin: 0;">٦ سنوات</p>
+                            </div>
+                            <div style="background: var(--bg-secondary); padding: 20px; border-radius: 20px; text-align: center; width: 150px;">
+                                <div class="img-placeholder" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 10px; background: #ec4899; color: white;">👧</div>
+                                <h3>لينا</h3>
+                                <p style="margin: 0;">٤ سنوات</p>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                            <h3 style="color: var(--primary-blue);">ترشيحات النظام لعمر (٦ سنوات):</h3>
+                            <p>بناءً على عمر "عمر"، نقترح قصص تركز على تنمية مهارات التواصل والتعاون.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==============================
+         6. REWARD SYSTEM MODAL
+         ============================== -->
+    <div class="modal-overlay" id="rewardModal">
+        <div class="modal">
+            <div class="modal-mascot">🎁</div>
+            <h2>مفاجأة باسم!</h2>
+            <p style="font-size: 1.2rem; margin: 15px 0 25px;">رائع! لقد أتممت عملية الشراء بنجاح. بمناسبة انضمامك لمغامراتنا، أهداك باسم كود خصم ٥٠٪ على قصتك القادمة!</p>
+            <div style="background: var(--bg-secondary); padding: 15px; border-radius: 10px; font-weight: 800; font-size: 1.5rem; letter-spacing: 2px; color: var(--primary-blue); margin-bottom: 20px;">BASSEM50</div>
+            <button class="btn btn-yellow" style="width: 100%; font-size: 1.1rem;" onclick="closeModal()">شكراً باسم! (الذهاب للمكتبة)</button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="logo" style="margin-bottom: 20px;">سوبر <span>قيم</span></div>
+            <p>منصة رقمية آمنة تصنع القيم من خلال قصص تفاعلية ملهمة.</p>
+            <p style="font-size: 0.9rem; margin-top: 30px; color: var(--text-secondary);">© 2024 سوبر قيم. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
+
+    <!-- ==============================
+         JAVASCRIPT LOGIC
+         ============================== -->
+    <script>
+        // --- Navigation Logic (Single Page App Simulation) ---
+        function navigateTo(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-view').forEach(page => {
+                page.classList.remove('active');
+            });
+            // Show target page
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Update Nav Links Active State
+            document.querySelectorAll('.nav-links li').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            const activeNav = document.getElementById('nav-' + pageId);
+            if(activeNav) activeNav.classList.add('active');
+        }
+
+        // --- Dark/Light Mode Toggle ---
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const toggleBtn = document.querySelector('.theme-toggle');
+
+            if (currentTheme === 'dark') {
+                body.removeAttribute('data-theme');
+                toggleBtn.innerHTML = '🌙'; // Switch icon to moon
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                toggleBtn.innerHTML = '☀️'; // Switch icon to sun
+            }
+        }
+
+        // --- Reward System (Popup Logic) ---
+        function purchaseStory() {
+            // Trigger the reward modal overlay
+            const modal = document.getElementById('rewardModal');
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('rewardModal');
+            modal.style.display = 'none';
+            // After claiming reward, navigate to library
+            navigateTo('library');
+        }
+
+        // Close modal if clicked outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('rewardModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
