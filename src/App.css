@@ -82,6 +82,14 @@ p { color: var(--text-secondary); margin-bottom: 1rem; }
 .floating { animation: float 6s ease-in-out infinite; }
 .page-view { display: none; animation: fadeIn 0.5s ease; }
 .page-view.active { display: block; }
+
+/* Library and Account Sections */
+.library-section,
+.account-section {
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Image Placeholders (Dreamy Style) */

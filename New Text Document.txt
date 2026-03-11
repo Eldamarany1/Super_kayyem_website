@@ -1,0 +1,6 @@
+make pages files to add the pages content to it like :
+1- الرئيسية 
+2- مكتبتي
+3- حسابي 
+4 - من نحن 
+etc 
