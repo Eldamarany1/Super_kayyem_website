@@ -1,5 +1,6 @@
 // Main App Component
 import { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import './App.css'
 
 // Import Pages
@@ -17,14 +18,36 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import RewardModal from './components/RewardModal'
 
-// Main App Component
-function App() {
-  const [currentPage, setCurrentPage] = useState('home')
+function AppContent() {
   const [selectedStoryId, setSelectedStoryId] = useState(1)
   const [isDark, setIsDark] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  
+  const navigate = useNavigate()
+  const location = useLocation()
 
+  // Bridge function to support your existing pages without breaking them
+  const setCurrentPage = (page) => {
+    const routes = {
+      home: '/',
+      about: '/about',
+      library: '/library',
+      account: '/account',
+      login: '/login',
+      signup: '/signup',
+      story: '/story',
+      reader: '/reader'
+    }
+    if (routes[page]) navigate(routes[page])
+  }
+
+  // Scroll to top on route change, but only if not doing a hash scroll
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [location.pathname])
+
+  // Theme toggle
   useEffect(() => {
     if (isDark) {
       document.body.setAttribute('data-theme', 'dark')
@@ -33,15 +56,9 @@ function App() {
     }
   }, [isDark])
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [currentPage])
-
   return (
     <div className="app" dir="rtl">
       <Navbar 
-        currentPage={currentPage} 
-        setCurrentPage={setCurrentPage} 
         isDark={isDark} 
         setIsDark={setIsDark}
         isLoggedIn={isLoggedIn}
@@ -49,23 +66,28 @@ function App() {
       />
 
       <main id="app">
-        {/* Page Routing */}
-        {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} />}
-        {currentPage === 'about' && <AboutPage />}
-        {currentPage === 'library' && <LibraryPage setCurrentPage={setCurrentPage} setSelectedStoryId={setSelectedStoryId} />}
-        {currentPage === 'account' && <AccountPage />}
-        
-        {/* Authentication Pages */}
-        {currentPage === 'login' && (
-          <LoginPage setCurrentPage={setCurrentPage} setIsLoggedIn={setIsLoggedIn} />
-        )}
-        {currentPage === 'signup' && (
-          <SignupPage setCurrentPage={setCurrentPage} setIsLoggedIn={setIsLoggedIn} />
-        )}
-        
-        {/* All Pages - No login required */}
-        {currentPage === 'story' && <StoryPage setCurrentPage={setCurrentPage} setShowModal={setShowModal} setSelectedStoryId={setSelectedStoryId} />}
-        {currentPage === 'reader' && <ReaderPage setCurrentPage={setCurrentPage} storyId={selectedStoryId} />}
+        <Routes>
+          <Route path="/" element={<HomePage setCurrentPage={setCurrentPage} />} />
+          <Route path="/about" element={<AboutPage />} />
+          
+          {/* Protected Routes */}
+          <Route path="/library" element={
+            isLoggedIn ? 
+              <LibraryPage setCurrentPage={setCurrentPage} setSelectedStoryId={setSelectedStoryId} /> 
+            : <Navigate to="/login" />
+          } />
+          <Route path="/account" element={
+            isLoggedIn ? <AccountPage /> : <Navigate to="/login" />
+          } />
+          
+          {/* Auth Routes */}
+          <Route path="/login" element={<LoginPage setCurrentPage={setCurrentPage} setIsLoggedIn={setIsLoggedIn} />} />
+          <Route path="/signup" element={<SignupPage setCurrentPage={setCurrentPage} setIsLoggedIn={setIsLoggedIn} />} />
+          
+          {/* Content Routes */}
+          <Route path="/story" element={<StoryPage setCurrentPage={setCurrentPage} setShowModal={setShowModal} setSelectedStoryId={setSelectedStoryId} />} />
+          <Route path="/reader" element={<ReaderPage setCurrentPage={setCurrentPage} storyId={selectedStoryId} />} />
+        </Routes>
       </main>
 
       <Footer />
@@ -79,5 +101,13 @@ function App() {
   )
 }
 
-export default App
+// Wrap the app in BrowserRouter
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  )
+}
 
+export default App

@@ -11,12 +11,24 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
   const isFirstPage = currentPage === 0
   const isLastPage = currentPage === totalPages - 1
   
+  
   const goToNextPage = () => {
-    if (!isLastPage) setCurrentPageNum(currentPage + 1)
+    // Jump by 2 to turn the whole spread
+    if (currentPage + 2 < totalPages) {
+      setCurrentPageNum(currentPage + 2)
+    } else if (!isLastPage) {
+      // Fallback if there's an odd number of pages at the very end
+      setCurrentPageNum(currentPage + 1)
+    }
   }
   
   const goToPrevPage = () => {
-    if (!isFirstPage) setCurrentPageNum(currentPage - 1)
+    // Go back by 2 pages
+    if (currentPage - 2 >= 0) {
+      setCurrentPageNum(currentPage - 2)
+    } else if (!isFirstPage) {
+      setCurrentPageNum(0)
+    }
   }
 
   const handleGoBack = () => {
@@ -32,11 +44,28 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
               إغلاق وتخزين
             </button>
             <h3 style={{ margin: '0' }}>{story.title}</h3>
-            <div>
-              <button className="btn btn-outline" title="حفظ علامة">🔖</button>
-              <button className="btn btn-primary" title="تحميل PDF">⬇️ PDF</button>
-            </div>
           </div>
+
+                    <div className="reader-toolbar" style={{ justifyContent: 'center', gap: '20px' }}>
+            <button 
+              className="btn btn-primary" 
+              onClick={goToPrevPage}
+              disabled={isFirstPage}
+              style={{ opacity: isFirstPage ? 0.5 : 1 }}
+            >
+              ▶ الصفحة السابقة 
+            </button>
+            <span style={{ fontWeight: '600', fontSize: '1.1rem' }}>
+              {currentPage + 1} - {Math.min(currentPage + 2, totalPages)} من {totalPages}
+            </span>
+            <button 
+              className="btn btn-primary" 
+              onClick={goToNextPage}
+              disabled={isLastPage}
+              style={{ opacity: isLastPage ? 0.5 : 1 }}
+            >
+              الصفحة التالية ◀
+            </button>
           
           <div className="book-spread">
             {/* Left Page - Current Page */}
@@ -65,8 +94,10 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
                   <div style={{ marginTop: 'auto', textAlign: 'right', color: '#94a3b8', fontSize: '1.2rem' }}>
                     {currentPage + 2}
                   </div>
+
                 </>
-              ) : (
+            ) : (
+              <>
                 <div className="story-end">
                   <div style={{ textAlign: 'center', padding: '40px 20px' }}>
                     <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🏆</div>
@@ -85,30 +116,16 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
                     {currentPage + 2}
                   </div>
                 </div>
-              )}
+
+              </>
+            )}
             </div>
           </div>
           
-          <div className="reader-toolbar" style={{ justifyContent: 'center', gap: '20px' }}>
-            <button 
-              className="btn btn-primary" 
-              onClick={goToPrevPage}
-              disabled={isFirstPage}
-              style={{ opacity: isFirstPage ? 0.5 : 1 }}
-            >
-              ◀ الصفحة السابقة
-            </button>
-            <span style={{ fontWeight: '600', fontSize: '1.1rem' }}>
-              {currentPage + 1} - {Math.min(currentPage + 2, totalPages)} من {totalPages}
-            </span>
-            <button 
-              className="btn btn-primary" 
-              onClick={goToNextPage}
-              disabled={isLastPage}
-              style={{ opacity: isLastPage ? 0.5 : 1 }}
-            >
-              الصفحة التالية ▶
-            </button>
+                <div>
+                  <button className="btn btn-outline" title="حفظ علامة">🔖</button>
+                  <button className="btn btn-primary" title="تحميل PDF">⬇️ PDF</button>
+                </div>
           </div>
         </div>
       </div>

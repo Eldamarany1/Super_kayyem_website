@@ -1,66 +1,65 @@
 // Navigation Component - شريط التنقل
-function Navbar({ currentPage, setCurrentPage, isDark, setIsDark, isLoggedIn, setIsLoggedIn }) {
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+
+function Navbar({ isDark, setIsDark, isLoggedIn, setIsLoggedIn }) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const currentPath = location.pathname
+
   const handleLogout = () => {
     setIsLoggedIn(false)
-    setCurrentPage('login')
+    navigate('/login')
+  }
+
+  const handleScrollTo = (id) => {
+    if (currentPath !== '/') {
+      navigate('/')
+      // Slight delay to ensure the home page DOM is painted before scrolling
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+    }
   }
 
   return (
     <nav>
       <div className="container nav-container">
-        <div className="logo" onClick={() => setCurrentPage('home')}>
+        <Link to="/" className="logo" style={{ textDecoration: 'none' }}>
           سوبر <span>قيم</span>
-        </div>
+        </Link>
         <ul className="nav-links">
-          <li 
-            onClick={() => setCurrentPage('home')} 
-            id="nav-home" 
-            className={currentPage === 'home' ? 'active' : ''}
-          >
-            الرئيسية
+          <li>
+            <Link to="/" className={currentPath === '/' ? 'active' : ''}>الرئيسية</Link>
           </li>
           <li 
-            onClick={() => {
-              setCurrentPage('home')
-              document.getElementById('stories')?.scrollIntoView({ behavior: 'smooth' })
-            }} 
-            id="nav-stories"
-            className={currentPage === 'stories' ? 'active' : ''}
+            onClick={() => handleScrollTo('stories')} 
+            style={{ cursor: 'pointer' }}
           >
             قصصنا
           </li>
           <li 
-            onClick={() => {
-              setCurrentPage('home')
-              document.getElementById('parents')?.scrollIntoView({ behavior: 'smooth' })
-            }} 
-            id="nav-parents"
-            className={currentPage === 'parents' ? 'active' : ''}
+            onClick={() => handleScrollTo('parents')} 
+            style={{ cursor: 'pointer' }}
           >
             للآباء
           </li>
-          <li 
-            onClick={() => setCurrentPage('about')} 
-            id="nav-about"
-            className={currentPage === 'about' ? 'active' : ''}
-          >
-            من نحن
+          <li>
+            <Link to="/about" className={currentPath === '/about' ? 'active' : ''}>من نحن</Link>
           </li>
-          {/* Show Library and Account for demo */}
-          <li 
-            onClick={() => setCurrentPage('library')} 
-            id="nav-library"
-            className={currentPage === 'library' ? 'active' : ''}
-          >
-            مكتبتي
-          </li>
-          <li 
-            onClick={() => setCurrentPage('account')} 
-            id="nav-account"
-            className={currentPage === 'account' ? 'active' : ''}
-          >
-            حسابي
-          </li>
+          
+          {/* True Conditional Rendering for Protected Routes */}
+          {isLoggedIn && (
+            <>
+              <li>
+                <Link to="/library" className={currentPath === '/library' ? 'active' : ''}>مكتبتي</Link>
+              </li>
+              <li>
+                <Link to="/account" className={currentPath === '/account' ? 'active' : ''}>حسابي</Link>
+              </li>
+            </>
+          )}
         </ul>
         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
           <button 
@@ -76,10 +75,10 @@ function Navbar({ currentPage, setCurrentPage, isDark, setIsDark, isLoggedIn, se
             </button>
           ) : (
             <>
-              <button className="btn btn-outline" onClick={() => setCurrentPage('signup')}>
+              <button className="btn btn-outline" onClick={() => navigate('/signup')}>
                 إنشاء حساب
               </button>
-              <button className="btn btn-primary" onClick={() => setCurrentPage('login')}>
+              <button className="btn btn-primary" onClick={() => navigate('/login')}>
                 تسجيل دخول
               </button>
             </>
@@ -91,4 +90,3 @@ function Navbar({ currentPage, setCurrentPage, isDark, setIsDark, isLoggedIn, se
 }
 
 export default Navbar
-
