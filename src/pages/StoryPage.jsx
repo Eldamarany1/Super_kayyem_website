@@ -1,47 +1,69 @@
-// Story Page Component - صفحة القصة
-function StoryPage({ setCurrentPage, setShowModal, setSelectedStoryId }) {
-  const handlePreview = () => {
-    if (setSelectedStoryId) {
-      setSelectedStoryId(1) // Default to first story for preview
-    }
-    setCurrentPage('reader')
+import React from 'react'
+
+// Story Page Component - Shows story details before reading
+function StoryPage({ story, setCurrentPage, setShowModal, setSelectedStoryId }) {
+  // Show loading state if story data is not yet available
+  if (!story) {
+    return (
+      <div className="reader-error">
+        <div className="loader"></div>
+        <p>جاري تحميل تفاصيل القصة...</p>
+        <button className="btn btn-outline" onClick={() => setCurrentPage('library')}>
+          العودة للمكتبة
+        </button>
+      </div>
+    )
   }
+
   return (
-    <section id="story" className="page-view active">
+    <section className="story-details-page" dir="rtl">
       <div className="container">
-        <div className="story-header">
-          <div className="story-banner img-placeholder">
-            تصميم سينمائي ناعم للمغامرة: باسم بملابس رائد فضاء يطفو بين النجوم المضيئة.
-          </div>
-          <div className="story-info">
-            <h1>باسم ومسبار الأمل</h1>
-            <div className="story-meta">
-              <span className="tag">الفئة العمرية: ٦-٨ سنوات</span>
-              <span className="tag">القيمة: التعاون</span>
-              <span className="tag">مدة القراءة: ١٠ دقائق</span>
-            </div>
-            <div className="ratings">⭐⭐⭐⭐⭐ (٤.٨ / ٥)</div>
-            <p style={{ fontSize: '1.1rem', marginBottom: '20px' }}>
-              ينطلق باسم مع أصدقائه في رحلة خيالية لإنقاذ كوكب صغير فقد نوره. من خلال هذه القصة المليئة بالخيال والألوان الدافئة، يتعلم الأطفال أن العمل الجماعي يضيء حتى أظلم الأماكن.
-            </p>
-            <div className="story-actions">
-              <button className="btn btn-primary" onClick={() => setShowModal(true)}>شراء القصة (١٥ ر.س)</button>
-              <button className="btn btn-outline" onClick={() => setCurrentPage('reader')}>معاينة مجانية</button>
-            </div>
+        {/* Story Cover Image */}
+        <div className="story-header-image">
+          {story.cover ? (
+            <img
+              src={`http://127.0.0.1:8000${story.cover}`}
+              alt={story.title}
+            />
+          ) : (
+            <div style={{ height: '100%', background: '#eee' }}></div>
+          )}
+        </div>
+
+        {/* Story Header Info */}
+        <div className="story-header-info">
+          <h1>{story.title}</h1>
+          <div className="story-tags">
+            <span className="tag tag-category">{story.category}</span>
+            <span className="tag tag-age">{story.age || '٦-٨'} سنوات</span>
           </div>
         </div>
 
-        <h2 className="section-title" style={{ textAlign: 'right', marginTop: '60px' }}>قصص مشابهة قد تعجبك</h2>
-        <div className="grid">
-          <div className="card" onClick={() => setCurrentPage('story')}>
-            <div className="img-placeholder" style={{ height: '120px' }}>غلاف</div>
-            <h3>بطل المجرة</h3>
-            <span className="tag">المسؤولية</span>
+        {/* Story Preview Content */}
+        <div className="story-card-large">
+          <div className="preview-content">
+            <h3>لمحة عن القصة:</h3>
+            <p>
+              {story.pages && story.pages.length > 0
+                ? story.pages[0].content.substring(0, 250) + "..."
+                : "هذه القصة جاهزة لتبدأ مغامرتك فيها الآن!"}
+            </p>
           </div>
-          <div className="card" onClick={() => setCurrentPage('story')}>
-            <div className="img-placeholder" style={{ height: '120px' }}>غلاف</div>
-            <h3>أصدقاء القمر</h3>
-            <span className="tag">الصداقة</span>
+
+          {/* Action Buttons */}
+          <div className="action-buttons">
+            <button
+              className="btn btn-primary btn-read"
+              onClick={() => setCurrentPage('reader')}
+            >
+              ابدأ القراءة الآن 📖
+            </button>
+            <button
+              className="btn btn-outline btn-back"
+              onClick={() => setCurrentPage('library')}
+            >
+              العودة للمكتبة
+            </button>
           </div>
         </div>
       </div>
@@ -50,4 +72,3 @@ function StoryPage({ setCurrentPage, setShowModal, setSelectedStoryId }) {
 }
 
 export default StoryPage
-

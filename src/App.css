@@ -54,6 +54,18 @@ body {
 }
 .app main { flex: 1; }
 
+/* Loading and Error Screen */
+.loading-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 40px 20px;
+}
+
 a { text-decoration: none; color: inherit; }
 ul { list-style: none; }
 button { font-family: inherit; cursor: pointer; border: none; outline: none; }
@@ -385,7 +397,549 @@ footer { background: var(--bg-secondary); padding: 40px 0; text-align: center; m
 }
 
 /* ==============================
-   9. ARABIC 3D FLIPBOOK (CUSTOM)
+   9. COMPONENT-SPECIFIC STYLES
+   ============================== */
+
+/* HomePage Styles */
+.hero-graphics-placeholder {
+    width: 200px;
+    height: 80px;
+    border-radius: 40px;
+    position: absolute;
+    top: 20px;
+    left: 10%;
+}
+.hero-graphics-cloud {
+    width: 150px;
+    height: 60px;
+    border-radius: 40px;
+    position: absolute;
+    top: 60px;
+    right: 15%;
+    animation-delay: 2s;
+}
+.hero-graphics-city {
+    width: 300px;
+    height: 120px;
+    border-radius: 60px;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    animation-delay: 1s;
+}
+.btn-hero {
+    font-size: 1.2rem;
+    padding: 15px 35px;
+}
+.card-secondary {
+    background: var(--bg-secondary);
+}
+.link-primary {
+    color: var(--primary-blue);
+    font-weight: 600;
+}
+
+/* AboutPage Styles */
+.about-hero {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--gradient-hero);
+    border-radius: 30px;
+    margin-bottom: 40px;
+}
+.about-hero h1 {
+    font-size: 2.5rem;
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+}
+.about-hero p {
+    font-size: 1.2rem;
+    max-width: 700px;
+    margin: 0 auto;
+}
+.about-section {
+    margin-bottom: 60px;
+}
+.about-card-centered {
+    text-align: center;
+    padding: 40px;
+}
+.about-icon-lg {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+.about-icon-md {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+.bassem-avatar-about {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: var(--primary-yellow);
+    flex-shrink: 0;
+    box-shadow: var(--shadow);
+    border: 8px solid var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+}
+.bassem-content-about {
+    max-width: 600px;
+    text-align: center;
+}
+.bassem-content-about h2 {
+    color: var(--primary-blue);
+    margin-bottom: 15px;
+}
+.bassem-content-about p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+.value-card h3 {
+    color: var(--primary-blue);
+}
+.contact-link {
+    color: var(--primary-blue);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+.social-links {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 10px;
+}
+.social-links a {
+    font-size: 1.5rem;
+}
+.location-box {
+    background: var(--bg-secondary);
+    padding: 20px;
+    border-radius: 15px;
+    display: inline-block;
+}
+
+/* StoryPage Styles */
+.story-details-page {
+    padding: 40px 20px;
+}
+.story-header-image {
+    width: 100%;
+    height: 300px;
+    margin-bottom: 30px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+.story-header-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.story-header-info {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.story-header-info h1 {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+.story-tags {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+.tag-category {
+    background: #4ecdc4;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+}
+.tag-age {
+    background: #ffe66d;
+    color: #333;
+    padding: 5px 15px;
+    border-radius: 20px;
+}
+.story-card-large {
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: 25px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+}
+.preview-content h3 {
+    margin-bottom: 20px;
+}
+.preview-content p {
+    line-height: 1.8;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    opacity: 0.9;
+}
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 40px;
+}
+.btn-read {
+    flex: 2;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+.btn-back {
+    flex: 1;
+}
+
+/* ReaderPage Styles */
+.reader-page-container {
+    padding: 20px;
+    direction: rtl;
+    min-height: 80vh;
+}
+.reader-card {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+.reader-page-content {
+    min-height: 350px;
+    font-size: 1.5rem;
+    line-height: 2;
+    text-align: justify;
+}
+.reader-divider {
+    margin: 30px 0;
+    opacity: 0.1;
+}
+.reader-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.page-indicator {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+.btn-finish {
+    width: 100%;
+    margin-top: 30px;
+    font-weight: bold;
+}
+.reader-error {
+    padding: 50px;
+    text-align: center;
+    color: var(--text-primary);
+}
+.reader-error h2 {
+    margin-bottom: 15px;
+}
+.reader-error p {
+    margin-bottom: 20px;
+}
+
+/* LoginPage Styles */
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    direction: rtl;
+    padding: 20px;
+}
+.auth-card-wide {
+    max-width: 500px;
+}
+.auth-logo {
+    margin-bottom: 10px;
+}
+.auth-error {
+    background: #fff5f5;
+    color: #e74c3c;
+    padding: 10px;
+    border-radius: 8px;
+    border-right: 4px solid #e74c3c;
+    font-size: 0.9rem;
+    text-align: center;
+}
+.auth-footer-text {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #636e72;
+}
+.auth-link-btn {
+    background: none;
+    border: none;
+    color: #6c5ce7;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 5px;
+    text-decoration: underline;
+}
+.form-input {
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: 1px solid #dfe6e9;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+    background-color: #f9f9f9;
+}
+.form-input:focus {
+    border-color: var(--primary-blue);
+}
+.form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #2d3436;
+    margin-right: 5px;
+}
+.btn-submit {
+    background-color: #6c5ce7;
+    color: #fff;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: transform 0.2s ease, background 0.3s ease;
+}
+.btn-submit:hover {
+    transform: translateY(-2px);
+}
+.btn-submit:disabled {
+    opacity: 0.7;
+}
+
+/* SignupPage Styles */
+.form-divider {
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+}
+.children-tags {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+.child-form-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.child-form-row input {
+    flex: 1;
+}
+.child-form-row select {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-color);
+    color: var(--text-primary);
+}
+.btn-add-child {
+    width: 100%;
+}
+
+/* AccountPage Styles */
+.section-title-centered {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.card-margin {
+    margin-bottom: 30px;
+}
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.children-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.recommendations-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+.recommendation-item {
+    margin-bottom: 20px;
+}
+.recommendation-item h3 {
+    color: var(--primary-blue);
+}
+.child-avatar-colored {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    border: 4px solid var(--card-bg);
+}
+.child-profile-card p {
+    margin: 0;
+}
+
+/* LibraryPage Styles */
+.story-cover-img {
+    height: 180px;
+    overflow: hidden;
+    border-radius: 15px;
+}
+.story-cover-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.story-cover-placeholder {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    background: #f0f0f0;
+}
+.story-title {
+    margin-top: 15px;
+}
+.story-tags-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.btn-story {
+    width: 100%;
+    padding: 8px;
+}
+
+/* AddStoryPage Styles */
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.admin-form input[type="text"],
+.admin-form input[type="file"],
+.admin-form select,
+.admin-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
+    background: var(--bg-color);
+    color: var(--text-primary);
+}
+.admin-form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+.admin-form label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+}
+.admin-form hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid var(--border-color);
+}
+.admin-form h3 {
+    margin-bottom: 15px;
+}
+.page-input-group {
+    margin-bottom: 20px;
+}
+.page-input-group h4 {
+    margin-bottom: 10px;
+}
+.btn-publish {
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Navbar Styles */
+.nav-admin-link {
+    color: #ff4757;
+    font-weight: bold;
+}
+.nav-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+.nav-links li {
+    cursor: pointer;
+}
+
+/* Footer Styles */
+.footer-logo {
+    margin-bottom: 20px;
+}
+.footer-copyright {
+    font-size: 0.9rem;
+    margin-top: 30px;
+    color: var(--text-secondary);
+}
+
+/* RewardModal Styles */
+.modal-code {
+    background: var(--bg-secondary);
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+}
+.btn-modal {
+    width: 100%;
+    font-size: 1.1rem;
+}
+
+/* About Page Additional Styles */
+.about-bassem-row {
+    background: var(--bg-secondary);
+    padding: 60px 20px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.about-contact-grid {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.about-location {
+    text-align: center;
+}
+.about-location-card {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+/* ==============================
+   10. ARABIC 3D FLIPBOOK (CUSTOM)
    ============================== */
 .book-scene {
     display: flex;

@@ -1,31 +1,33 @@
-// Reward Modal Component - نافذة المكافأة
+// Reward Modal Component - Popup for rewards
 function RewardModal({ showModal, setShowModal, setCurrentPage }) {
+  // Don't render if modal is not visible
   if (!showModal) return null
 
+  // Close modal and navigate to library
+  const handleClose = () => {
+    setShowModal(false)
+    setCurrentPage('library')
+  }
+
   return (
-    <div className="modal-overlay active" onClick={(e) => {
-      if (e.target.className.includes('modal-overlay')) {
-        setShowModal(false)
-        setCurrentPage('library')
-      }
-    }}>
+    <div
+      className="modal-overlay active"
+      onClick={(e) => {
+        if (e.target.className.includes('modal-overlay')) {
+          handleClose()
+        }
+      }}
+    >
       <div className="modal">
         <div className="modal-mascot">🎁</div>
         <h2>مفاجأة باسم!</h2>
         <p style={{ fontSize: '1.2rem', margin: '15px 0 25px' }}>
           رائع! لقد أتممت عملية الشراء بنجاح. بمناسبة انضمامك لمغامراتنا، أهداك باسم كود خصم ٥٠٪ على قصتك القادمة!
         </p>
-        <div style={{ background: 'var(--bg-secondary)', padding: '15px', borderRadius: '10px', fontWeight: '800', fontSize: '1.5rem', letterSpacing: '2px', color: 'var(--primary-blue)', marginBottom: '20px' }}>
+        <div className="modal-code">
           BASSEM50
         </div>
-        <button 
-          className="btn btn-yellow" 
-          style={{ width: '100%', fontSize: '1.1rem' }} 
-          onClick={() => {
-            setShowModal(false)
-            setCurrentPage('library')
-          }}
-        >
+        <button className="btn btn-yellow btn-modal" onClick={handleClose}>
           شكراً باسم! (الذهاب للمكتبة)
         </button>
       </div>
@@ -34,4 +36,3 @@ function RewardModal({ showModal, setShowModal, setCurrentPage }) {
 }
 
 export default RewardModal
-

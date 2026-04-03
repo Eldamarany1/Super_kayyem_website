@@ -1,27 +1,30 @@
-// Homepage Component - الرئيسية
+// Homepage Component - Main landing page
 function HomePage({ setCurrentPage }) {
+  // Scroll to stories section smoothly
+  const scrollToStories = () => {
+    document.getElementById('stories')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
   return (
     <section id="home" className="page-view active">
+      {/* Hero Section */}
       <div className="hero">
         <div className="container">
           <h1>مغامرات تصنع القيم</h1>
           <p>عالم رقمي آمن يجمع بين سحر القصص وتنمية القيم الأخلاقية لدى الأطفال، صُمم خصيصاً للآباء الباحثين عن محتوى راقي.</p>
-          <button 
-            className="btn btn-yellow" 
-            style={{ fontSize: '1.2rem', padding: '15px 35px' }}
-            onClick={() => document.getElementById('stories')?.scrollIntoView({ behavior: 'smooth' })}
-          >
+          <button className="btn btn-yellow btn-hero" onClick={scrollToStories}>
             استكشف القصص
           </button>
-          
+
+          {/* Hero Graphics - Decorative Elements */}
           <div className="hero-graphics">
-            <div className="img-placeholder floating" style={{ width: '200px', height: '80px', borderRadius: '40px', position: 'absolute', top: '20px', left: '10%' }}>
+            <div className="img-placeholder floating hero-graphics-placeholder">
               ☁️ جزيرة طافية
             </div>
-            <div className="img-placeholder floating" style={{ width: '150px', height: '60px', borderRadius: '40px', position: 'absolute', top: '60px', right: '15%', animationDelay: '2s' }}>
+            <div className="img-placeholder floating hero-graphics-cloud">
               ☁️ غيوم ناعمة
             </div>
-            <div className="img-placeholder floating" style={{ width: '300px', height: '120px', borderRadius: '60px', position: 'absolute', bottom: '0', left: '50%', transform: 'translateX(-50%)', animationDelay: '1s' }}>
+            <div className="img-placeholder floating hero-graphics-city">
               ✨ مدينة الخيال ✨
             </div>
           </div>
@@ -29,6 +32,7 @@ function HomePage({ setCurrentPage }) {
       </div>
 
       <div className="container" id="stories">
+        {/* Bassem Character Section */}
         <div className="bassem-section">
           <div className="bassem-avatar img-placeholder floating">
             صورة باسم<br/>(بطل المغامرات)
@@ -42,6 +46,7 @@ function HomePage({ setCurrentPage }) {
           </div>
         </div>
 
+        {/* Featured Stories Section */}
         <h2 className="section-title">مغامرات شيقة</h2>
         <div className="grid">
           <div className="card" onClick={() => setCurrentPage('story')}>
@@ -64,17 +69,18 @@ function HomePage({ setCurrentPage }) {
           </div>
         </div>
 
+        {/* Parents Section */}
         <h2 className="section-title">ركن الآباء والمربين</h2>
         <div className="grid" id="parents">
-          <div className="card" style={{ background: 'var(--bg-secondary)' }}>
+          <div className="card card-secondary">
             <h3>كيف نغرس الصدق؟</h3>
             <p>مقال تربوي قصير عن أهمية القراءة في بناء الشخصية.</p>
-            <a href="#" style={{ color: 'var(--primary-blue)', fontWeight: '600' }}>اقرأ المزيد ←</a>
+            <a href="#" className="link-primary">اقرأ المزيد ←</a>
           </div>
-          <div className="card" style={{ background: 'var(--bg-secondary)' }}>
+          <div className="card card-secondary">
             <h3>وقت النوم الهادئ</h3>
             <p>نصائح لاختيار قصص ما قبل النوم المناسبة لطفلك.</p>
-            <a href="#" style={{ color: 'var(--primary-blue)', fontWeight: '600' }}>اقرأ المزيد ←</a>
+            <a href="#" className="link-primary">اقرأ المزيد ←</a>
           </div>
         </div>
       </div>
@@ -83,4 +89,3 @@ function HomePage({ setCurrentPage }) {
 }
 
 export default HomePage
-

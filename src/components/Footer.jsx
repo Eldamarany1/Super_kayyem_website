@@ -1,15 +1,14 @@
-// Footer Component - التذييل
+// Footer Component - Page footer
 function Footer() {
   return (
     <footer>
       <div className="container">
-        <div className="logo" style={{ marginBottom: '20px' }}>سوبر <span>قيم</span></div>
+        <div className="logo footer-logo">سوبر <span>قيم</span></div>
         <p>منصة رقمية آمنة تصنع القيم من خلال قصص تفاعلية ملهمة.</p>
-        <p style={{ fontSize: '0.9rem', marginTop: '30px', color: 'var(--text-secondary)' }}>© 2024 سوبر قيم. جميع الحقوق محفوظة.</p>
+        <p className="footer-copyright">© 2024 سوبر قيم. جميع الحقوق محفوظة.</p>
       </div>
     </footer>
   )
 }
 
 export default Footer
-

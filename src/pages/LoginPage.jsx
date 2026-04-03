@@ -1,74 +1,114 @@
-// Login Page Component - تسجيل دخول
-import { useState } from 'react'
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-function LoginPage({ setCurrentPage, setIsLoggedIn }) {
-  const [email, setEmail] = useState('')
+// Login Page Component - User authentication
+function LoginPage({ setIsLoggedIn, setIsAdmin }) {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
-  const handleLogin = (e) => {
+  // Handle form submission
+  const handleLogin = async (e) => {
     e.preventDefault()
-    if (email && password) {
-      setIsLoggedIn(true)
-      setCurrentPage('home')
-    } else {
-      setError('يرجى إدخال البريد الإلكتروني وكلمة المرور')
+    setLoading(true)
+    setError('')
+
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/token/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username.trim(), password: password })
+      });
+      const response = await res.json();
+
+      if (response.access) {
+
+        // Save tokens to localStorage
+        localStorage.setItem('access_token', response.access)
+        localStorage.setItem('refresh_token', response.refresh)
+
+        // Update login state
+        setIsLoggedIn(true)
+
+        // Check if user is admin
+        const isAdminUser = username.trim().toLowerCase() === 'admin'
+        localStorage.setItem('is_admin', isAdminUser ? 'true' : 'false')
+        setIsAdmin(isAdminUser)
+
+        // Navigate to library
+        navigate('/library')
+      } else {
+        setError('بيانات الدخول غير صحيحة')
+      }
+    } catch (err) {
+      setError('خطأ في الاتصال بالخادم')
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <section id="login" className="page-view active">
-      <div className="auth-container">
-        <div className="auth-card">
-          <div className="auth-header">
-            <div className="logo" style={{ marginBottom: '10px' }}>سوبر <span>قيم</span></div>
-            <h2>مرحباً بعودتك!</h2>
-            <p>سجل دخولك للمتابعة في مغامرات باسم</p>
-          </div>
-          
-          <form onSubmit={handleLogin}>
-            {error && <div className="error-message">{error}</div>}
-            
-            <div className="form-group">
-              <label>البريد الإلكتروني</label>
-              <input 
-                type="email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="أدخل بريدك الإلكتروني"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>كلمة المرور</label>
-              <input 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="أدخل كلمة المرور"
-              />
-            </div>
+    <div className="auth-page">
+      <div className="auth-card auth-card-wide">
+        {/* Header */}
+        <div className="auth-header">
+          <div className="logo auth-logo">سوبر <span>قيم</span></div>
+          <h2>مرحباً بك مجدداً 👋</h2>
+          <p>سجل دخولك للوصول إلى قصصك المفضلة</p>
+        </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input type="checkbox" /> تذكرني
-              </label>
-              <a href="#" style={{ color: 'var(--primary-blue)', fontWeight: '600' }}>نسيت كلمة المرور؟</a>
-            </div>
-            
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-              تسجيل دخول
-            </button>
-          </form>
+        {/* Login Form */}
+        <form onSubmit={handleLogin}>
+          {error && <div className="auth-error">{error}</div>}
 
-          <div className="auth-footer">
-            <p>ليس لديك حساب؟ <span onClick={() => setCurrentPage('signup')} style={{ color: 'var(--primary-blue)', fontWeight: '600', cursor: 'pointer' }}>أنشئ حساباً جديداً</span></p>
+          <div className="form-group">
+            <label className="form-label">اسم المستخدم</label>
+            <input
+              type="text"
+              placeholder="مثلاً: admin"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="form-input"
+              required
+            />
           </div>
+
+          <div className="form-group">
+            <label className="form-label">كلمة المرور</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="form-input"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-submit"
+          >
+            {loading ? 'جاري التحقق...' : 'دخول للمنصة'}
+          </button>
+        </form>
+
+        {/* Footer */}
+        <div className="auth-footer-text">
+          <span>ليس لديك حساب؟</span>
+          <button
+            onClick={() => navigate('/signup')}
+            className="auth-link-btn"
+          >
+            إنشاء حساب جديد
+          </button>
         </div>
       </div>
-    </section>
+    </div>
   )
 }
 
 export default LoginPage
-
