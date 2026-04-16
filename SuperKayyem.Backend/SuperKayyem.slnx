@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SuperKayyem.API/SuperKayyem.API.csproj" />
+    <Project Path="src/SuperKayyem.Application/SuperKayyem.Application.csproj" />
+    <Project Path="src/SuperKayyem.Domain/SuperKayyem.Domain.csproj" />
+    <Project Path="src/SuperKayyem.Infrastructure/SuperKayyem.Infrastructure.csproj" />
+  </Folder>
+</Solution>

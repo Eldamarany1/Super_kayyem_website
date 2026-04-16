@@ -12,6 +12,8 @@
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^7.2.0",
     "@fortawesome/react-fontawesome": "^3.2.0",
+    "axios": "^1.15.0",
+    "jwt-decode": "^4.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-pageflip": "^2.0.3",

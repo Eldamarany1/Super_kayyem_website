@@ -1,482 +1,936 @@
-/* ==============================
+/* ================================================================
+   App.css — Global Styles for Super Kayyem (سوبر قيم)
+   ----------------------------------------------------------------
+   Table of Contents:
+     1. CSS Variables & Themes
+     2. Global Reset & Base
+     3. Shared Utilities (container, buttons, tags, animations)
+     4. Navbar
+     5. Auth Pages (Login / Signup)
+     6. Homepage
+     7. Story Page
+     8. Library Page
+     9. Account Page
+    10. Reader Page (3D Flipbook)
+    11. Modal & Footer
+    12. Responsive Design
+   ================================================================ */
+
+
+/* ================================================================
    1. CSS VARIABLES & THEMES
-   ============================== */
+   ================================================================ */
 :root {
-    /* Light Mode (Warm & Calm) */
-    --bg-color: #ffffff;
-    --bg-secondary: #f0f7ff;
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --primary-blue: #2563eb;
-    --primary-blue-hover: #1d4ed8;
-    --primary-yellow: #fbbf24;
-    --primary-yellow-hover: #f59e0b;
-    --card-bg: #ffffff;
-    --border-color: #e2e8f0;
-    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-    --gradient-hero: linear-gradient(135deg, #e0f2fe 0%, #fef3c7 100%);
+  /* Colors */
+  --primary-blue:        #2563eb;
+  --primary-blue-hover:  #1d4ed8;
+  --primary-yellow:      #fbbf24;
+  --primary-yellow-hover:#f59e0b;
+
+  /* Light mode surfaces */
+  --bg-color:       #ffffff;
+  --bg-secondary:   #f0f7ff;
+  --card-bg:        #ffffff;
+  --border-color:   #e2e8f0;
+
+  /* Text */
+  --text-primary:   #1e293b;
+  --text-secondary: #64748b;
+
+  /* Effects */
+  --shadow:         0 10px 25px -5px rgba(0, 0, 0, 0.07);
+  --gradient-hero:  linear-gradient(135deg, #e0f2fe 0%, #fef3c7 100%);
+
+  /* Layout */
+  --nav-height: 70px;
 }
 
 [data-theme="dark"] {
-    /* Dark Mode (Soft Night Sky) */
-    --bg-color: #0f172a;
-    --bg-secondary: #1e293b;
-    --text-primary: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --primary-blue: #3b82f6;
-    --primary-blue-hover: #60a5fa;
-    --primary-yellow: #f59e0b;
-    --primary-yellow-hover: #fbbf24;
-    --card-bg: #1e293b;
-    --border-color: #334155;
-    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-    --gradient-hero: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  --bg-color:        #0f172a;
+  --bg-secondary:    #1e293b;
+  --card-bg:         #1e293b;
+  --border-color:    #334155;
+  --text-primary:    #f8fafc;
+  --text-secondary:  #cbd5e1;
+  --primary-blue:    #3b82f6;
+  --primary-blue-hover: #60a5fa;
+  --primary-yellow:  #f59e0b;
+  --primary-yellow-hover: #fbbf24;
+  --shadow:          0 10px 25px -5px rgba(0, 0, 0, 0.35);
+  --gradient-hero:   linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
 }
 
-/* ==============================
-   2. GLOBAL STYLES & RESET
-   ============================== */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ================================================================
+   2. GLOBAL RESET & BASE
+   ================================================================ */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
 
 body {
-    font-family: 'Cairo', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-primary);
-    transition: background-color 0.4s ease, color 0.4s ease;
-    line-height: 1.6;
+  font-family: 'Cairo', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  line-height: 1.6;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* App Container */
-.app {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-.app main { flex: 1; }
-
-a { text-decoration: none; color: inherit; }
+a  { text-decoration: none; color: inherit; }
 ul { list-style: none; }
 button { font-family: inherit; cursor: pointer; border: none; outline: none; }
+img { max-width: 100%; display: block; }
 
-/* Typography */
-h1, h2, h3 { color: var(--text-primary); margin-bottom: 1rem; }
+h1, h2, h3 { color: var(--text-primary); margin-bottom: 1rem; line-height: 1.3; }
 p { color: var(--text-secondary); margin-bottom: 1rem; }
 
-/* Shared Components */
-.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-
-.btn {
-    padding: 12px 24px;
-    border-radius: 50px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    display: inline-block;
+/* App shell — fills full viewport height */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
-.btn-primary { background-color: var(--primary-blue); color: white; }
-.btn-primary:hover { background-color: var(--primary-blue-hover); transform: translateY(-2px); }
-.btn-yellow { background-color: var(--primary-yellow); color: #1e293b; }
-.btn-yellow:hover { background-color: var(--primary-yellow-hover); transform: translateY(-2px); }
-.btn-outline { border: 2px solid var(--primary-blue); color: var(--primary-blue); background: transparent;}
-.btn-outline:hover { background: var(--primary-blue); color: white; }
+.app > main { flex: 1; }
 
+
+/* ================================================================
+   3. SHARED UTILITIES
+   ================================================================ */
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+.btn-primary {
+  background-color: var(--primary-blue);
+  color: #fff;
+}
+.btn-primary:hover {
+  background-color: var(--primary-blue-hover);
+  transform: translateY(-2px);
+}
+.btn-yellow {
+  background-color: var(--primary-yellow);
+  color: #1e293b;
+}
+.btn-yellow:hover {
+  background-color: var(--primary-yellow-hover);
+  transform: translateY(-2px);
+}
+.btn-outline {
+  border: 2px solid var(--primary-blue);
+  color: var(--primary-blue);
+  background: transparent;
+}
+.btn-outline:hover {
+  background: var(--primary-blue);
+  color: #fff;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Tag badge */
 .tag {
-    background: var(--bg-secondary); color: var(--primary-blue);
-    padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+  display: inline-block;
+  background: var(--bg-secondary);
+  color: var(--primary-blue);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Card */
+.card {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s ease;
+}
+.card:hover { transform: translateY(-6px); }
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+/* Section title */
+.section-title {
+  text-align: center;
+  font-size: 2rem;
+  margin: 60px 0 30px;
+}
+
+/* Image placeholder */
+.img-placeholder {
+  background: linear-gradient(45deg, var(--bg-secondary), var(--border-color));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-align: center;
+  border-radius: 16px;
+  min-height: 60px;
+}
+[data-theme="dark"] .img-placeholder {
+  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+  color: #f8fafc;
+  border: 1px solid #475569;
+}
+
+/* Form group */
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-color);
+  color: var(--text-primary);
+  font-family: 'Cairo', sans-serif;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+}
+
+/* Error message */
+.error-message {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+[data-theme="dark"] .error-message {
+  background: #450a0a;
+  color: #fca5a5;
+}
+
+/* Progress bar */
+.progress-bar {
+  width: 100%;
+  background: var(--bg-secondary);
+  height: 8px;
+  border-radius: 10px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.progress-fill {
+  background: var(--primary-blue);
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.4s ease;
 }
 
 /* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeIn 0.5s ease both; }
+
 @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-15px); }
-    100% { transform: translateY(0px); }
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-14px); }
 }
 .floating { animation: float 6s ease-in-out infinite; }
 
-@keyframes fadeIn { 
-    from { opacity: 0; transform: translateY(10px); } 
-    to { opacity: 1; transform: translateY(0); } 
-}
-.page-view { display: none; animation: fadeIn 0.5s ease; }
-.page-view.active { display: block; }
-.library-section, .account-section { display: block; animation: fadeIn 0.5s ease; }
 
-/* Image Placeholders (Dreamy Style) */
-.img-placeholder {
-    background: linear-gradient(45deg, var(--bg-secondary), var(--border-color));
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-secondary); font-weight: 600; text-align: center; border-radius: 16px;
-}
-[data-theme="dark"] .img-placeholder {
-    background: linear-gradient(135deg, #334155 0%, #1e293b 100%) !important;
-    color: #f8fafc;
-    border: 1px solid #475569;
-}
-
-/* ==============================
-   3. NAVIGATION BAR
-   ============================== */
+/* ================================================================
+   4. NAVBAR
+   ================================================================ */
 nav {
-    background: var(--card-bg);
-    box-shadow: var(--shadow);
-    position: sticky; top: 0; z-index: 100;
-    padding: 15px 0;
-    transition: background 0.4s ease;
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  transition: background 0.4s ease;
 }
-.nav-container { display: flex; justify-content: space-between; align-items: center; }
-.logo { font-size: 1.8rem; font-weight: 800; color: var(--primary-blue); cursor: pointer; }
+
+.nav-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--primary-blue);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .logo span { color: var(--primary-yellow); }
-.nav-links { display: flex; gap: 20px; align-items: center; }
-.nav-links li { cursor: pointer; font-weight: 600; color: var(--text-secondary); transition: color 0.3s; }
-.nav-links li:hover, .nav-links li.active, .nav-links a.active { color: var(--primary-blue); }
-.theme-toggle { background: var(--bg-secondary); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--primary-yellow); font-size: 1.2rem; }
 
-/* ==============================
-   4. AUTH PAGES
-   ============================== */
+/* Nav links (horizontal on desktop) */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
+}
+.nav-links li {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+  white-space: nowrap;
+}
+.nav-links li:hover      { color: var(--primary-blue); }
+.nav-links a.active,
+.nav-links li.active     { color: var(--primary-blue); }
+
+/* Auth buttons row (desktop) */
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  background: var(--bg-secondary);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.theme-toggle:hover { background: var(--border-color); }
+
+/* Mobile auth items (hidden on desktop, shown inside mobile menu) */
+.nav-auth-mobile { display: none; }
+
+/* Hamburger button (hidden on desktop) */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 6px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  margin-right: auto; /* push to the right in RTL layouts */
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.hamburger span {
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--text-primary);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+/* Animated X state */
+.hamburger--open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger--open span:nth-child(2) { opacity: 0; }
+.hamburger--open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Semi-transparent backdrop behind mobile menu */
+.nav-backdrop {
+  position: fixed;
+  inset: 0;
+  top: var(--nav-height);
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 150;
+}
+
+
+/* ================================================================
+   5. AUTH PAGES  (Login / Signup)
+   ================================================================ */
 .auth-container {
-    min-height: calc(100vh - 200px);
-    display: flex; align-items: center; justify-content: center;
-    padding: 40px 20px; background: var(--gradient-hero);
+  min-height: calc(100vh - var(--nav-height) - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: var(--gradient-hero);
 }
+
 .auth-card {
-    background: var(--card-bg); padding: 40px; border-radius: 30px;
-    box-shadow: var(--shadow); width: 100%; max-width: 420px; animation: fadeIn 0.5s ease;
+  background: var(--card-bg);
+  padding: 40px;
+  border-radius: 30px;
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 440px;
+  animation: fadeIn 0.5s ease;
 }
-.auth-header { text-align: center; margin-bottom: 30px; }
-.auth-header p { color: var(--text-secondary); margin-bottom: 0; }
-.auth-footer { text-align: center; margin-top: 25px; padding-top: 25px; border-top: 1px solid var(--border-color); }
-.auth-footer p { margin-bottom: 0; color: var(--text-secondary); }
 
-.error-message {
-    background: #fef2f2; color: #dc2626; padding: 12px 16px;
-    border-radius: 10px; margin-bottom: 20px; font-weight: 600; font-size: 0.9rem;
+.auth-header {
+  text-align: center;
+  margin-bottom: 30px;
 }
-[data-theme="dark"] .error-message { background: #450a0a; color: #fca5a5; }
+.auth-header p { margin-bottom: 0; }
 
-/* ==============================
-   5. PAGES LAYOUTS
-   ============================== */
+.auth-footer {
+  text-align: center;
+  margin-top: 25px;
+  padding-top: 25px;
+  border-top: 1px solid var(--border-color);
+}
+.auth-footer p { margin-bottom: 0; }
 
-/* HOMEPAGE */
-.hero { background: var(--gradient-hero); padding: 80px 0; border-radius: 0 0 40px 40px; text-align: center; overflow: hidden; position: relative; }
-.hero h1 { font-size: 3rem; color: var(--primary-blue); }
-.hero p { font-size: 1.2rem; max-width: 600px; margin: 0 auto 30px; }
-.hero-graphics { height: 250px; margin: 40px auto 0; position: relative; width: 100%; max-width: 800px; }
-.cloud, .island { position: absolute; border-radius: 50%; background: white; opacity: 0.8; }
 
-.section-title { text-align: center; font-size: 2rem; margin: 60px 0 30px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-bottom: 40px; }
-.card { background: var(--card-bg); border-radius: 20px; padding: 20px; box-shadow: var(--shadow); transition: transform 0.3s; cursor: pointer; }
-.card:hover { transform: translateY(-10px); }
-.card .img-placeholder { height: 180px; margin-bottom: 15px; }
-.card h3 { font-size: 1.4rem; margin-bottom: 5px; }
+/* ================================================================
+   6. HOMEPAGE
+   ================================================================ */
+.hero {
+  background: var(--gradient-hero);
+  padding: 100px 0 60px;
+  border-radius: 0 0 50px 50px;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+}
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  color: var(--primary-blue);
+  margin-bottom: 20px;
+}
+.hero p {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  max-width: 600px;
+  margin: 0 auto 35px;
+}
 
-.bassem-section { background: var(--bg-secondary); padding: 60px 20px; border-radius: 30px; display: flex; align-items: center; gap: 40px; margin: 60px 0; }
-.bassem-avatar { width: 200px; height: 200px; border-radius: 50%; background: var(--primary-yellow); flex-shrink: 0; box-shadow: var(--shadow); border: 8px solid white; }
+/* Floating decorative elements */
+.hero-graphics {
+  height: 220px;
+  margin: 40px auto 0;
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+}
+
+/* Bassem intro section */
+.bassem-section {
+  background: var(--bg-secondary);
+  padding: 60px 40px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  margin: 60px 0;
+  flex-wrap: wrap;
+}
+.bassem-avatar {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: var(--primary-yellow);
+  flex-shrink: 0;
+  box-shadow: var(--shadow);
+  border: 8px solid var(--card-bg);
+}
 .bassem-content h2 { color: var(--primary-blue); }
 
-/* STORY PAGE */
-.story-header { display: flex; gap: 40px; margin-top: 40px; background: var(--card-bg); padding: 30px; border-radius: 30px; box-shadow: var(--shadow); }
-.story-banner { flex: 1; height: 350px; border-radius: 20px; }
-.story-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-.story-meta { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-.ratings { color: var(--primary-yellow); margin-bottom: 15px; font-size: 1.2rem; }
-.story-actions { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+/* Story card image */
+.card .img-placeholder { height: 180px; margin-bottom: 15px; }
+.card h3 { font-size: 1.3rem; }
 
-/* LIBRARY PAGE */
-.dashboard-header { margin: 40px 0 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-.progress-bar { width: 100%; background: var(--bg-secondary); height: 8px; border-radius: 10px; margin-top: 15px; overflow: hidden; }
-.progress-fill { background: var(--primary-blue); height: 100%; border-radius: 10px; transition: width 0.3s ease; }
 
-.library-controls { background: var(--card-bg); padding: 20px; border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 30px; }
-.search-box { position: relative; margin-bottom: 15px; }
-.search-box input { width: 100%; padding: 14px 50px 14px 20px; border: 2px solid var(--border-color); border-radius: 50px; font-size: 1rem; font-family: 'Cairo', sans-serif; background: var(--bg-color); color: var(--text-primary); transition: border-color 0.3s; }
-.search-box input:focus { outline: none; border-color: var(--primary-blue); }
+/* ================================================================
+   7. STORY PAGE
+   ================================================================ */
+.story-header {
+  display: flex;
+  gap: 40px;
+  margin-top: 40px;
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: 30px;
+  box-shadow: var(--shadow);
+}
+.story-banner {
+  flex: 1;
+  min-height: 320px;
+  border-radius: 20px;
+}
+.story-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.story-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+.ratings {
+  color: var(--primary-yellow);
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+.story-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+
+/* ================================================================
+   8. LIBRARY PAGE
+   ================================================================ */
+.dashboard-header {
+  margin: 40px 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.library-controls {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 30px;
+}
+
+.search-box {
+  position: relative;
+  margin-bottom: 15px;
+}
+.search-box input {
+  width: 100%;
+  padding: 14px 50px 14px 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 50px;
+  font-size: 1rem;
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg-color);
+  color: var(--text-primary);
+  transition: border-color 0.3s;
+}
+.search-box input:focus   { outline: none; border-color: var(--primary-blue); }
 .search-box input::placeholder { color: var(--text-secondary); }
-.search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; }
+.search-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  pointer-events: none;
+}
 
-.category-filters { display: flex; gap: 10px; flex-wrap: wrap; }
-.filter-btn { padding: 8px 16px; border-radius: 20px; background: var(--bg-secondary); color: var(--text-secondary); font-weight: 600; font-size: 0.9rem; transition: all 0.3s; border: none; }
-.filter-btn:hover, .filter-btn.active { background: var(--primary-blue); color: white; }
+.category-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: none;
+  transition: all 0.3s ease;
+}
+.filter-btn:hover,
+.filter-btn.active { background: var(--primary-blue); color: #fff; }
+
 .story-cover { font-size: 0.9rem; font-weight: 600; }
-.empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
 .empty-state p { font-size: 1.2rem; }
 
-/* ACCOUNT PAGE */
-.profile-container { max-width: 800px; margin: 40px auto; }
-.form-group { margin-bottom: 20px; }
-.form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
-.form-group input { width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; background: var(--bg-color); color: var(--text-primary); font-family: 'Cairo', sans-serif; font-size: 1rem; transition: border-color 0.3s; }
-.form-group input:focus { outline: none; border-color: var(--primary-blue); }
 
-.child-profile-card { background: var(--bg-secondary); padding: 20px; border-radius: 20px; text-align: center; width: 150px; transition: transform 0.3s; }
+/* ================================================================
+   9. ACCOUNT PAGE
+   ================================================================ */
+.profile-container {
+  max-width: 820px;
+  margin: 40px auto;
+  padding: 0 10px;
+}
+
+.child-profile-card {
+  background: var(--bg-secondary);
+  padding: 20px;
+  border-radius: 20px;
+  text-align: center;
+  width: 150px;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
 .child-profile-card:hover { transform: translateY(-5px); }
-.child-avatar { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; border: 4px solid var(--card-bg); }
-.remove-child-btn { margin-top: 10px; padding: 6px 12px; background: transparent; border: 1px solid var(--text-secondary); border-radius: 10px; color: var(--text-secondary); font-size: 0.8rem; transition: all 0.3s; }
-.remove-child-btn:hover { background: #dc2626; border-color: #dc2626; color: white; }
-.child-tag { background: var(--primary-blue); color: white; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; }
 
-.add-child-form { display: flex; gap: 10px; flex-wrap: wrap; padding: 20px; background: var(--bg-secondary); border-radius: 15px; margin-bottom: 20px; }
-.add-child-form input, .add-child-form select { flex: 1; min-width: 150px; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; background: var(--bg-color); color: var(--text-primary); font-family: 'Cairo', sans-serif; }
-.add-child-form select { min-width: 120px; }
-.add-child-form input:focus, .add-child-form select:focus { outline: none; border-color: var(--primary-blue); }
-
-
-/* ==============================
-   6. READER PAGE (Optimized)
-   ============================== */
-.reader-container { 
-    max-width: 900px;
-    margin: 0 auto; 
-    background: var(--card-bg); 
-    box-shadow: var(--shadow); 
-    border-radius: 20px; 
-    overflow: hidden; 
+.child-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  border: 4px solid var(--card-bg);
 }
 
-.reader-toolbar { 
-    padding: 15px 30px; 
-    background: var(--bg-secondary); 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    flex-wrap: wrap; 
-    gap: 15px; 
+.remove-child-btn {
+  margin-top: 10px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--text-secondary);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+.remove-child-btn:hover { background: #dc2626; border-color: #dc2626; color: #fff; }
+
+.child-tag {
+  background: var(--primary-blue);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
-/* Mobile-First Book Layout */
-.book-spread { 
-    display: flex; 
-    flex-direction: column; 
-    background: var(--bg-color); 
+.add-child-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 20px;
+  background: var(--bg-secondary);
+  border-radius: 15px;
+  margin-bottom: 20px;
+}
+.add-child-form input,
+.add-child-form select {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-color);
+  color: var(--text-primary);
+  font-family: 'Cairo', sans-serif;
+  font-size: 1rem;
+}
+.add-child-form input:focus,
+.add-child-form select:focus { outline: none; border-color: var(--primary-blue); }
+
+
+/* ================================================================
+   10. READER PAGE — 3D Arabic Flipbook
+   ================================================================ */
+
+/* Book scene wrapper */
+.book-scene {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 10px;
+  perspective: 2000px;
+  overflow: hidden;
+  min-height: 60vh;
 }
 
-.book-page { 
-    flex: 1; 
-    padding: 30px; 
-    display: flex; 
-    flex-direction: column; 
-    border-bottom: 1px solid var(--border-color);
+/* Scales the fixed-size book to fit any screen without layout shift */
+.book-scaler {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.3s ease;
 }
-.book-page:last-child { border: none; }
+@media (max-width: 1024px) { .book-scaler { transform: scale(0.85); } }
+@media (max-width:  768px) { .book-scaler { transform: scale(0.65); } }
+@media (max-width:  500px) { .book-scaler { transform: scale(0.44); } }
+@media (max-width:  400px) { .book-scaler { transform: scale(0.38); } }
 
-.page-text { 
-    font-size: 1.2rem; 
-    line-height: 1.8; 
-    color: var(--text-primary); 
-    text-align: justify; 
-}
-
-/* Reader Dark Mode Logic */
-[data-theme="dark"] .reader-container { background-color: transparent; box-shadow: none; }
-[data-theme="dark"] .reader-toolbar { background-color: #0f172a; border: 1px solid #334155; border-radius: 10px; margin-bottom: 10px; }
-[data-theme="dark"] .book-page { background-color: #1e293b; color: #f8fafc; border: 1px solid #334155; }
-[data-theme="dark"] .page-text { color: #e2e8f0; }
-
-/* Desktop Readability Optimization (Book on a Desk) */
-@media (min-width: 768px) {
-    .reader-container {
-        max-width: 950px; 
-        margin: 40px auto; 
-        padding: 30px;
-        background: var(--bg-secondary); 
-        border-radius: 12px;
-    }
-    
-    [data-theme="dark"] .reader-container { background: #0f172a; }
-    
-    .book-spread {
-        flex-direction: row; 
-        gap: 40px; 
-        justify-content: center;
-        background: transparent;
-    }
-    
-    .book-page {
-        min-height: 550px; 
-        padding: 40px 45px; 
-        background-color: var(--card-bg);
-        border: none;
-        border-radius: 4px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), inset 0 0 10px rgba(0,0,0,0.02); 
-    }
-    
-    [data-theme="dark"] .book-page { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); }
-    
-    .page-text {
-        font-size: 1.25rem; 
-        line-height: 2.1; 
-    }
-    
-    .reader-toolbar {
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
+/* The book itself (fixed dimensions used as a viewport) */
+.book-3d {
+  position: relative;
+  width: 420px;
+  height: 580px;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
+/* Each sheet (two pages back-to-back) */
+.sheet-3d {
+  position: absolute;
+  inset: 0;
+  transform-origin: right center; /* spine on the right for Arabic */
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  cursor: pointer;
+}
+.sheet-3d.flipped { transform: rotateY(180deg); }
 
-/* ==============================
-   7. MODALS & FOOTER
-   ============================== */
+/* Front & back faces of a sheet */
+.face-3d {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+.face-3d.front {
+  transform: rotateY(0deg);
+  border-radius: 15px 2px 2px 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1), inset 8px 0 20px rgba(0,0,0,0.03);
+}
+.face-3d.back {
+  transform: rotateY(180deg);
+  border-radius: 15px 2px 2px 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1), inset -8px 0 20px rgba(0,0,0,0.03);
+}
+
+/* Page content area */
+.page-content {
+  padding: 40px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-primary);
+}
+.page-content.cover-front {
+  background: var(--primary-blue);
+  color: #fff;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: 8px solid #fff;
+}
+.page-content.cover-back {
+  background: var(--bg-secondary);
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Reader toolbar (top & bottom) */
+.reader-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 15px 20px;
+  background: var(--bg-secondary);
+  border-radius: 15px;
+  margin-bottom: 20px;
+}
+.reader-toolbar h3 { margin: 0; font-size: 1.1rem; }
+
+
+/* ================================================================
+   11. MODAL & FOOTER
+   ================================================================ */
 .modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
-    display: none; justify-content: center; align-items: center; z-index: 1000;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 500;
+  padding: 20px;
 }
 .modal-overlay.active { display: flex; }
+
 .modal {
-    background: var(--card-bg); padding: 40px; border-radius: 30px; text-align: center;
-    max-width: 400px; width: 90%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-    animation: fadeIn 0.3s ease; position: relative;
+  background: var(--card-bg);
+  padding: 40px;
+  border-radius: 30px;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.3s ease;
+  position: relative;
 }
 .modal h2 { color: var(--primary-yellow); font-size: 2rem; margin-top: 20px; }
-.modal-mascot { width: 120px; height: 120px; background: var(--bg-secondary); border-radius: 50%; margin: -80px auto 20px; display: flex; align-items: center; justify-content: center; border: 5px solid var(--card-bg); font-size: 3rem; }
+.modal-mascot {
+  width: 120px;
+  height: 120px;
+  background: var(--bg-secondary);
+  border-radius: 50%;
+  margin: -80px auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 5px solid var(--card-bg);
+  font-size: 3rem;
+}
 
-footer { background: var(--bg-secondary); padding: 40px 0; text-align: center; margin-top: 80px; }
+footer {
+  background: var(--bg-secondary);
+  padding: 50px 0;
+  text-align: center;
+  margin-top: 80px;
+}
+footer .logo { margin-bottom: 15px; }
 
-/* ==============================
-   8. RESPONSIVE DESIGN (Mobile)
-   ============================== */
+
+/* ================================================================
+   12. RESPONSIVE DESIGN
+   ================================================================ */
+
+/* ── Tablet / Small Desktop (≤ 900px) ── */
+@media (max-width: 900px) {
+  .story-header {
+    flex-direction: column;
+    padding: 20px;
+  }
+  .story-banner { min-height: 220px; }
+  .story-actions { flex-direction: column; }
+  .story-actions .btn { width: 100%; text-align: center; }
+
+  .bassem-section {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .bassem-avatar { width: 150px; height: 150px; }
+}
+
+/* ── Mobile (≤ 768px) — hamburger kicks in ── */
 @media (max-width: 768px) {
-    .nav-container { flex-direction: column; gap: 15px; }
-    .nav-links { flex-wrap: wrap; justify-content: center; }
-    
-    .hero h1 { font-size: 2rem; }
-    .hero p { font-size: 1rem; }
-    .hero-graphics { display: none; }
-    
-    .story-header { flex-direction: column; padding: 20px; }
-    .story-banner { height: 200px; }
-    .story-actions { flex-direction: column; }
-    .story-actions .btn { width: 100%; text-align: center; }
-    
-    .bassem-section { flex-direction: column; text-align: center; padding: 40px 20px; }
-    .bassem-avatar { width: 150px; height: 150px; }
-    
-    .dashboard-header { flex-direction: column; align-items: stretch; }
-    .library-controls { padding: 15px; }
-    .category-filters { justify-content: center; }
-    .filter-btn { padding: 6px 12px; font-size: 0.8rem; }
-    
-    .reader-toolbar { flex-direction: column; gap: 10px; }
-    .reader-toolbar h3 { font-size: 1rem; text-align: center; }
-    
-    .profile-container { padding: 0 10px; }
-    .child-profile-card { width: 100%; max-width: 150px; }
-    .add-child-form { flex-direction: column; }
-    
-    .auth-card { padding: 30px 20px; }
-    .form-group input { font-size: 1rem; }
-    
-    .grid { grid-template-columns: 1fr; gap: 20px; }
-    
-    .modal { padding: 30px 20px; margin: 20px; }
-    .modal-mascot { width: 80px; height: 80px; font-size: 2rem; margin-top: -60px; }
-    .modal h2 { font-size: 1.5rem; }
-}
+  /* Show hamburger, hide desktop controls */
+  .hamburger    { display: flex; }
+  .nav-controls { display: none; }
 
-@media (max-width: 480px) {
-    .hero { padding: 60px 0; }
-    .hero h1 { font-size: 1.8rem; }
-    .section-title { font-size: 1.5rem; }
-    .bassem-section { margin: 40px 0; }
-    .btn { padding: 10px 20px; font-size: 0.9rem; }
-    .tag { font-size: 0.75rem; padding: 3px 10px; }
-}
-
-/* ==============================
-   9. ARABIC 3D FLIPBOOK (CUSTOM)
-   ============================== */
-.book-scene {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 30px 10px;
-    perspective: 2000px;
-    overflow: hidden;
-    min-height: 60vh; /* لضمان وجود مساحة كافية عند تصغير الكتاب */
-}
-
-/* هذه الحاوية تقوم بتصغير الكتاب برمجياً ليناسب أي شاشة مع الحفاظ على دقته */
-.book-scaler {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: transform 0.3s ease;
-}
-
-@media (max-width: 1024px) { .book-scaler { transform: scale(0.85); } }
-@media (max-width: 768px) { .book-scaler { transform: scale(0.65); } }
-@media (max-width: 500px) { .book-scaler { transform: scale(0.42); } }
-@media (max-width: 400px) { .book-scaler { transform: scale(0.38); } }
-
-.book-3d {
-    position: relative;
-    width: 420px; 
-    height: 580px;
-    transform-style: preserve-3d;
-    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.sheet-3d {
+  /* Mobile nav: slide-down panel */
+  .nav-links {
+    display: none; /* hidden by default */
     position: absolute;
-    top: 0;
+    top: var(--nav-height);
+    right: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    transform-origin: right center; /* كعب الكتاب على اليمين */
-    transform-style: preserve-3d;
-    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-    cursor: pointer;
-}
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    z-index: 199;
+    padding: 12px 20px 20px;
+    animation: fadeIn 0.2s ease;
+  }
+  .nav-links--open { display: flex; }
 
-.sheet-3d.flipped {
-    transform: rotateY(180deg);
-}
+  .nav-links li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.1rem;
+  }
+  .nav-links li:last-child { border-bottom: none; }
 
-.face-3d {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-}
-
-.face-3d.front {
-    transform: rotateY(0deg);
-    border-radius: 15px 2px 2px 15px; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1), inset 8px 0 20px rgba(0,0,0,0.03);
-}
-
-.face-3d.back {
-    transform: rotateY(180deg);
-    border-radius: 15px 2px 2px 15px; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1), inset -8px 0 20px rgba(0,0,0,0.03);
-}
-
-.page-content {
-    padding: 40px;
-    height: 100%;
+  /* Auth buttons rendered inside the mobile menu */
+  .nav-auth-mobile {
     display: flex;
     flex-direction: column;
-    color: var(--text-primary);
+    gap: 10px;
+    padding-top: 10px;
+  }
+  .nav-auth-mobile .btn { width: 100%; text-align: center; }
+  .nav-auth-mobile .theme-toggle { width: 100%; border-radius: 10px; height: 44px; }
+
+  /* Hero */
+  .hero { padding: 70px 0 50px; border-radius: 0 0 30px 30px; }
+  .hero-graphics { display: none; }
+
+  /* Grid single column */
+  .grid { grid-template-columns: 1fr; gap: 18px; }
+
+  /* Library */
+  .dashboard-header { flex-direction: column; align-items: stretch; }
+  .library-controls  { padding: 15px; }
+  .category-filters  { justify-content: center; }
+  .filter-btn        { padding: 6px 12px; font-size: 0.8rem; }
+
+  /* Reader toolbar stacks vertically */
+  .reader-toolbar { flex-direction: column; gap: 10px; }
+  .reader-toolbar h3 { text-align: center; }
+
+  /* Account */
+  .child-profile-card { width: 100%; max-width: 160px; }
+  .add-child-form { flex-direction: column; }
+
+  /* Auth */
+  .auth-card { padding: 30px 20px; }
+
+  /* Modal */
+  .modal { padding: 30px 20px; }
+  .modal-mascot { width: 80px; height: 80px; font-size: 2rem; margin-top: -60px; }
+  .modal h2     { font-size: 1.5rem; }
 }
 
-.page-content.cover-front {
-    background: var(--primary-blue);
-    color: white;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    border: 8px solid white;
-}
-
-.page-content.cover-back {
-    background: var(--bg-secondary);
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+/* ── Small phones (≤ 480px) ── */
+@media (max-width: 480px) {
+  .section-title { font-size: 1.5rem; margin: 40px 0 20px; }
+  .btn           { padding: 10px 20px; font-size: 0.9rem; }
+  .tag           { font-size: 0.75rem; padding: 3px 10px; }
+  .bassem-section { margin: 30px 0; }
+  footer         { margin-top: 50px; }
 }

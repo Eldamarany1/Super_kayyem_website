@@ -1,37 +1,82 @@
-// Story Page Component - صفحة القصة
-function StoryPage({ setCurrentPage, setShowModal, setSelectedStoryId }) {
+// ============================================================
+//  StoryPage.jsx — صفحة تفاصيل القصة
+// ============================================================
+
+import { useState, useEffect } from 'react'
+import apiClient from '../api/client'
+import { useNavigate } from 'react-router-dom'
+
+function StoryPage({ setCurrentPage, setShowModal, selectedStoryId, setSelectedStoryId }) {
+  const navigate = useNavigate()
+  const [story, setStory] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!selectedStoryId) return;
+    setLoading(true);
+    apiClient.get(`/stories/${selectedStoryId}`)
+      .then(res => {
+        if (res.success && res.data) setStory(res.data)
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [selectedStoryId])
+
   const handlePreview = () => {
-    if (setSelectedStoryId) {
-      setSelectedStoryId(1) // Default to first story for preview
-    }
-    setCurrentPage('reader')
+    if (setSelectedStoryId && story?.id) setSelectedStoryId(story.id)
+    navigate('/reader')
   }
+
+  if (loading) return <section id="story"><div className="container">جاري التحميل...</div></section>
+  if (!story) return <section id="story"><div className="container">القصة غير موجودة</div></section>
+
   return (
-    <section id="story" className="page-view active">
+    <section id="story">
       <div className="container">
-        <div className="story-header">
-          <div className="story-banner img-placeholder">
-            تصميم سينمائي ناعم للمغامرة: باسم بملابس رائد فضاء يطفو بين النجوم المضيئة.
+
+        {/* Story Header — banner + info */}
+        <div className="story-header" style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
+          <div className="story-banner img-placeholder" style={{ 
+            flex: '1 1 300px', 
+            minHeight: '350px',
+            backgroundImage: `url(${story.coverImageUrl})`, 
+            backgroundSize: 'cover', 
+            backgroundPosition: 'center', 
+            color: story.coverImageUrl ? 'transparent' : 'inherit'
+          }}>
+            غلاف القصة
           </div>
-          <div className="story-info">
-            <h1>باسم ومسبار الأمل</h1>
+
+          <div className="story-info" style={{ flex: '2 1 400px' }}>
+            <h1>{story.title}</h1>
+
             <div className="story-meta">
-              <span className="tag">الفئة العمرية: ٦-٨ سنوات</span>
-              <span className="tag">القيمة: التعاون</span>
-              <span className="tag">مدة القراءة: ١٠ دقائق</span>
+              <span className="tag">الفئة العمرية: {story.targetAgeGroup}</span>
+              <span className="tag">القيمة: {story.valueLearned}</span>
             </div>
+
+            {/* In a real app we'd fetch actual reviews to aggregate rating */}
             <div className="ratings">⭐⭐⭐⭐⭐ (٤.٨ / ٥)</div>
-            <p style={{ fontSize: '1.1rem', marginBottom: '20px' }}>
-              ينطلق باسم مع أصدقائه في رحلة خيالية لإنقاذ كوكب صغير فقد نوره. من خلال هذه القصة المليئة بالخيال والألوان الدافئة، يتعلم الأطفال أن العمل الجماعي يضيء حتى أظلم الأماكن.
+
+            <p style={{ fontSize: '1.05rem', margin: '20px 0' }}>
+              {story.description}
             </p>
+
             <div className="story-actions">
-              <button className="btn btn-primary" onClick={() => setShowModal(true)}>شراء القصة (١٥ ر.س)</button>
-              <button className="btn btn-outline" onClick={() => setCurrentPage('reader')}>معاينة مجانية</button>
+              <button className="btn btn-primary" onClick={() => setShowModal({ type: 'payment', storyId: story.id, price: story.price })}>
+                شراء القصة ({story.price} EGP)
+              </button>
+              <button className="btn btn-outline" onClick={handlePreview}>
+                الذهاب للغلاف (معاينة)
+              </button>
             </div>
           </div>
         </div>
 
-        <h2 className="section-title" style={{ textAlign: 'right', marginTop: '60px' }}>قصص مشابهة قد تعجبك</h2>
+        {/* Related Stories */}
+        <h2 className="section-title" style={{ textAlign: 'right', marginTop: '60px' }}>
+          قصص مشابهة قد تعجبك
+        </h2>
         <div className="grid">
           <div className="card" onClick={() => setCurrentPage('story')}>
             <div className="img-placeholder" style={{ height: '120px' }}>غلاف</div>
@@ -44,10 +89,10 @@ function StoryPage({ setCurrentPage, setShowModal, setSelectedStoryId }) {
             <span className="tag">الصداقة</span>
           </div>
         </div>
+
       </div>
     </section>
   )
 }
 
 export default StoryPage
-

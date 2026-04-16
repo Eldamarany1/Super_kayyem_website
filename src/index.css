@@ -1,15 +1,8 @@
-/* Google Fonts - Cairo for Arabic */
+/* ============================================================
+   index.css — Entry-level styles loaded before App.css
+   Only handles: Arabic font import & font rendering
+   Full reset and design tokens live in App.css
+   ============================================================ */
+
+/* Arabic font — Cairo */
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap');
-
-/* Global Reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Cairo', sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-

@@ -1,111 +1,116 @@
-// Main App Component
+// ============================================================
+//  App.jsx — Root Component
+//  Handles routing, global state (theme, auth), and layout
+// ============================================================
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import './App.css'
 
-// Import Pages
-import HomePage from './pages/HomePage'
+// Pages
+import HomePage    from './pages/HomePage'
 import LibraryPage from './pages/LibraryPage'
 import AccountPage from './pages/AccountPage'
-import AboutPage from './pages/AboutPage'
-import LoginPage from './pages/LoginPage'
-import SignupPage from './pages/SignupPage'
-import StoryPage from './pages/StoryPage'
-import ReaderPage from './pages/ReaderPage'
+import LoginPage   from './pages/LoginPage'
+import SignupPage  from './pages/SignupPage'
+import StoryPage   from './pages/StoryPage'
+import ReaderPage  from './pages/ReaderPage'
 
-// Import Components
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
+// Components
+import Navbar      from './components/Navbar'
+import Footer      from './components/Footer'
 import RewardModal from './components/RewardModal'
 
+// ──────────────────────────────────────────────
+//  Inner App (needs Router context for hooks)
+// ──────────────────────────────────────────────
 function AppContent() {
   const [selectedStoryId, setSelectedStoryId] = useState(1)
-  const [isDark, setIsDark] = useState(false)
-  const [showModal, setShowModal] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  
-  const navigate = useNavigate()
-  const location = useLocation()
+  const [isDark,          setIsDark]          = useState(false)
+  const [showModal,       setShowModal]       = useState(false)
 
-  // Bridge function to support your existing pages without breaking them
+  const { isLoggedIn } = useAuth()
+
+  const navigate  = useNavigate()
+  const location  = useLocation()
+
+  // String-based navigation helper used by child pages
   const setCurrentPage = (page) => {
     const routes = {
-      home: '/',
-      about: '/about',
+      home:    '/',
       library: '/library',
       account: '/account',
-      login: '/login',
-      signup: '/signup',
-      story: '/story',
-      reader: '/reader'
+      login:   '/login',
+      signup:  '/signup',
+      story:   '/story',
+      reader:  '/reader',
     }
     if (routes[page]) navigate(routes[page])
   }
 
-  // Scroll to top on route change, but only if not doing a hash scroll
+  // Scroll to top on every route change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [location.pathname])
 
-  // Theme toggle
+  // Apply / remove dark-theme attribute on <body>
   useEffect(() => {
-    if (isDark) {
-      document.body.setAttribute('data-theme', 'dark')
-    } else {
-      document.body.removeAttribute('data-theme')
-    }
+    document.body.setAttribute('data-theme', isDark ? 'dark' : 'light')
   }, [isDark])
 
   return (
     <div className="app" dir="rtl">
-      <Navbar 
-        isDark={isDark} 
+      <Navbar
+        isDark={isDark}
         setIsDark={setIsDark}
         isLoggedIn={isLoggedIn}
-        setIsLoggedIn={setIsLoggedIn}
       />
 
-      <main id="app">
+      <main>
         <Routes>
-          <Route path="/" element={<HomePage setCurrentPage={setCurrentPage} />} />
-          <Route path="/about" element={<AboutPage />} />
-          
-          {/* Protected Routes */}
+          {/* Public */}
+          <Route path="/"      element={<HomePage setCurrentPage={setCurrentPage} />} />
+          <Route path="/story" element={<StoryPage setCurrentPage={setCurrentPage} setShowModal={setShowModal} selectedStoryId={selectedStoryId} setSelectedStoryId={setSelectedStoryId} />} />
+
+          {/* Auth */}
+          <Route path="/login"  element={<LoginPage  setCurrentPage={setCurrentPage} />} />
+          <Route path="/signup" element={<SignupPage setCurrentPage={setCurrentPage} />} />
+
+          {/* Protected — redirect to /login if not logged in */}
           <Route path="/library" element={
-            isLoggedIn ? 
-              <LibraryPage setCurrentPage={setCurrentPage} setSelectedStoryId={setSelectedStoryId} /> 
-            : <Navigate to="/login" />
+            isLoggedIn
+              ? <LibraryPage setCurrentPage={setCurrentPage} setSelectedStoryId={setSelectedStoryId} />
+              : <Navigate to="/login" />
           } />
           <Route path="/account" element={
             isLoggedIn ? <AccountPage /> : <Navigate to="/login" />
           } />
-          
-          {/* Auth Routes */}
-          <Route path="/login" element={<LoginPage setCurrentPage={setCurrentPage} setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/signup" element={<SignupPage setCurrentPage={setCurrentPage} setIsLoggedIn={setIsLoggedIn} />} />
-          
-          {/* Content Routes */}
-          <Route path="/story" element={<StoryPage setCurrentPage={setCurrentPage} setShowModal={setShowModal} setSelectedStoryId={setSelectedStoryId} />} />
-          <Route path="/reader" element={<ReaderPage setCurrentPage={setCurrentPage} storyId={selectedStoryId} />} />
+          <Route path="/reader" element={
+            <ReaderPage setCurrentPage={setCurrentPage} storyId={selectedStoryId} />
+          } />
         </Routes>
       </main>
 
       <Footer />
 
-      <RewardModal 
-        showModal={showModal} 
-        setShowModal={setShowModal} 
-        setCurrentPage={setCurrentPage} 
+      <RewardModal
+        showModal={showModal}
+        setShowModal={setShowModal}
+        setCurrentPage={setCurrentPage}
       />
     </div>
   )
 }
 
-// Wrap the app in BrowserRouter
+// ──────────────────────────────────────────────
+//  Root — wraps everything in BrowserRouter
+// ──────────────────────────────────────────────
 function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </BrowserRouter>
   )
 }

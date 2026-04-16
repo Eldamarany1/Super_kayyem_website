@@ -1,0 +1,13 @@
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Domain\obj\Debug\net10.0\SuperKayyem.Domain.GeneratedMSBuildEditorConfig.editorconfig
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Domain\obj\Debug\net10.0\SuperKayyem.Domain.AssemblyInfoInputs.cache
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Domain\obj\Debug\net10.0\SuperKayyem.Domain.AssemblyInfo.cs
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Domain\obj\Debug\net10.0\SuperKayyem.Domain.csproj.CoreCompileInputs.cache
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Domain\obj\Debug\net10.0\SuperKayyem.Domain.sourcelink.json
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Domain\bin\Debug\net10.0\SuperKayyem.Domain.deps.json
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Domain\bin\Debug\net10.0\SuperKayyem.Domain.dll
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Domain\bin\Debug\net10.0\SuperKayyem.Domain.pdb
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Domain\obj\Debug\net10.0\SuperKayyem.Domain.csproj.AssemblyReference.cache
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Domain\obj\Debug\net10.0\SuperKayyem.Domain.dll
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Domain\obj\Debug\net10.0\refint\SuperKayyem.Domain.dll
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Domain\obj\Debug\net10.0\SuperKayyem.Domain.pdb
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Domain\obj\Debug\net10.0\ref\SuperKayyem.Domain.dll

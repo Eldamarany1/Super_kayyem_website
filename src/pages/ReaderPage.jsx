@@ -1,38 +1,41 @@
-import { useState, useEffect } from 'react'
+// ============================================================
+//  ReaderPage.jsx — قارئ الكتاب التفاعلي (3D Flipbook)
+// ============================================================
+import { useState, useEffect, useCallback } from 'react'
 import { STORIES } from '../data/stories'
 
 function ReaderPage({ setCurrentPage, storyId = 1 }) {
   const story = STORIES.find(s => s.id === storyId) || STORIES[0]
+
   const [currentSheet, setCurrentSheet] = useState(0)
-  
-  // Touch states
-  const [touchStartX, setTouchStartX] = useState(null)
-  const [touchEndX, setTouchEndX] = useState(null)
+  const [touchStartX,  setTouchStartX]  = useState(null)
+  const [touchEndX,    setTouchEndX]    = useState(null)
 
   const handleGoBack = () => setCurrentPage('library')
 
-  // --- بناء أوجه الصفحات بالترتيب الصحيح ---
+  // ── Build page faces ──────────────────────────────────────
   const faces = []
 
-  // 1. الغلاف الأمامي (ورقة 1 - وجه)
+  // Front cover
   faces.push(
     <div className="page-content cover-front">
       <h1 style={{ fontSize: '3rem', marginBottom: '20px' }}>{story.title}</h1>
-      <div style={{ backgroundColor: 'white', color: 'var(--primary-blue)', padding: '5px 20px', borderRadius: '20px', fontWeight: 'bold', fontSize: '1.2rem' }}>
+      <div style={{ backgroundColor: '#fff', color: 'var(--primary-blue)', padding: '5px 20px', borderRadius: '20px', fontWeight: 'bold', fontSize: '1.2rem' }}>
         {story.category}
       </div>
     </div>
   )
 
-  // 2. باطن الغلاف الأمامي (ورقة 1 - ظهر)
-  faces.push(<div className="page-content cover-back"></div>)
+  // Inside front cover (blank)
+  faces.push(<div className="page-content cover-back" />)
 
-  // 3. صفحات القصة
+  // Story pages
+  const ILLUSTRATIONS = ['🌟 باسم يواجه المهمة', '🚀 الرحلة تستمر', '🤝 الأصدقاء يتعاونون', '⭐ النور يعود']
   story.pages.forEach((page, index) => {
     faces.push(
       <div className="page-content">
         <div className="img-placeholder" style={{ height: '180px', marginBottom: '20px', borderRadius: '10px' }}>
-          {index % 4 === 0 ? '🌟 باسم يواجه المهمة' : (index % 4 === 1 ? '🚀 الرحلة تستمر' : (index % 4 === 2 ? '🤝 الأصدقاء يتعاونون' : '⭐ النور يعود'))}
+          {ILLUSTRATIONS[index % ILLUSTRATIONS.length]}
         </div>
         <p style={{ fontSize: '1.4rem', lineHeight: '1.8', textAlign: 'justify' }}>{page.content}</p>
         <div style={{ marginTop: 'auto', textAlign: index % 2 === 0 ? 'right' : 'left', color: '#94a3b8', fontSize: '1.2rem' }}>
@@ -42,7 +45,7 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
     )
   })
 
-  // 4. شاشة النهاية (أحسنت)
+  // Completion screen
   faces.push(
     <div className="page-content">
       <div style={{ textAlign: 'center', margin: 'auto' }}>
@@ -56,96 +59,87 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
     </div>
   )
 
-  // --- الحل الجذري لمشكلة الغلاف الخلفي ---
-  // يجب أن يكون عدد الأوجه زوجياً قبل إضافة الغلاف الخلفي
-  // لضمان أن الغلاف الخلفي سيطبع على ورقة مستقلة تماماً
+  // Ensure even count before back cover
   if (faces.length % 2 !== 0) {
-    faces.push(<div className="page-content"></div>)
+    faces.push(<div className="page-content" />)
   }
 
-  // 5. الغلاف الخلفي الخارجي (ورقة أخيرة)
-  faces.push(<div className="page-content cover-back"></div>) // باطن الغلاف الخلفي
-  
+  // Back cover (inside + outside)
+  faces.push(<div className="page-content cover-back" />)
   faces.push(
     <div className="page-content cover-front">
       <div style={{ textAlign: 'center', margin: 'auto' }}>
         <h2 style={{ fontSize: '3rem', marginBottom: '15px' }}>النهاية</h2>
-        <p style={{ fontSize: '1.5rem', opacity: '0.9' }}>سوبر قيّم</p>
+        <p style={{ fontSize: '1.5rem', opacity: 0.9 }}>سوبر قيّم</p>
       </div>
     </div>
   )
 
-  // --- تجميع الأوجه في أوراق (Sheets) ---
+  // ── Group faces into sheets ───────────────────────────────
   const sheets = []
   for (let i = 0; i < faces.length; i += 2) {
-    sheets.push({
-      id: `sheet-${i / 2}`,
-      front: faces[i],      
-      back: faces[i + 1]    
-    })
+    sheets.push({ id: `sheet-${i / 2}`, front: faces[i], back: faces[i + 1] })
   }
-
   const totalSheets = sheets.length
 
-  // --- دوال التنقل ---
-  const flipNext = () => {
-    if (currentSheet < totalSheets) setCurrentSheet(prev => prev + 1)
-  }
+  // ── Navigation ───────────────────────────────────────────────
+  const flipNext = useCallback(() => { if (currentSheet < totalSheets)  setCurrentSheet(p => p + 1) }, [currentSheet, totalSheets])
+  const flipPrev = useCallback(() => { if (currentSheet > 0)            setCurrentSheet(p => p - 1) }, [currentSheet])
 
-  const flipPrev = () => {
-    if (currentSheet > 0) setCurrentSheet(prev => prev - 1)
-  }
-
+  // Keyboard navigation
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'ArrowLeft') flipNext()   
-      if (e.key === 'ArrowRight') flipPrev()  
-      if (e.key === 'Escape') handleGoBack()
+    const onKey = (e) => {
+      if (e.key === 'ArrowLeft')  flipNext()
+      if (e.key === 'ArrowRight') flipPrev()
+      if (e.key === 'Escape')     handleGoBack()
     }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [currentSheet, totalSheets])
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [flipNext, flipPrev])
 
+  // Touch swipe
   const onTouchEnd = () => {
     if (!touchStartX || !touchEndX) return
-    const distance = touchStartX - touchEndX
-    
-    // في الكتاب العربي: السحب لليمين يقلب الصفحة التالية (نمسك اليسار ونسحبه لليمين)
-    if (distance < -40) flipNext()   // سحب لليمين
-    if (distance > 40) flipPrev()    // سحب لليسار
+    const dist = touchStartX - touchEndX
+    if (dist < -40) flipNext()
+    if (dist >  40) flipPrev()
   }
 
-  let bookTranslate = 'translateX(0)'
-  if (currentSheet > 0 && currentSheet < totalSheets) {
-    bookTranslate = 'translateX(-50%)' 
-  } else if (currentSheet === totalSheets) {
-    bookTranslate = 'translateX(-100%)' 
-  }
+  // Book translate based on sheet position
+  const bookTranslate =
+    currentSheet === 0            ? 'translateX(0)'
+    : currentSheet === totalSheets ? 'translateX(-100%)'
+    :                                'translateX(-50%)'
+
+  // Page counter label
+  const pageLabel =
+    currentSheet === 0            ? 'الغلاف'
+    : currentSheet === totalSheets ? 'النهاية'
+    : `ورقة ${currentSheet} من ${totalSheets - 1}`
 
   return (
-    <section id="reader" className="page-view active" dir="rtl">
+    <section id="reader" dir="rtl">
       <div className="container">
-        <div className="reader-toolbar" style={{ marginBottom: '20px', borderRadius: '15px' }}>
+
+        {/* Top toolbar */}
+        <div className="reader-toolbar">
           <button className="btn btn-outline" onClick={handleGoBack}>إغلاق وتخزين</button>
-          <h3 style={{ margin: '0' }}>{story.title}</h3>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button className="btn btn-outline" title="حفظ علامة">🔖</button>
-          </div>
+          <h3>{story.title}</h3>
+          <button className="btn btn-outline" title="حفظ علامة">🔖</button>
         </div>
 
-        <div 
+        {/* 3D Book */}
+        <div
           className="book-scene"
           onTouchStart={e => { setTouchEndX(null); setTouchStartX(e.targetTouches[0].clientX) }}
-          onTouchMove={e => setTouchEndX(e.targetTouches[0].clientX)}
+          onTouchMove={e  => setTouchEndX(e.targetTouches[0].clientX)}
           onTouchEnd={onTouchEnd}
         >
-          {/* الحاوية الجديدة الخاصة بالتصغير على الجوال */}
           <div className="book-scaler">
             <div className="book-3d" style={{ transform: bookTranslate }}>
               {sheets.map((sheet, index) => {
                 const isFlipped = index < currentSheet
-                const zIndex = isFlipped ? index : totalSheets - index
-
+                const zIndex    = isFlipped ? index : totalSheets - index
                 return (
                   <div
                     key={sheet.id}
@@ -162,29 +156,27 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
           </div>
         </div>
 
-        <div className="reader-toolbar" style={{ justifyContent: 'center', gap: '20px', borderRadius: '15px' }}>
-          <button 
-            className="btn btn-primary" 
+        {/* Bottom navigation toolbar */}
+        <div className="reader-toolbar" style={{ justifyContent: 'center', gap: '20px' }}>
+          <button
+            className="btn btn-primary"
             onClick={flipPrev}
             disabled={currentSheet === 0}
-            style={{ opacity: currentSheet === 0 ? 0.5 : 1 }}
           >
             ◀ السابق
           </button>
-          
-          <span style={{ fontWeight: '600', fontSize: '1.1rem' }}>
-             {currentSheet === 0 ? 'الغلاف' : (currentSheet === totalSheets ? 'النهاية' : `ورقة ${currentSheet} من ${totalSheets - 1}`)}
-          </span>
-          
-          <button 
-            className="btn btn-primary" 
+
+          <span style={{ fontWeight: '600', fontSize: '1.1rem' }}>{pageLabel}</span>
+
+          <button
+            className="btn btn-primary"
             onClick={flipNext}
             disabled={currentSheet === totalSheets}
-            style={{ opacity: currentSheet === totalSheets ? 0.5 : 1 }}
           >
             التالي ▶
           </button>
         </div>
+
       </div>
     </section>
   )

@@ -1,0 +1,16 @@
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\bin\Debug\net10.0\SuperKayyem.Application.deps.json
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\bin\Debug\net10.0\SuperKayyem.Application.dll
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\bin\Debug\net10.0\SuperKayyem.Application.pdb
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\bin\Debug\net10.0\SuperKayyem.Domain.dll
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\bin\Debug\net10.0\SuperKayyem.Domain.pdb
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\obj\Debug\net10.0\SuperKayyem.Application.csproj.AssemblyReference.cache
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\obj\Debug\net10.0\SuperKayyem.Application.GeneratedMSBuildEditorConfig.editorconfig
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\obj\Debug\net10.0\SuperKayyem.Application.AssemblyInfoInputs.cache
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\obj\Debug\net10.0\SuperKayyem.Application.AssemblyInfo.cs
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\obj\Debug\net10.0\SuperKayyem.Application.csproj.CoreCompileInputs.cache
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\obj\Debug\net10.0\SuperKayyem.Application.sourcelink.json
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\obj\Debug\net10.0\SuperKay.B3D44CC6.Up2Date
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\obj\Debug\net10.0\SuperKayyem.Application.dll
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\obj\Debug\net10.0\refint\SuperKayyem.Application.dll
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\obj\Debug\net10.0\SuperKayyem.Application.pdb
+F:\MK_project\super-kayyem\Super_kayyem_website\SuperKayyem.Backend\src\SuperKayyem.Application\obj\Debug\net10.0\ref\SuperKayyem.Application.dll
