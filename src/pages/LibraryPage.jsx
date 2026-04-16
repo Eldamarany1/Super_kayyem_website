@@ -2,34 +2,35 @@
 //  LibraryPage.jsx — مكتبتي الخاصة
 // ============================================================
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/client'
 
 const CATEGORIES = ['الكل', 'التعاون', 'الشجاعة', 'الصدق', 'المسؤولية', 'الصداقة', 'الصبر']
 
 function LibraryPage({ setCurrentPage, setSelectedStoryId }) {
-  const [filter,      setFilter]      = useState('الكل')
-  const [searchTerm,  setSearchTerm]  = useState('')
-  const [libraryData, setLibraryData] = useState([])
-  const [loading,     setLoading]     = useState(true)
+  const navigate                          = useNavigate()
+  const [filter,      setFilter]          = useState('الكل')
+  const [searchTerm,  setSearchTerm]      = useState('')
+  const [libraryData, setLibraryData]     = useState([])
+  const [loading,     setLoading]         = useState(true)
 
   useEffect(() => {
-    apiClient.get('/library').then(res => {
-      if (res.success && res.data) setLibraryData(res.data)
-    }).catch(console.error).finally(() => setLoading(false))
+    apiClient.get('/library')
+      .then(res => { if (res.success && res.data) setLibraryData(res.data) })
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [])
 
+  // Navigate to the Flipbook reader with the correct story id
   const handleReadStory = (storyId) => {
-    if (setSelectedStoryId) setSelectedStoryId(storyId)
-    setCurrentPage('reader')
+    navigate(`/reader/${storyId}`)
   }
 
   const filtered = libraryData.filter(story => {
-    const matchSearch = story.title.includes(searchTerm)
-    return matchSearch
+    const matchSearch   = story.title?.includes(searchTerm) ?? true
+    const matchCategory = filter === 'الكل' || story.valueLearned === filter
+    return matchSearch && matchCategory
   })
-
-  // Since actual progress logic isn't dynamic right now, just map them all to "Available Stories"
-  const availableStories = filtered
 
   return (
     <section id="library">
@@ -66,11 +67,11 @@ function LibraryPage({ setCurrentPage, setSelectedStoryId }) {
         </div>
 
         {/* Available Stories */}
-        {loading ? <p>جاري تحميل المكتبة...</p> : availableStories.length > 0 && (
+        {loading ? <p>جاري تحميل المكتبة...</p> : filtered.length > 0 && (
           <>
             <h2 style={{ marginTop: '40px' }}>مجموعة قصصك</h2>
             <div className="grid">
-              {availableStories.map(story => (
+              {filtered.map(story => (
                 <div className="card" key={story.id}>
                   <div className="img-placeholder story-cover" style={{ 
                     height: '150px',

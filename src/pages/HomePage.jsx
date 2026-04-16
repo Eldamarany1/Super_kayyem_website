@@ -3,23 +3,29 @@
 // ============================================================
 
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/client'
 
 function HomePage({ setCurrentPage, setSelectedStoryId }) {
+  const navigate          = useNavigate()
   const [stories, setStories] = useState([])
   const [banners, setBanners] = useState([])
 
   useEffect(() => {
-    // Fetch Banners
     apiClient.get('/cms/banners').then(res => {
       if (res.success && res.data) setBanners(res.data)
     }).catch(console.error)
 
-    // Fetch Stories
     apiClient.get('/stories').then(res => {
       if (res.success && res.data) setStories(res.data)
     }).catch(console.error)
   }, [])
+
+  const handleStoryClick = (story) => {
+    if (setSelectedStoryId) setSelectedStoryId(story.id)
+    navigate('/story')
+  }
+
 
   return (
     <section id="home">
@@ -81,10 +87,7 @@ function HomePage({ setCurrentPage, setSelectedStoryId }) {
         <h2 className="section-title">مغامرات شيقة</h2>
         <div className="grid">
           {stories.map(story => (
-            <div className="card" key={story.id} onClick={() => { 
-                setSelectedStoryId && setSelectedStoryId(story.id); 
-                setCurrentPage('story') 
-              }}>
+            <div className="card" key={story.id} onClick={() => handleStoryClick(story)} style={{ cursor: 'pointer' }}>
               <div className="img-placeholder" style={{ 
                 backgroundImage: `url(${story.coverImageUrl})`, 
                 backgroundSize: 'cover', 

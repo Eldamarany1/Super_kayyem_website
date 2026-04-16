@@ -7,25 +7,32 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate } from
 import { AuthProvider, useAuth } from './context/AuthContext'
 import './App.css'
 
-// Pages
-import HomePage    from './pages/HomePage'
-import LibraryPage from './pages/LibraryPage'
-import AccountPage from './pages/AccountPage'
-import LoginPage   from './pages/LoginPage'
-import SignupPage  from './pages/SignupPage'
-import StoryPage   from './pages/StoryPage'
-import ReaderPage  from './pages/ReaderPage'
+// Pages — public
+import HomePage        from './pages/HomePage'
+import LibraryPage     from './pages/LibraryPage'
+import AccountPage     from './pages/AccountPage'
+import LoginPage       from './pages/LoginPage'
+import SignupPage      from './pages/SignupPage'
+import StoryPage       from './pages/StoryPage'
+
+// Pages — reader
+import FlipbookReader  from './pages/FlipbookReader'
+
+// Pages — admin
+import AdminLayout     from './pages/admin/AdminLayout'
+import Dashboard       from './pages/admin/Dashboard'
+import StoryEditor     from './pages/admin/StoryEditor'
 
 // Components
-import Navbar      from './components/Navbar'
-import Footer      from './components/Footer'
-import RewardModal from './components/RewardModal'
+import Navbar          from './components/Navbar'
+import Footer          from './components/Footer'
+import RewardModal     from './components/RewardModal'
 
 // ──────────────────────────────────────────────
 //  Inner App (needs Router context for hooks)
 // ──────────────────────────────────────────────
 function AppContent() {
-  const [selectedStoryId, setSelectedStoryId] = useState(1)
+  const [selectedStoryId, setSelectedStoryId] = useState(null)
   const [isDark,          setIsDark]          = useState(false)
   const [showModal,       setShowModal]       = useState(false)
 
@@ -33,6 +40,11 @@ function AppContent() {
 
   const navigate  = useNavigate()
   const location  = useLocation()
+
+  // Hide Navbar/Footer on the admin section and the fullscreen reader
+  const isAdminRoute  = location.pathname.startsWith('/admin')
+  const isReaderRoute = location.pathname.startsWith('/reader')
+  const hideShell = isAdminRoute || isReaderRoute
 
   // String-based navigation helper used by child pages
   const setCurrentPage = (page) => {
@@ -60,23 +72,32 @@ function AppContent() {
 
   return (
     <div className="app" dir="rtl">
-      <Navbar
-        isDark={isDark}
-        setIsDark={setIsDark}
-        isLoggedIn={isLoggedIn}
-      />
+      {!hideShell && (
+        <Navbar
+          isDark={isDark}
+          setIsDark={setIsDark}
+          isLoggedIn={isLoggedIn}
+        />
+      )}
 
       <main>
         <Routes>
-          {/* Public */}
+          {/* ── Public ────────────────────────────────────── */}
           <Route path="/"      element={<HomePage setCurrentPage={setCurrentPage} />} />
-          <Route path="/story" element={<StoryPage setCurrentPage={setCurrentPage} setShowModal={setShowModal} selectedStoryId={selectedStoryId} setSelectedStoryId={setSelectedStoryId} />} />
+          <Route path="/story" element={
+            <StoryPage
+              setCurrentPage={setCurrentPage}
+              setShowModal={setShowModal}
+              selectedStoryId={selectedStoryId}
+              setSelectedStoryId={setSelectedStoryId}
+            />
+          } />
 
-          {/* Auth */}
+          {/* ── Auth ──────────────────────────────────────── */}
           <Route path="/login"  element={<LoginPage  setCurrentPage={setCurrentPage} />} />
           <Route path="/signup" element={<SignupPage setCurrentPage={setCurrentPage} />} />
 
-          {/* Protected — redirect to /login if not logged in */}
+          {/* ── Protected user routes ─────────────────────── */}
           <Route path="/library" element={
             isLoggedIn
               ? <LibraryPage setCurrentPage={setCurrentPage} setSelectedStoryId={setSelectedStoryId} />
@@ -85,13 +106,28 @@ function AppContent() {
           <Route path="/account" element={
             isLoggedIn ? <AccountPage /> : <Navigate to="/login" />
           } />
-          <Route path="/reader" element={
-            <ReaderPage setCurrentPage={setCurrentPage} storyId={selectedStoryId} />
-          } />
+
+          {/* ── Flipbook reader ───────────────────────────── */}
+          {/* /reader/:id — id comes from URL params in FlipbookReader */}
+          <Route path="/reader/:id" element={<FlipbookReader />} />
+          {/* Legacy /reader route without id — redirect back */}
+          <Route path="/reader" element={<Navigate to="/" />} />
+
+          {/* ── Admin section (nested routes) ─────────────── */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index          element={<Dashboard />} />
+            <Route path="stories/new" element={<StoryEditor />} />
+            {/* Placeholder routes — add full pages as needed */}
+            <Route path="stories"     element={<Dashboard />} />
+            <Route path="users"       element={<Dashboard />} />
+            <Route path="transactions" element={<Dashboard />} />
+            <Route path="discounts"   element={<Dashboard />} />
+            <Route path="cms"         element={<Dashboard />} />
+          </Route>
         </Routes>
       </main>
 
-      <Footer />
+      {!hideShell && <Footer />}
 
       <RewardModal
         showModal={showModal}

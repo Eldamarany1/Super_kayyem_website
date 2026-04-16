@@ -37,18 +37,18 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    // Expected response shape from backend: { data: { token, ... } }
     const res = await apiClient.post('/auth/login', { email, password });
     if (res.success && res.data?.token) {
       localStorage.setItem('token', res.data.token);
       const decoded = jwtDecode(res.data.token);
-      setUser({
-        id: res.data.id || decoded.nameid,
-        email: res.data.email,
-        role: res.data.role,
+      const userData = {
+        id:       res.data.id || decoded.nameid,
+        email:    res.data.email,
+        role:     res.data.role,
         fullName: res.data.fullName
-      });
-      return true;
+      };
+      setUser(userData);
+      return userData;   // ← return so LoginPage can check the role
     }
     throw new Error(res.message || 'Login failed');
   };

@@ -39,3 +39,4 @@ public record StoryResponse(
     int ReviewCount,
     DateTime CreatedAt
 );
+

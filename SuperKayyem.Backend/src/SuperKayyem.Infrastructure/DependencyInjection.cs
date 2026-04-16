@@ -20,9 +20,13 @@ public static class DependencyInjection
         // Settings (strongly-typed, bound via IOptions)
         services.Configure<MongoDbSettings>(configuration.GetSection("MongoDB"));
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+        services.Configure<FileStorageSettings>(configuration.GetSection("FileStorage"));
 
         // MongoDB Context (singleton — MongoClient is thread-safe)
         services.AddSingleton<MongoDbContext>();
+
+        // File Storage (singleton — no state per-request)
+        services.AddSingleton<IFileStorageService, LocalFileStorageService>();
 
         // Application services
         services.AddScoped<IJwtService, JwtService>();

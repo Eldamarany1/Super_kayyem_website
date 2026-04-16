@@ -53,5 +53,30 @@
     "C:\\Users\\Dmdm5555\\.nuget\\packages\\system.security.cryptography.xml\\8.0.2\\system.security.cryptography.xml.8.0.2.nupkg.sha512",
     "C:\\Users\\Dmdm5555\\.nuget\\packages\\zstdsharp.port\\0.7.3\\zstdsharp.port.0.7.3.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'System.Security.Cryptography.Xml' 8.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-37gx-xxp4-5rgx",
+      "projectPath": "F:\\MK_project\\super-kayyem\\Super_kayyem_website\\SuperKayyem.Backend\\src\\SuperKayyem.Infrastructure\\SuperKayyem.Infrastructure.csproj",
+      "warningLevel": 1,
+      "filePath": "F:\\MK_project\\super-kayyem\\Super_kayyem_website\\SuperKayyem.Backend\\src\\SuperKayyem.Infrastructure\\SuperKayyem.Infrastructure.csproj",
+      "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'System.Security.Cryptography.Xml' 8.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-w3x6-4m5h-cxqf",
+      "projectPath": "F:\\MK_project\\super-kayyem\\Super_kayyem_website\\SuperKayyem.Backend\\src\\SuperKayyem.Infrastructure\\SuperKayyem.Infrastructure.csproj",
+      "warningLevel": 1,
+      "filePath": "F:\\MK_project\\super-kayyem\\Super_kayyem_website\\SuperKayyem.Backend\\src\\SuperKayyem.Infrastructure\\SuperKayyem.Infrastructure.csproj",
+      "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }

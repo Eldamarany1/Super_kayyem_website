@@ -17,19 +17,21 @@ function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault()
-    if (email && password) {
-      setLoading(true)
-      setError('')
-      try {
-        await login(email, password)
+    if (!email || !password) { setError('يرجى إدخال البريد الإلكتروني وكلمة المرور'); return }
+    setLoading(true)
+    setError('')
+    try {
+      const loggedInUser = await login(email, password)
+      // Redirect admins straight to the dashboard
+      if (loggedInUser?.role === 'Admin') {
+        navigate('/admin')
+      } else {
         navigate('/')
-      } catch (err) {
-        setError(err.message)
-      } finally {
-        setLoading(false)
       }
-    } else {
-      setError('يرجى إدخال البريد الإلكتروني وكلمة المرور')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
     }
   }
 
