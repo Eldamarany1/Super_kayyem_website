@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SuperKayyem.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+891373adb3f62df8092b205dbd6d1816272921af")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8880a8b486154e0d51d9683271d3931e33ebf11e")]
 [assembly: System.Reflection.AssemblyProductAttribute("SuperKayyem.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SuperKayyem.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

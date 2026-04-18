@@ -5,6 +5,12 @@ using SuperKayyem.Domain.Enums;
 namespace SuperKayyem.Domain.Entities;
 
 /// <summary>
+/// Lightweight value object stored inside the User document.
+/// No identity of its own — identified by name+age within the list.
+/// </summary>
+public sealed record ChildProfile(string Name, int Age, string Gender = "Boy");
+
+/// <summary>
 /// Represents a registered user of the platform.
 /// The IsBlocked flag enforces User Moderation (Phase 3).
 /// </summary>
@@ -24,11 +30,17 @@ public sealed class User : BaseEntity
     [BsonElement("PurchasedPackageIds")]
     private List<string> _purchasedPackageIds = new();
 
+    [BsonElement("Children")]
+    private List<ChildProfile> _children = new();
+
     [BsonIgnore]
     public IReadOnlyCollection<string> PurchasedStoryIds => _purchasedStoryIds.AsReadOnly();
 
     [BsonIgnore]
     public IReadOnlyCollection<string> PurchasedPackageIds => _purchasedPackageIds.AsReadOnly();
+
+    [BsonIgnore]
+    public IReadOnlyCollection<ChildProfile> Children => _children.AsReadOnly();
 
     private User() 
     {
@@ -52,6 +64,32 @@ public sealed class User : BaseEntity
             Role = role,
             IsBlocked = false
         };
+    }
+
+    public void UpdateProfile(string fullName, string? whatsAppNumber)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) throw new ArgumentException("FullName cannot be empty.");
+        FullName = fullName.Trim();
+        WhatsAppNumber = whatsAppNumber?.Trim();
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void AddChild(string name, int age, string gender)
+    {
+        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Child name is required.");
+        if (age < 1 || age > 18) throw new ArgumentException("Child age must be between 1 and 18.");
+        if (string.IsNullOrWhiteSpace(gender)) throw new ArgumentException("Child gender is required.");
+        _children.Add(new ChildProfile(name.Trim(), age, gender));
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public bool RemoveChild(string name, int age)
+    {
+        var toRemove = _children.FirstOrDefault(c => c.Name == name && c.Age == age);
+        if (toRemove is null) return false;
+        _children.Remove(toRemove);
+        UpdatedAt = DateTime.UtcNow;
+        return true;
     }
 
     public void Block()
