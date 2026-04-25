@@ -3,13 +3,15 @@
 // ============================================================
 
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import apiClient from '../api/client'
+import '../styles/HomePage.css'
 
 function HomePage({ setCurrentPage, setSelectedStoryId }) {
-  const navigate          = useNavigate()
+  const navigate = useNavigate()
   const [stories, setStories] = useState([])
   const [banners, setBanners] = useState([])
+  const [parentArticles, setParentArticles] = useState([])
 
   useEffect(() => {
     apiClient.get('/cms/banners').then(res => {
@@ -19,13 +21,20 @@ function HomePage({ setCurrentPage, setSelectedStoryId }) {
     apiClient.get('/stories').then(res => {
       if (res.success && res.data) setStories(res.data)
     }).catch(console.error)
+
+    apiClient.get('/parent-articles').then(res => {
+      if (res.success && res.data) {
+        // Only get the top 3 latest published
+        const published = res.data.filter(a => a.isPublished);
+        setParentArticles(published.slice(0, 3));
+      }
+    }).catch(console.error)
   }, [])
 
   const handleStoryClick = (story) => {
     if (setSelectedStoryId) setSelectedStoryId(story.id)
     navigate('/story')
   }
-
 
   return (
     <section id="home">
@@ -39,8 +48,7 @@ function HomePage({ setCurrentPage, setSelectedStoryId }) {
             صُمم خصيصاً للآباء الباحثين عن محتوى راقي.
           </p>
           <button
-            className="btn btn-yellow"
-            style={{ fontSize: '1.1rem', padding: '14px 32px' }}
+            className="btn btn-yellow hero-btn"
             onClick={() => document.getElementById('stories')?.scrollIntoView({ behavior: 'smooth' })}
           >
             استكشف القصص
@@ -48,16 +56,13 @@ function HomePage({ setCurrentPage, setSelectedStoryId }) {
 
           {/* Decorative floating elements */}
           <div className="hero-graphics">
-            <div className="img-placeholder floating"
-              style={{ width: '200px', height: '80px', borderRadius: '40px', position: 'absolute', top: '20px', left: '10%' }}>
+            <div className="img-placeholder floating floating-cloud-1">
               ☁️ جزيرة طافية
             </div>
-            <div className="img-placeholder floating"
-              style={{ width: '150px', height: '60px', borderRadius: '40px', position: 'absolute', top: '60px', right: '15%', animationDelay: '2s' }}>
+            <div className="img-placeholder floating floating-cloud-2">
               ☁️ غيوم ناعمة
             </div>
-            <div className="img-placeholder floating"
-              style={{ width: '300px', height: '120px', borderRadius: '60px', position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', animationDelay: '1s' }}>
+            <div className="img-placeholder floating floating-city">
               ✨ مدينة الخيال ✨
             </div>
           </div>
@@ -66,42 +71,28 @@ function HomePage({ setCurrentPage, setSelectedStoryId }) {
 
       <div className="container" id="stories">
 
-        {/* Bassem Character Intro */}
-        <div className="bassem-section">
-          <div className="bassem-avatar img-placeholder floating">
-            صورة باسم<br />(بطل المغامرات)
-          </div>
-          <div className="bassem-content">
-            <h2>مرحباً! أنا باسم</h2>
-            <p>
-              أنا صديق أطفالكم الجديد. أحب استكشاف الفضاء، وحل الألغاز العلمية، والسفر عبر الجزر الطافية!
-              في كل قصة نعيشها معاً، نتعلم قيمة جديدة تجعلنا أبطالاً حقيقيين في عالمنا.
-            </p>
-            <button className="btn btn-outline" onClick={() => setCurrentPage('story')}>
-              اقرأ مغامرتي الأولى
-            </button>
-          </div>
-        </div>
-
         {/* Featured Stories Grid */}
         <h2 className="section-title">مغامرات شيقة</h2>
         <div className="grid">
           {stories.map(story => (
-            <div className="card" key={story.id} onClick={() => handleStoryClick(story)} style={{ cursor: 'pointer' }}>
-              <div className="img-placeholder" style={{ 
-                backgroundImage: `url(${story.coverImageUrl})`, 
-                backgroundSize: 'cover', 
-                backgroundPosition: 'center', 
-                color: story.coverImageUrl ? 'transparent' : 'inherit' 
-              }}>
-                غلاف القصة
-              </div>
+            <div className="card story-card" key={story.id} onClick={() => handleStoryClick(story)}>
+              {story.coverImageUrl ? (
+                <img 
+                  src={story.coverImageUrl} 
+                  alt={story.title} 
+                  className="story-card__image" 
+                />
+              ) : (
+                <div className="img-placeholder story-card__cover">
+                  غلاف القصة
+                </div>
+              )}
               <h3>{story.title}</h3>
               <p>{story.description || 'قصة مشوقة وممتعة.'}</p>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
-                <span className="tag" style={{ background: 'var(--primary-blue)', color: 'white' }}>{story.valueLearned}</span>
+              <div className="story-tags">
+                <span className="tag tag-blue">{story.valueLearned}</span>
                 <span className="tag">{story.targetAgeGroup}</span>
-                <span className="tag" style={{ background: 'var(--yellow)', color: 'black' }}>{story.price} EGP</span>
+                <span className="tag tag-yellow">{story.price} EGP</span>
               </div>
             </div>
           ))}
@@ -110,16 +101,27 @@ function HomePage({ setCurrentPage, setSelectedStoryId }) {
 
         {/* Parents Corner */}
         <h2 className="section-title">ركن الآباء والمربين</h2>
-        <div className="grid" id="parents">
-          <div className="card" style={{ background: 'var(--bg-secondary)' }}>
-            <h3>كيف نغرس الصدق؟</h3>
-            <p>مقال تربوي قصير عن أهمية القراءة في بناء الشخصية.</p>
-            <a href="#" style={{ color: 'var(--primary-blue)', fontWeight: '600' }}>اقرأ المزيد ←</a>
+        <div className="parents-section" id="parents">
+          <div className="grid">
+            {parentArticles.length > 0 ? (
+              parentArticles.map((article) => (
+                <div key={article.id} className="card parent-card">
+                  <h3>{article.title}</h3>
+                  <p>{article.content.substring(0, 100)}...</p>
+                  <Link to="/parents" className="parent-card__link">اقرأ المزيد ←</Link>
+                </div>
+              ))
+            ) : (
+              <p>جاري تحميل المقالات...</p>
+            )}
           </div>
-          <div className="card" style={{ background: 'var(--bg-secondary)' }}>
-            <h3>وقت النوم الهادئ</h3>
-            <p>نصائح لاختيار قصص ما قبل النوم المناسبة لطفلك.</p>
-            <a href="#" style={{ color: 'var(--primary-blue)', fontWeight: '600' }}>اقرأ المزيد ←</a>
+          <div className="parents-section__footer">
+            <button 
+              className="btn btn-outline parents-section__btn"
+              onClick={() => navigate('/parents')}
+            >
+              رؤية المزيد
+            </button>
           </div>
         </div>
 

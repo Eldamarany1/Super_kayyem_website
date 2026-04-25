@@ -1,11 +1,11 @@
 // ============================================================
 //  StoryPage.jsx — صفحة تفاصيل القصة
 // ============================================================
-
 import { useState, useEffect } from 'react'
 import apiClient from '../api/client'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import '../styles/StoryPage.css'
 
 function StoryPage({ setCurrentPage, setShowModal, selectedStoryId, setSelectedStoryId }) {
   const navigate = useNavigate()
@@ -41,19 +41,19 @@ function StoryPage({ setCurrentPage, setShowModal, selectedStoryId, setSelectedS
       <div className="container">
 
         {/* Story Header — banner + info */}
-        <div className="story-header" style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
-          <div className="story-banner img-placeholder" style={{
-            flex: '1 1 300px',
-            minHeight: '350px',
-            backgroundImage: story.coverImageUrl ? `url(${story.coverImageUrl})` : undefined,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            color: story.coverImageUrl ? 'transparent' : 'inherit'
-          }}>
+        <div className="story-header story-header-layout">
+
+          {/* Cover banner — dynamic backgroundImage stays inline since it's a runtime URL */}
+          <div
+            className={`story-banner img-placeholder story-cover-banner${story.coverImageUrl ? ' story-cover-banner--has-image' : ''}`}
+            style={{
+              backgroundImage: story.coverImageUrl ? `url(${story.coverImageUrl})` : undefined,
+            }}
+          >
             غلاف القصة
           </div>
 
-          <div className="story-info" style={{ flex: '2 1 400px' }}>
+          <div className="story-info story-info-col">
             <h1>{story.title}</h1>
 
             <div className="story-meta">
@@ -68,7 +68,7 @@ function StoryPage({ setCurrentPage, setShowModal, selectedStoryId, setSelectedS
               {'⭐'.repeat(Math.round(story.averageRating || 0))} ({story.reviewCount ?? 0} تقييم)
             </div>
 
-            <p style={{ fontSize: '1.05rem', margin: '20px 0' }}>{story.description}</p>
+            <p className="story-description">{story.description}</p>
 
             <div className="story-actions">
               <button className="btn btn-primary" onClick={handleBuy}>

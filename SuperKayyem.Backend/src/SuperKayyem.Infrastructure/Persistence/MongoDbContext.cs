@@ -41,7 +41,17 @@ public class MongoDbContext
     public IMongoCollection<Transaction> Transactions =>
         _database.GetCollection<Transaction>("Transactions");
 
+    /// <summary>
+    /// Per-ownership records linking users to their purchased stories.
+    /// Complements User.PurchasedStoryIds for audit, filtering, and rich queries.
+    /// </summary>
+    public IMongoCollection<UserLibraryItem> UserLibraryItems =>
+        _database.GetCollection<UserLibraryItem>("UserLibraryItems");
+
     /// <summary>Singleton CMS collection — one document only.</summary>
     public IMongoCollection<AboutUsConfig> AboutUsConfigs =>
         _database.GetCollection<AboutUsConfig>("AboutUsConfig");
+
+    public IMongoCollection<ParentArticle> ParentArticles =>
+        _database.GetCollection<ParentArticle>("ParentArticles");
 }

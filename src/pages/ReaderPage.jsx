@@ -3,6 +3,7 @@
 // ============================================================
 import { useState, useEffect, useCallback } from 'react'
 import { STORIES } from '../data/stories'
+import '../styles/ReaderPage.css'
 
 function ReaderPage({ setCurrentPage, storyId = 1 }) {
   const story = STORIES.find(s => s.id === storyId) || STORIES[0]
@@ -19,10 +20,8 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
   // Front cover
   faces.push(
     <div className="page-content cover-front">
-      <h1 style={{ fontSize: '3rem', marginBottom: '20px' }}>{story.title}</h1>
-      <div style={{ backgroundColor: '#fff', color: 'var(--primary-blue)', padding: '5px 20px', borderRadius: '20px', fontWeight: 'bold', fontSize: '1.2rem' }}>
-        {story.category}
-      </div>
+      <h1 className="reader-cover-title">{story.title}</h1>
+      <div className="reader-cover-category">{story.category}</div>
     </div>
   )
 
@@ -34,11 +33,11 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
   story.pages.forEach((page, index) => {
     faces.push(
       <div className="page-content">
-        <div className="img-placeholder" style={{ height: '180px', marginBottom: '20px', borderRadius: '10px' }}>
+        <div className={`img-placeholder reader-illustration`}>
           {ILLUSTRATIONS[index % ILLUSTRATIONS.length]}
         </div>
-        <p style={{ fontSize: '1.4rem', lineHeight: '1.8', textAlign: 'justify' }}>{page.content}</p>
-        <div style={{ marginTop: 'auto', textAlign: index % 2 === 0 ? 'right' : 'left', color: '#94a3b8', fontSize: '1.2rem' }}>
+        <p className="reader-page-text">{page.content}</p>
+        <div className={`reader-page-number ${index % 2 === 0 ? 'reader-page-number--right' : 'reader-page-number--left'}`}>
           {index + 1}
         </div>
       </div>
@@ -48,11 +47,14 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
   // Completion screen
   faces.push(
     <div className="page-content">
-      <div style={{ textAlign: 'center', margin: 'auto' }}>
-        <div style={{ fontSize: '5rem', marginBottom: '20px' }}>🏆</div>
-        <h3 style={{ color: 'var(--primary-blue)', fontSize: '2.5rem', marginBottom: '15px' }}>أحسنت!</h3>
-        <p style={{ fontSize: '1.3rem' }}>لقد أنهيت قراءة القصة بنجاح</p>
-        <button className="btn btn-yellow" onClick={handleGoBack} style={{ marginTop: '30px', fontSize: '1.2rem' }}>
+      <div className="reader-completion">
+        <div className="reader-completion__trophy">🏆</div>
+        <h3 className="reader-completion__title">أحسنت!</h3>
+        <p className="reader-completion__subtitle">لقد أنهيت قراءة القصة بنجاح</p>
+        <button
+          className="btn btn-yellow reader-completion__back-btn"
+          onClick={handleGoBack}
+        >
           العودة للمكتبة
         </button>
       </div>
@@ -68,9 +70,9 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
   faces.push(<div className="page-content cover-back" />)
   faces.push(
     <div className="page-content cover-front">
-      <div style={{ textAlign: 'center', margin: 'auto' }}>
-        <h2 style={{ fontSize: '3rem', marginBottom: '15px' }}>النهاية</h2>
-        <p style={{ fontSize: '1.5rem', opacity: 0.9 }}>سوبر قيّم</p>
+      <div className="reader-back-cover">
+        <h2 className="reader-back-cover__title">النهاية</h2>
+        <p className="reader-back-cover__brand">سوبر قيّم</p>
       </div>
     </div>
   )
@@ -105,7 +107,7 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
     if (dist >  40) flipPrev()
   }
 
-  // Book translate based on sheet position
+  // Book translate based on sheet position — dynamic value, stays inline
   const bookTranslate =
     currentSheet === 0            ? 'translateX(0)'
     : currentSheet === totalSheets ? 'translateX(-100%)'
@@ -117,6 +119,7 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
     : currentSheet === totalSheets ? 'النهاية'
     : `ورقة ${currentSheet} من ${totalSheets - 1}`
 
+  // Sheet z-index — dynamic value, stays inline
   return (
     <section id="reader" dir="rtl">
       <div className="container">
@@ -157,7 +160,7 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
         </div>
 
         {/* Bottom navigation toolbar */}
-        <div className="reader-toolbar" style={{ justifyContent: 'center', gap: '20px' }}>
+        <div className="reader-toolbar reader-toolbar--bottom">
           <button
             className="btn btn-primary"
             onClick={flipPrev}
@@ -166,7 +169,7 @@ function ReaderPage({ setCurrentPage, storyId = 1 }) {
             ◀ السابق
           </button>
 
-          <span style={{ fontWeight: '600', fontSize: '1.1rem' }}>{pageLabel}</span>
+          <span className="reader-page-label">{pageLabel}</span>
 
           <button
             className="btn btn-primary"

@@ -3,8 +3,8 @@
 // ============================================================
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-
 import { useAuth } from '../context/AuthContext'
+import '../styles/LoginPage.css'
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -22,7 +22,6 @@ function LoginPage() {
     setError('')
     try {
       const loggedInUser = await login(email, password)
-      // Redirect admins straight to the dashboard
       if (loggedInUser?.role === 'Admin') {
         navigate('/admin')
       } else {
@@ -40,7 +39,7 @@ function LoginPage() {
       <div className="auth-card">
 
         <div className="auth-header">
-          <div className="logo" style={{ marginBottom: '10px' }}>سوبر <span>قيم</span></div>
+          <div className="logo auth-logo">سوبر <span>قيم</span></div>
           <h2>مرحباً بعودتك!</h2>
           <p>سجل دخولك للمتابعة في مغامرات باسم</p>
         </div>
@@ -68,14 +67,18 @@ function LoginPage() {
             />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+          <div className="login-meta-row">
+            <label className="login-remember-label">
               <input type="checkbox" /> تذكرني
             </label>
-            <a href="#" style={{ color: 'var(--primary-blue)', fontWeight: '600' }}>نسيت كلمة المرور؟</a>
+            <a href="#" className="login-forgot-link">نسيت كلمة المرور؟</a>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+          <button
+            type="submit"
+            className="btn btn-primary login-submit-btn"
+            disabled={loading}
+          >
             {loading ? 'جاري التحميل...' : 'تسجيل دخول'}
           </button>
         </form>
@@ -83,7 +86,7 @@ function LoginPage() {
         <div className="auth-footer">
           <p>
             ليس لديك حساب؟{' '}
-            <Link to="/signup" style={{ color: 'var(--primary-blue)', fontWeight: '600' }}>
+            <Link to="/signup" className="auth-footer-link">
               أنشئ حساباً جديداً
             </Link>
           </p>

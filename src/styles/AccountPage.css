@@ -1,0 +1,126 @@
+/* ============================================================
+   AccountPage.css — Styles for src/pages/AccountPage.jsx
+   ============================================================ */
+
+/* ── Toast ─────────────────────────────────────────────────── */
+.account-toast {
+  position: fixed;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.account-toast--success { background: #10b981; }
+.account-toast--error   { background: #dc2626; }
+
+/* ── Loading / error states ─────────────────────────────────── */
+.account-loading-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-secondary);
+}
+
+.account-loading-state__icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+
+.account-error-state {
+  text-align: center;
+  padding: 30px;
+}
+
+.account-error-state__icon {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+/* ── Page heading ───────────────────────────────────────────── */
+.account-heading {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* ── Parent profile card spacing ────────────────────────────── */
+.account-parent-card {
+  margin-bottom: 30px;
+}
+
+/* ── Email label with readonly badge ────────────────────────── */
+.account-email-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.account-email-readonly-badge {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+/* ── Read-only email input ──────────────────────────────────── */
+.account-email-input {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  opacity: 0.75;
+  border-style: dashed;
+}
+
+/* ── Children card header ───────────────────────────────────── */
+.account-children-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.account-children-header h2 {
+  margin: 0;
+}
+
+/* ── Empty children state ───────────────────────────────────── */
+.account-no-children {
+  padding: 30px 0;
+}
+
+/* ── Children grid ──────────────────────────────────────────── */
+.account-children-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* ── Individual child card ──────────────────────────────────── */
+.account-child-card {
+  /* base styles inherited from .child-profile-card in App.css */
+  transition: opacity 0.3s;
+}
+
+.account-child-card--removing {
+  opacity: 0.5;
+}
+
+/* ── Child age text ─────────────────────────────────────────── */
+.account-child-age {
+  margin: 0;
+  font-size: 0.9rem;
+}

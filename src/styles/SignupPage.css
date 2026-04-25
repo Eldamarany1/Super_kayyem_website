@@ -1,0 +1,106 @@
+/* ============================================================
+   SignupPage.css — Styles for src/pages/SignupPage.jsx
+   ============================================================ */
+
+/* ── Wider auth card for signup ─────────────────────────────── */
+.signup-card {
+  max-width: 500px;
+}
+
+/* ── Logo margin ─────────────────────────────────────────────── */
+.signup-logo {
+  margin-bottom: 10px;
+}
+
+/* ── Children section divider ───────────────────────────────── */
+.signup-children-section {
+  border-top: 1px solid var(--border-color);
+  padding-top: 15px;
+}
+
+/* ── Children tags row ──────────────────────────────────────── */
+.signup-children-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+/* ── Remove child tag "×" button ────────────────────────────── */
+.signup-child-remove {
+  cursor: pointer;
+  margin-right: 6px;
+}
+
+/* ── Inline add-child form row ──────────────────────────────── */
+.signup-child-form-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── Text input inside child form ───────────────────────────── */
+.signup-child-input {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-color);
+  color: var(--text-primary);
+  font-family: 'Cairo', sans-serif;
+  outline: none;
+  transition: border-color 0.25s;
+}
+
+.signup-child-input:focus {
+  border-color: var(--primary-blue);
+}
+
+/* ── Select inside child form ───────────────────────────────── */
+.signup-child-select {
+  flex: 1;
+  min-width: 110px;
+  padding: 10px;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-color);
+  color: var(--text-primary);
+  font-family: 'Cairo', sans-serif;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+.signup-child-select:focus {
+  border-color: var(--primary-blue);
+}
+
+/* ── Confirm child button ───────────────────────────────────── */
+.signup-child-confirm-btn {
+  padding: 10px 20px;
+}
+
+/* ── Show child form button ─────────────────────────────────── */
+.signup-add-child-btn {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* ── Submit button ──────────────────────────────────────────── */
+.signup-submit-btn {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* ── Footer link ─────────────────────────────────────────────── */
+.auth-footer-link {
+  color: var(--primary-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-footer-link:hover {
+  text-decoration: underline;
+}

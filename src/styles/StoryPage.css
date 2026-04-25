@@ -1,0 +1,34 @@
+/* ============================================================
+   StoryPage.css — Styles for src/pages/StoryPage.jsx
+   ============================================================ */
+
+/* ── Story header layout (cover + info side-by-side) ────────── */
+.story-header-layout {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+/* ── Cover banner ───────────────────────────────────────────── */
+.story-cover-banner {
+  flex: 1 1 300px;
+  min-height: 350px;
+  background-size: cover;
+  background-position: center;
+}
+
+/* ── When the cover image is loaded, hide the alt text ──────── */
+.story-cover-banner--has-image {
+  color: transparent;
+}
+
+/* ── Info column ────────────────────────────────────────────── */
+.story-info-col {
+  flex: 2 1 400px;
+}
+
+/* ── Description paragraph ──────────────────────────────────── */
+.story-description {
+  font-size: 1.05rem;
+  margin: 20px 0;
+}

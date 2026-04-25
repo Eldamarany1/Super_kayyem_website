@@ -4,6 +4,7 @@
 // ============================================================
 import { useState, useEffect, useCallback } from 'react'
 import { fetchProfile, updateProfile, addChild, removeChild } from '../api/account'
+import '../styles/AccountPage.css'
 
 // ── Decorative helpers ────────────────────────────────────────
 const AVATARS = ['👦', '👧', '👶', '🧒', '🧑']
@@ -22,30 +23,11 @@ function Toast({ message, type = 'success', onClose }) {
     return () => clearTimeout(timer)
   }, [onClose])
 
-  const bg = type === 'success' ? '#10b981' : '#dc2626'
   return (
     <div
       role="status"
       aria-live="polite"
-      style={{
-        position: 'fixed',
-        top: '90px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: bg,
-        color: '#fff',
-        padding: '14px 28px',
-        borderRadius: '50px',
-        fontWeight: 700,
-        fontSize: '0.95rem',
-        boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
-        zIndex: 1000,
-        animation: 'fadeIn 0.3s ease',
-        whiteSpace: 'nowrap',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-      }}
+      className={`account-toast account-toast--${type}`}
     >
       {type === 'success' ? '✓' : '✕'} {message}
     </div>
@@ -93,7 +75,6 @@ function AccountPage() {
         setLoading(true)
         setFetchError(null)
         try {
-          // client.js interceptor unwraps ApiResponse → returns response.data
           const res = await fetchProfile()
           if (!cancelled && res.success && res.data) applyProfile(res.data)
           else if (!cancelled) setFetchError(res.message || 'تعذّر تحميل الملف الشخصي.')
@@ -174,8 +155,8 @@ function AccountPage() {
       <section id="account">
         <div className="container">
           <div className="profile-container">
-            <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-secondary)' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '16px' }}>⏳</div>
+            <div className="account-loading-state">
+              <div className="account-loading-state__icon">⏳</div>
               <p>جاري تحميل الملف الشخصي…</p>
             </div>
           </div>
@@ -190,8 +171,8 @@ function AccountPage() {
       <section id="account">
         <div className="container">
           <div className="profile-container">
-            <div className="error-message" style={{ textAlign: 'center', padding: '30px' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '12px' }}>⚠️</div>
+            <div className="error-message account-error-state">
+              <div className="account-error-state__icon">⚠️</div>
               {fetchError}
             </div>
           </div>
@@ -210,10 +191,10 @@ function AccountPage() {
       <div className="container">
         <div className="profile-container">
 
-          <h1 style={{ textAlign: 'center', marginBottom: '40px' }}>إعدادات الحساب</h1>
+          <h1 className="account-heading">إعدادات الحساب</h1>
 
           {/* ── Parent Profile Card ─────────────────────────────── */}
-          <div className="card" style={{ marginBottom: '30px' }}>
+          <div className="card account-parent-card">
             <h2>ملف ولي الأمر</h2>
 
             {/* Full name */}
@@ -228,28 +209,11 @@ function AccountPage() {
               />
             </div>
 
-            {/* Email — read-only, explicitly non-editable */}
+            {/* Email — read-only */}
             <div className="form-group">
-              <label
-                htmlFor="acc-email"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}
-              >
+              <label htmlFor="acc-email" className="account-email-label">
                 <span>البريد الإلكتروني</span>
-
-                <span style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 400,
-                  color: 'var(--text-secondary)',
-                  background: 'var(--bg-secondary)',
-                  padding: '2px 10px',
-                  borderRadius: '20px',
-                }}>
-                  لا يمكن تعديله
-                </span>
+                <span className="account-email-readonly-badge">لا يمكن تعديله</span>
               </label>
               <input
                 id="acc-email"
@@ -259,13 +223,7 @@ function AccountPage() {
                 disabled
                 aria-readonly="true"
                 aria-label="البريد الإلكتروني — لا يمكن تعديله"
-                style={{
-                  background: 'var(--bg-secondary)',
-                  color: 'var(--text-secondary)',
-                  cursor: 'not-allowed',
-                  opacity: 0.75,
-                  borderStyle: 'dashed',
-                }}
+                className="account-email-input"
               />
             </div>
 
@@ -296,15 +254,8 @@ function AccountPage() {
           {/* ── Children Profiles Card ──────────────────────────── */}
           <div className="card">
             {/* Card header */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '20px',
-              flexWrap: 'wrap',
-              gap: '10px',
-            }}>
-              <h2 style={{ margin: 0 }}>ملفات الأطفال</h2>
+            <div className="account-children-header">
+              <h2>ملفات الأطفال</h2>
               <button
                 id="btn-show-add-child"
                 className="btn btn-yellow"
@@ -367,19 +318,18 @@ function AccountPage() {
 
             {/* Children grid */}
             {children.length === 0 ? (
-              <div className="empty-state" style={{ padding: '30px 0' }}>
+              <div className="empty-state account-no-children">
                 <p>لا يوجد أطفال مضافون بعد. أضف طفلك الأول!</p>
               </div>
             ) : (
-              <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+              <div className="account-children-grid">
                 {children.map((child, idx) => {
                   const key = `${child.name}-${child.age}`
                   const isRemoving = removingId === key
                   return (
                     <div
                       key={key}
-                      className="child-profile-card"
-                      style={{ opacity: isRemoving ? 0.5 : 1, transition: 'opacity 0.3s' }}
+                      className={`child-profile-card account-child-card${isRemoving ? ' account-child-card--removing' : ''}`}
                     >
                       <div
                         className="child-avatar"
@@ -389,7 +339,7 @@ function AccountPage() {
                         {child.gender === 'Girl' ? '👧' : '👦'}
                       </div>
                       <h3>{child.name}</h3>
-                      <p style={{ margin: 0, fontSize: '0.9rem' }}>{child.age} سنوات</p>
+                      <p className="account-child-age">{child.age} سنوات</p>
                       <button
                         id={`btn-remove-child-${idx}`}
                         className="remove-child-btn"

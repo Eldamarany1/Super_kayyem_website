@@ -40,6 +40,21 @@ public interface ILibraryService
     Task<ApiResponse<List<LibraryItemResponse>>> GetUserLibraryAsync(string userId);
 }
 
+public interface IUserLibraryService
+{
+    /// <summary>
+    /// Returns the rich list of owned stories for the given user,
+    /// joining UserLibraryItems with Stories and Reviews collections.
+    /// </summary>
+    Task<ApiResponse<List<DTOs.Library.UserOwnedStoryResponseDto>>> GetOwnedStoriesAsync(string userId);
+
+    /// <summary>
+    /// Records ownership of one or more stories instantly (online payment flow).
+    /// Also writes to User.PurchasedStoryIds for backwards-compat with LibraryService.
+    /// </summary>
+    Task<ApiResponse> RecordPurchaseAsync(string userId, IEnumerable<string> storyIds, string paymentMethod);
+}
+
 public interface IDiscountCodeService
 {
     Task<ApiResponse<Domain.Entities.DiscountCode>> CreateAsync(string codeString, Domain.Enums.DiscountType discountType, decimal value);

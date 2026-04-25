@@ -1,0 +1,49 @@
+/* ============================================================
+   LoginPage.css — Styles for src/pages/LoginPage.jsx
+   ============================================================ */
+
+/* ── Logo margin inside auth card ───────────────────────────── */
+.auth-logo {
+  margin-bottom: 10px;
+}
+
+/* ── Remember-me / forgot-password row ──────────────────────── */
+.login-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.login-remember-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.login-forgot-link {
+  color: var(--primary-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Full-width submit button ────────────────────────────────── */
+.login-submit-btn {
+  width: 100%;
+}
+
+/* ── Footer link ─────────────────────────────────────────────── */
+.auth-footer-link {
+  color: var(--primary-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-footer-link:hover {
+  text-decoration: underline;
+}

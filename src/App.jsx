@@ -5,15 +5,18 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { CartProvider } from './context/CartContext'
 import './App.css'
 
 // Pages — public
 import HomePage        from './pages/HomePage'
 import LibraryPage     from './pages/LibraryPage'
+import MyLibraryPage  from './pages/MyLibraryPage'
 import AccountPage     from './pages/AccountPage'
 import LoginPage       from './pages/LoginPage'
 import SignupPage      from './pages/SignupPage'
 import StoryPage       from './pages/StoryPage'
+import ParentsPage     from './pages/ParentsPage'
 
 // Pages — reader
 import FlipbookReader  from './pages/FlipbookReader'
@@ -22,6 +25,7 @@ import FlipbookReader  from './pages/FlipbookReader'
 import AdminLayout     from './pages/admin/AdminLayout'
 import Dashboard       from './pages/admin/Dashboard'
 import StoryEditor     from './pages/admin/StoryEditor'
+import AdminParentsArticles from './pages/admin/AdminParentsArticles'
 
 // Components
 import Navbar          from './components/Navbar'
@@ -84,6 +88,7 @@ function AppContent() {
         <Routes>
           {/* ── Public ────────────────────────────────────── */}
           <Route path="/"      element={<HomePage setCurrentPage={setCurrentPage} />} />
+          <Route path="/parents" element={<ParentsPage />} />
           <Route path="/story" element={
             <StoryPage
               setCurrentPage={setCurrentPage}
@@ -102,6 +107,9 @@ function AppContent() {
             isLoggedIn
               ? <LibraryPage setCurrentPage={setCurrentPage} setSelectedStoryId={setSelectedStoryId} />
               : <Navigate to="/login" />
+          } />
+          <Route path="/my-library" element={
+            isLoggedIn ? <MyLibraryPage /> : <Navigate to="/login" />
           } />
           <Route path="/account" element={
             isLoggedIn ? <AccountPage /> : <Navigate to="/login" />
@@ -123,6 +131,7 @@ function AppContent() {
             <Route path="transactions" element={<Dashboard />} />
             <Route path="discounts"   element={<Dashboard />} />
             <Route path="cms"         element={<Dashboard />} />
+            <Route path="parents-articles" element={<AdminParentsArticles />} />
           </Route>
         </Routes>
       </main>
@@ -145,7 +154,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppContent />
+        <CartProvider>
+          <AppContent />
+        </CartProvider>
       </AuthProvider>
     </BrowserRouter>
   )

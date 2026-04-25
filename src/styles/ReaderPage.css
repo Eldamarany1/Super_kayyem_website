@@ -1,0 +1,98 @@
+/* ============================================================
+   ReaderPage.css — Styles for src/pages/ReaderPage.jsx
+   ============================================================ */
+
+/* ── Cover front title ──────────────────────────────────────── */
+.reader-cover-title {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+/* ── Category pill inside cover ─────────────────────────────── */
+.reader-cover-category {
+  background-color: #fff;
+  color: var(--primary-blue);
+  padding: 5px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  display: inline-block;
+}
+
+/* ── Story page illustration placeholder ────────────────────── */
+.reader-illustration {
+  height: 180px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+/* ── Story page body text ───────────────────────────────────── */
+.reader-page-text {
+  font-size: 1.4rem;
+  line-height: 1.8;
+  text-align: justify;
+}
+
+/* ── Page numbers (even / odd alignment) ───────────────────── */
+.reader-page-number {
+  margin-top: auto;
+  color: #94a3b8;
+  font-size: 1.2rem;
+}
+
+.reader-page-number--right { text-align: right; }
+.reader-page-number--left  { text-align: left;  }
+
+/* ── Completion screen ──────────────────────────────────────── */
+.reader-completion {
+  text-align: center;
+  margin: auto;
+}
+
+.reader-completion__trophy {
+  font-size: 5rem;
+  margin-bottom: 20px;
+}
+
+.reader-completion__title {
+  color: var(--primary-blue);
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+.reader-completion__subtitle {
+  font-size: 1.3rem;
+}
+
+.reader-completion__back-btn {
+  margin-top: 30px;
+  font-size: 1.2rem;
+}
+
+/* ── Back cover end title ───────────────────────────────────── */
+.reader-back-cover {
+  text-align: center;
+  margin: auto;
+}
+
+.reader-back-cover__title {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.reader-back-cover__brand {
+  font-size: 1.5rem;
+  opacity: 0.9;
+}
+
+/* ── Bottom toolbar ─────────────────────────────────────────── */
+.reader-toolbar--bottom {
+  justify-content: center;
+  gap: 20px;
+}
+
+/* ── Page label in bottom toolbar ──────────────────────────── */
+.reader-page-label {
+  font-weight: 600;
+  font-size: 1.1rem;
+}

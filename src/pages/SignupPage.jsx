@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import '../styles/SignupPage.css'
 
 function SignupPage() {
   const navigate = useNavigate()
@@ -32,7 +33,7 @@ function SignupPage() {
     setLoading(true)
     setError('')
     try {
-      await register(name, email, password, '') // WhatsApp number empty for now
+      await register(name, email, password, '')
       navigate('/')
     } catch (err) {
       setError(err.message)
@@ -56,10 +57,10 @@ function SignupPage() {
 
   return (
     <div className="auth-container">
-      <div className="auth-card" style={{ maxWidth: '500px' }}>
+      <div className="auth-card signup-card">
 
         <div className="auth-header">
-          <div className="logo" style={{ marginBottom: '10px' }}>سوبر <span>قيم</span></div>
+          <div className="logo signup-logo">سوبر <span>قيم</span></div>
           <h2>أنشئ حسابك!</h2>
           <p>انضم إلى عائلة سوبر قيم</p>
         </div>
@@ -108,54 +109,68 @@ function SignupPage() {
           </div>
 
           {/* Optional: add children */}
-          <div className="form-group" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '15px' }}>
+          <div className="form-group signup-children-section">
             <label>أضف أطفالك (اختياري)</label>
 
             {children.length > 0 && (
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
+              <div className="signup-children-tags">
                 {children.map((child, index) => (
                   <div key={index} className="child-tag">
                     <span>{child.name} ({child.age} سنوات)</span>
-                    <span onClick={() => removeChild(index)} style={{ cursor: 'pointer', marginRight: '6px' }}>×</span>
+                    <span
+                      onClick={() => removeChild(index)}
+                      className="signup-child-remove"
+                    >
+                      ×
+                    </span>
                   </div>
                 ))}
               </div>
             )}
 
             {showChildForm ? (
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div className="signup-child-form-row">
                 <input
                   type="text"
                   value={childName}
                   onChange={(e) => setChildName(e.target.value)}
                   placeholder="اسم الطفل"
-                  style={{ flex: 1, minWidth: '120px', padding: '10px', border: '2px solid var(--border-color)', borderRadius: '10px', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'Cairo, sans-serif' }}
+                  className="signup-child-input"
                 />
                 <select
                   value={childAge}
                   onChange={(e) => setChildAge(e.target.value)}
-                  style={{ flex: 1, minWidth: '110px', padding: '10px', border: '2px solid var(--border-color)', borderRadius: '10px', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'Cairo, sans-serif' }}
+                  className="signup-child-select"
                 >
                   <option value="">العمر</option>
                   {['٣','٤','٥','٦','٧','٨','٩','١٠'].map(age => (
                     <option key={age} value={age}>{age} سنوات</option>
                   ))}
                 </select>
-                <button type="button" onClick={addChild} className="btn btn-primary" style={{ padding: '10px 20px' }}>✓</button>
+                <button
+                  type="button"
+                  onClick={addChild}
+                  className="btn btn-primary signup-child-confirm-btn"
+                >
+                  ✓
+                </button>
               </div>
             ) : (
               <button
                 type="button"
-                className="btn btn-outline"
+                className="btn btn-outline signup-add-child-btn"
                 onClick={() => setShowChildForm(true)}
-                style={{ width: '100%', marginTop: '8px' }}
               >
                 + إضافة طفل
               </button>
             )}
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '10px' }} disabled={loading}>
+          <button
+            type="submit"
+            className="btn btn-primary signup-submit-btn"
+            disabled={loading}
+          >
             {loading ? 'جاري التحميل...' : 'إنشاء حساب'}
           </button>
         </form>
@@ -163,7 +178,7 @@ function SignupPage() {
         <div className="auth-footer">
           <p>
             لديك حساب بالفعل؟{' '}
-            <Link to="/login" style={{ color: 'var(--primary-blue)', fontWeight: '600' }}>
+            <Link to="/login" className="auth-footer-link">
               سجل دخولك
             </Link>
           </p>

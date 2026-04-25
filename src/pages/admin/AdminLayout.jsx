@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { path: '/admin/transactions',    label: 'المعاملات',    icon: '💳', end: false },
   { path: '/admin/discounts',       label: 'رموز الخصم',   icon: '🏷️', end: false },
   { path: '/admin/cms',             label: 'إدارة المحتوى', icon: '🖊️', end: false },
+  { path: '/admin/parents-articles', label: 'مقالات الآباء', icon: '👨‍👩‍👧‍👦', end: false },
 ];
 
 export default function AdminLayout() {
