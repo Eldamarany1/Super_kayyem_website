@@ -1,0 +1,58 @@
+/* ============================================================
+   Footer.css — Footer Component Styles
+   ============================================================ */
+
+.site-footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  padding: 50px 0 30px;
+  margin-top: 80px;
+  text-align: center;
+  direction: rtl;
+}
+
+.site-footer .footer-logo {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--primary-blue);
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.site-footer .footer-logo span {
+  color: var(--primary-yellow);
+}
+
+.site-footer .footer-desc {
+  max-width: 540px;
+  margin: 0 auto 20px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.site-footer .footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.site-footer .footer-links a {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.site-footer .footer-links a:hover {
+  color: var(--primary-blue);
+}
+
+.site-footer .footer-copyright {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-color);
+  padding-top: 20px;
+  margin: 0;
+}

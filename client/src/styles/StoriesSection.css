@@ -1,0 +1,58 @@
+/* ============================================================
+   StoriesSection.css — Stories Section styles for HomePage
+   ============================================================ */
+
+.stories-section {
+  padding: 5rem 0 4rem;
+}
+
+.stories-section__header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.stories-section__title {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 800;
+  margin-bottom: 0.8rem;
+  color: var(--text-primary);
+}
+
+.stories-section__subtitle {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.stories-section__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 28px;
+  margin-bottom: 3rem;
+}
+
+.stories-section__footer {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.stories-section__more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--primary-blue);
+  color: #ffffff;
+  padding: 14px 36px;
+  border-radius: var(--border-radius-full, 9999px);
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  transition: all 0.25s ease;
+}
+
+.stories-section__more-btn:hover {
+  background: var(--primary-blue-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.4);
+}

@@ -1,0 +1,99 @@
+/* ============================================================
+   StoryPage.css — Styles for src/pages/StoryPage.jsx
+   ============================================================ */
+
+.story-page-section {
+  padding: 40px 0 80px;
+}
+
+/* ── Story header layout (cover + info side-by-side) ────────── */
+.story-header-layout {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  margin-bottom: 40px;
+}
+
+/* ── Cover banner ───────────────────────────────────────────── */
+.story-cover-banner {
+  flex: 1 1 300px;
+  min-height: 350px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-secondary);
+}
+
+.story-cover-banner--has-image {
+  color: transparent;
+}
+
+/* ── Info column ────────────────────────────────────────────── */
+.story-info-col {
+  flex: 2 1 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.story-nav-back {
+  margin-bottom: 8px;
+}
+
+.story-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── Description paragraph ──────────────────────────────────── */
+.story-description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin: 10px 0;
+}
+
+/* ── Reader section ─────────────────────────────────────────── */
+.story-reader-container {
+  margin-top: 40px;
+}
+
+.story-page-card {
+  background: var(--card-bg, #ffffff);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.story-page-indicator {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary-blue);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.story-page-text {
+  font-size: 1.25rem;
+  line-height: 2.2;
+  color: var(--text-primary);
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+}
+
+.story-page-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}

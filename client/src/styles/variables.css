@@ -1,0 +1,97 @@
+/* ================================================================
+   variables.css — Design Tokens & CSS Custom Properties
+   Super Kayyem (سوبر قيم)
+   ================================================================ */
+
+:root {
+  /* Brand Colors */
+  --primary-blue:         #2563eb;
+  --primary-blue-hover:   #1d4ed8;
+  --primary-yellow:       #fbbf24;
+  --primary-yellow-hover: #f59e0b;
+
+  /* Aliases & Semantic Colors */
+  --color-primary:        #2563eb;
+  --color-primary-dark:   #1d4ed8;
+  --color-primary-hover:  #1d4ed8;
+  --color-secondary:      #0ea5e9;
+  --color-accent:         #fbbf24;
+  --yellow:               #fbbf24;
+
+  /* Light Theme Surfaces */
+  --bg-primary:           #ffffff;
+  --bg-color:             #ffffff;
+  --bg-secondary:         #f0f7ff;
+  --bg-card:              #ffffff;
+  --card-bg:              #ffffff;
+  --border-color:         #e2e8f0;
+
+  /* Text Colors */
+  --text-primary:         #1e293b;
+  --text-secondary:       #64748b;
+  --text-muted:           #94a3b8;
+
+  /* Shadows */
+  --shadow-sm:            0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md:            0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg:            0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow:               0 10px 25px -5px rgba(0, 0, 0, 0.07);
+
+  /* Gradients */
+  --gradient-hero:        linear-gradient(135deg, #e0f2fe 0%, #fef3c7 100%);
+  --gradient-card:        linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  --gradient-primary:     linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+
+  /* Layout & Geometry */
+  --nav-height:           70px;
+  --border-radius-sm:     8px;
+  --border-radius-md:     14px;
+  --border-radius-lg:     20px;
+  --border-radius-full:   9999px;
+}
+
+[data-theme="dark"] {
+  /* Brand Colors in Dark Mode */
+  --primary-blue:         #3b82f6;
+  --primary-blue-hover:   #60a5fa;
+  --primary-yellow:       #f59e0b;
+  --primary-yellow-hover: #fbbf24;
+
+  /* Aliases & Semantic Colors */
+  --color-primary:        #3b82f6;
+  --color-primary-dark:   #2563eb;
+  --color-primary-hover:  #60a5fa;
+  --color-secondary:      #38bdf8;
+  --color-accent:         #f59e0b;
+  --yellow:               #f59e0b;
+
+  /* Dark Theme Surfaces */
+  --bg-primary:           #0f172a;
+  --bg-color:             #0f172a;
+  --bg-secondary:         #1e293b;
+  --bg-card:              #1e293b;
+  --card-bg:              #1e293b;
+  --border-color:         #334155;
+
+  /* Text Colors */
+  --text-primary:         #f8fafc;
+  --text-secondary:       #cbd5e1;
+  --text-muted:           #64748b;
+
+  /* Shadows */
+  --shadow-sm:            0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-md:            0 6px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg:            0 14px 32px rgba(0, 0, 0, 0.45);
+  --shadow:               0 10px 25px -5px rgba(0, 0, 0, 0.35);
+
+  /* Gradients */
+  --gradient-hero:        linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  --gradient-card:        linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  --gradient-primary:     linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+}
+
+/* Single global shimmer animation keyframe */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}

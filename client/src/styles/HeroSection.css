@@ -1,0 +1,126 @@
+/* ============================================================
+   HeroSection.css — Hero section styling
+   Fixes .hero conflicts by scoping to .hero-section
+   ============================================================ */
+
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  padding: 5rem 0 4.5rem;
+  background: var(--gradient-hero);
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.hero-section__glow {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 50% 30%, rgba(37, 99, 235, 0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-section__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  color: var(--primary-blue);
+  padding: 6px 18px;
+  border-radius: var(--border-radius-full, 9999px);
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.hero-section__title {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 1.2rem;
+  line-height: 1.3;
+}
+
+.hero-section__title span {
+  color: var(--primary-blue);
+}
+
+.hero-section__subtitle {
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  max-width: 680px;
+  margin: 0 auto 2.2rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.hero-section__cta-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+}
+
+.hero-section__btn-main {
+  background: var(--primary-yellow);
+  color: #1e293b;
+  font-weight: 700;
+  padding: 14px 34px;
+  border-radius: var(--border-radius-full, 9999px);
+  font-size: 1.05rem;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-section__btn-main:hover {
+  background: var(--primary-yellow-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+}
+
+.hero-section__btn-sec {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: var(--border-radius-full, 9999px);
+  font-size: 1rem;
+  transition: all 0.25s ease;
+}
+
+.hero-section__btn-sec:hover {
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
+  transform: translateY(-2px);
+}
+
+.hero-section__values {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.hero-section__value-chip {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  backdrop-filter: blur(4px);
+}
+
+[data-theme="dark"] .hero-section__value-chip {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(51, 65, 85, 0.8);
+}

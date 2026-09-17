@@ -20,5 +20,15 @@ dist-ssr
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
 *.sw?
+.vs/
+
+# ── .NET Backend ──────────────────────────────────
+**/bin/
+**/obj/
+uploads/
+
+# ── Secrets — never commit these ─────────────────
+.env
+.env.*
+appsettings.Production.json

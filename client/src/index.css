@@ -1,0 +1,9 @@
+/* ============================================================
+   index.css — Entry-level styles loaded before App.css
+   Arabic Cairo font is linked in index.html (single import)
+   ============================================================ */
+
+/* Root display properties */
+:root {
+  color-scheme: light dark;
+}

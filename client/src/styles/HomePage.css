@@ -1,0 +1,10 @@
+/* ============================================================
+   HomePage.css — Home Page Specific Layout
+   Scoped without .hero conflicts
+   ============================================================ */
+
+.home-page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--nav-height, 70px));
+}
