@@ -1,14 +1,14 @@
 @* ============================================================
-   _ViewImports.cshtml — استيرادات مشتركة بين جميع صفحات Razor
-   كل سطر هنا يُطبَّق تلقائياً على كل View في المشروع.
+   _ViewImports.cshtml — Shared imports across all Razor views
+   Every line here is automatically applied to every View in the project.
    ============================================================ *@
 
-@* استيراد الـ namespace الرئيسي للمشروع — يتيح استخدام كلاساته مباشرة *@
+@* Import the root namespace of the project — enables using its classes directly *@
 @using SuperKayyem
 
-@* استيراد namespace النماذج — يتيح كتابة "Story" مباشرة بدلاً من "SuperKayyem.Models.Story" *@
+@* Import the models namespace — allows writing "Story" directly instead of "SuperKayyem.Models.Story" *@
 @using SuperKayyem.Models
 
-@* تفعيل Tag Helpers: يسمح باستخدام asp-action, asp-for, asp-route-id... في HTML
-   * يعني "من كل الـ assemblies"، Microsoft.AspNetCore.Mvc.TagHelpers هي المكتبة الرسمية *@
+@* Enable Tag Helpers: allows using asp-action, asp-for, asp-route-id... in HTML
+   * means "from all assemblies", Microsoft.AspNetCore.Mvc.TagHelpers is the official library *@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

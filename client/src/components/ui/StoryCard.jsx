@@ -1,11 +1,16 @@
+import { useState } from 'react';
 import '../../styles/StoryCard.css';
 
 export function StoryCard({ story, onClick }) {
   if (!story) return null;
 
+  const [imgError, setImgError] = useState(false);
+
   const category = story.category || story.valueLearned || '';
   const priceFormatted = parseFloat(story.price ?? 0).toFixed(2);
-  const cover = story.coverImage || story.coverImageUrl || '';
+  const cover = story.coverImage || story.coverImageUrl || story.CoverImage || story.CoverImageUrl || '';
+  const hasPdf = Boolean(story.pdfUrl || story.PdfUrl);
+  const age = story.targetAge || story.targetAgeGroup;
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -24,12 +29,13 @@ export function StoryCard({ story, onClick }) {
       aria-label={`عرض تفاصيل قصة ${story.title}`}
     >
       <div className="story-card__cover">
-        {cover ? (
+        {cover && !imgError ? (
           <img
             src={cover}
             alt={story.title}
             className="story-card__cover-img"
             loading="lazy"
+            onError={() => setImgError(true)}
           />
         ) : (
           <div className="story-card__cover-placeholder">📖</div>
@@ -42,6 +48,12 @@ export function StoryCard({ story, onClick }) {
         {category && (
           <span className="story-card__category-badge">
             {category}
+          </span>
+        )}
+
+        {hasPdf && (
+          <span className="story-card__pdf-badge" title="متوفر نسخة PDF إلكترونية">
+            📄 PDF
           </span>
         )}
 
@@ -60,10 +72,10 @@ export function StoryCard({ story, onClick }) {
 
         <div className="story-card__meta">
           <span className="story-card__age">
-            {story.targetAgeGroup ? `العمر: ${story.targetAgeGroup} سنوات` : ''}
+            {age ? `العمر: ${age} سنوات` : ''}
           </span>
           <span className="story-card__rating">
-            ⭐ {story.rating ? Number(story.rating).toFixed(1) : '4.8'}
+            ⭐ {story.rating != null ? Number(story.rating).toFixed(1) : '—'}
           </span>
         </div>
       </div>

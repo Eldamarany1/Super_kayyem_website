@@ -88,6 +88,23 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* PDF Badge on Cover */
+.story-card__pdf-badge {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(220, 38, 38, 0.9);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  padding: 3px 10px;
+  border-radius: var(--border-radius-full, 9999px);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  z-index: 2;
+  box-shadow: var(--shadow-sm);
+}
+
 /* Hover Overlay */
 .story-card__hover-overlay {
   position: absolute;

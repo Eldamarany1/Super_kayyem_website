@@ -1,37 +1,38 @@
 @* ============================================================
-   Index.cshtml — لوحة تحكم إدارة القصص
-   @model: يحدد نوع البيانات القادمة من AdminController.Index()
-   IEnumerable<Story>: قائمة قصص يمكن تكرارها (foreach)
+   Index.cshtml — Story management admin dashboard
+   @model: Specifies the model type passed from AdminController.Index()
+   IEnumerable<Story>: Collection of stories that can be iterated with foreach
    ============================================================ *@
 @model IEnumerable<Story>
 @{
-    @* ViewData["Title"]: يُحدد عنوان الصفحة الذي يظهر في تاب المتصفح *@
+    @* ViewData["Title"]: Sets the page title displayed in the browser tab *@
     ViewData["Title"] = "إدارة القصص";
+
+    var ratedStories = Model.Where(s => s.Rating.HasValue).ToList();
+    var avgRating = ratedStories.Any() ? ratedStories.Average(s => s.Rating!.Value).ToString("F1") : "—";
 }
 
 <div class="dashboard-stats">
     <div class="stat-card">
-        @* @Model.Count(): عدد القصص في القائمة — @ يشغّل كود C# داخل HTML *@
+        @* @Model.Count(): Total number of stories in the list — @ runs C# code inside HTML *@
         <div class="stat-number">@Model.Count()</div>
         <div class="stat-label">إجمالي القصص</div>
     </div>
     <div class="stat-card">
-        @* .Select(s => s.Category): يستخرج فقط عمود Category من كل قصة
-           .Distinct(): يحذف التكرارات — .Count(): يعد الفريدة منها *@
+        @* .Select(s => s.Category): Extracts only Category values from each story
+           .Distinct(): Removes duplicates — .Count(): Counts unique categories *@
         <div class="stat-number">@Model.Select(s => s.Category).Distinct().Count()</div>
         <div class="stat-label">الفئات</div>
     </div>
     <div class="stat-card">
-        @* .Average(): يحسب متوسط التقييم — مضمون عدم الانهيار لأن AdminController يبذر البيانات إذا كانت القائمة فارغة
-           .ToString("F1"): يعرض رقماً عشرياً بمنزلة واحدة مثل "4.8" *@
-        <div class="stat-number">@Model.Average(s => s.Rating).ToString("F1")</div>
+        <div class="stat-number">@(avgRating != "—" ? $"⭐ {avgRating}" : "—")</div>
         <div class="stat-label">متوسط التقييم</div>
     </div>
 </div>
 
 <div class="section-header">
     <h2>القصص</h2>
-    @* asp-action="Create": Tag Helper يولّد رابط /Admin/Create تلقائياً *@
+    @* asp-action="Create": Tag Helper that generates /Admin/Create link automatically *@
     <a asp-action="Create" class="btn-admin btn-admin-primary">
         ➕ إضافة قصة جديدة
     </a>
@@ -48,17 +49,18 @@
                 <th>السعر (EGP)</th>
                 <th>التقييم</th>
                 <th>الصفحات</th>
+                <th>PDF</th>
                 <th>الإجراءات</th>
             </tr>
         </thead>
         <tbody>
-            @* foreach: يكرر نفس HTML لكل قصة في القائمة *@
+            @* foreach: repeats the HTML table row for each story in the collection *@
             @foreach (var story in Model)
             {
                 <tr>
                     <td>@story.Id</td>
                     <td class="story-title-cell">
-                        @* عرض صورة الغلاف فقط إذا كانت موجودة — تجنب عنصر <img> فارغ *@
+                        @* Render cover image only if present — avoids empty <img> tags *@
                         @if (!string.IsNullOrEmpty(story.CoverImage))
                         {
                             <img src="@story.CoverImage" alt="" class="story-thumb" />
@@ -66,15 +68,33 @@
                         <span>@story.Title</span>
                     </td>
                     <td><span class="category-badge">@story.Category</span></td>
-                    <td>@story.TargetAgeGroup</td>
-                    @* .ToString("F0"): يعرض السعر بدون أرقام عشرية مثل "35" *@
+                    <td>@(story.TargetAge.HasValue ? $"{story.TargetAge.Value} سنوات" : "—")</td>
+                    @* .ToString("F0"): displays price without decimal places like "35" *@
                     <td>@story.Price.ToString("F0")</td>
                     <td>
-                        <span class="rating-display">⭐ @story.Rating.ToString("F1")</span>
+                        @if (story.Rating.HasValue)
+                        {
+                            <span class="rating-display">⭐ @story.Rating.Value.ToString("F1")</span>
+                        }
+                        else
+                        {
+                            <span style="opacity: 0.5;">—</span>
+                        }
                     </td>
                     <td>@story.PageCount</td>
+                    @* PDF indicator: shows link icon if a PDF was uploaded *@
+                    <td>
+                        @if (!string.IsNullOrEmpty(story.PdfUrl))
+                        {
+                            <a href="@story.PdfUrl" target="_blank" title="عرض الـ PDF">📄</a>
+                        }
+                        else
+                        {
+                            <span style="opacity: 0.3;">—</span>
+                        }
+                    </td>
                     <td class="actions-cell">
-                        @* asp-route-id: يمرر Id القصة كجزء من الـ URL مثل /Admin/Details/3 *@
+                        @* asp-route-id: passes story Id as part of the URL like /Admin/Details/3 *@
                         <a asp-action="Details" asp-route-id="@story.Id" class="btn-action btn-view" title="عرض">👁</a>
                         <a asp-action="Edit" asp-route-id="@story.Id" class="btn-action btn-edit" title="تعديل">✏️</a>
                         <a asp-action="Delete" asp-route-id="@story.Id" class="btn-action btn-delete" title="حذف">🗑️</a>

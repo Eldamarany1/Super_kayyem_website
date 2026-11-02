@@ -1,7 +1,7 @@
 @* ============================================================
-   Delete.cshtml — صفحة تأكيد حذف قصة
-   @model Story: القصة المراد حذفها القادمة من AdminController.Delete(int id) [GET]
-   عند الضغط على "احذف" يُرسَل نموذج POST إلى AdminController.DeleteConfirmed(int id)
+   Delete.cshtml — Story delete confirmation page
+   @model Story: The story to delete passed from AdminController.Delete(int id) [GET]
+   Clicking delete submits a POST form to AdminController.DeleteConfirmed(int id)
    ============================================================ *@
 @model Story
 @{
@@ -15,8 +15,15 @@
         <p>لا يمكن التراجع عن هذا الإجراء.</p>
     </div>
 
-    @* عرض ملخص بيانات القصة قبل تأكيد الحذف *@
+    @* Display story summary before confirming deletion *@
     <div class="detail-grid">
+        @if (!string.IsNullOrEmpty(Model.CoverImage))
+        {
+            <div class="detail-item">
+                <label>صورة الغلاف</label>
+                <span><img src="@Model.CoverImage" alt="@Model.Title" style="max-width: 120px; max-height: 120px; border-radius: 8px;" /></span>
+            </div>
+        }
         <div class="detail-item">
             <label>العنوان</label>
             <span>@Model.Title</span>
@@ -26,23 +33,41 @@
             <span class="category-badge">@Model.Category</span>
         </div>
         <div class="detail-item">
+            <label>الفئة العمرية</label>
+            <span>@(Model.TargetAge.HasValue ? $"{Model.TargetAge.Value} سنوات" : "—")</span>
+        </div>
+        <div class="detail-item">
             <label>السعر</label>
             <span>@Model.Price.ToString("F0") EGP</span>
         </div>
         <div class="detail-item">
             <label>التقييم</label>
-            <span>⭐ @Model.Rating.ToString("F1")</span>
+            @if (Model.Rating.HasValue)
+            {
+                <span>⭐ @Model.Rating.Value.ToString("F1")</span>
+            }
+            else
+            {
+                <span style="opacity: 0.5;">—</span>
+            }
         </div>
+        @if (!string.IsNullOrEmpty(Model.PdfUrl))
+        {
+            <div class="detail-item">
+                <label>ملف PDF</label>
+                <span><a href="@Model.PdfUrl" target="_blank">📄 عرض الـ PDF</a></span>
+            </div>
+        }
     </div>
 
-    @* asp-action="Delete" مع method="post": يستدعي DeleteConfirmed في الـ Controller
-       لأن [ActionName("Delete")] على DeleteConfirmed يجعلها تستجيب لـ POST /Admin/Delete *@
+    @* asp-action="Delete" with method="post": calls DeleteConfirmed in the Controller
+       because [ActionName("Delete")] on DeleteConfirmed handles POST /Admin/Delete *@
     <form asp-action="Delete" method="post">
-        @* AntiForgeryToken: حماية ضرورية لنماذج الحذف والتعديل *@
+        @* AntiForgeryToken: required protection for delete and edit forms *@
         @Html.AntiForgeryToken()
         <div class="delete-actions">
             <button type="submit" class="btn-admin btn-admin-danger">🗑️ نعم، احذف القصة</button>
-            @* هذا الرابط لا يُرسِل النموذج — مجرد رابط للعودة للأمان *@
+            @* This link does not submit the form — simple safe return link *@
             <a asp-action="Index" class="btn-admin btn-admin-secondary">↩ إلغاء</a>
         </div>
     </form>

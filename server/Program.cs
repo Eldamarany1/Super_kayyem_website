@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CloudinaryDotNet;
 using Microsoft.EntityFrameworkCore;
 using SuperKayyem.Models;
 
@@ -10,6 +11,13 @@ builder.Services.AddControllersWithViews()
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
+
+// Register Cloudinary as a singleton via DI
+var cloudinaryAccount = new CloudinaryDotNet.Account(
+    builder.Configuration["Cloudinary:CloudName"],
+    builder.Configuration["Cloudinary:ApiKey"],
+    builder.Configuration["Cloudinary:ApiSecret"]);
+builder.Services.AddSingleton(new Cloudinary(cloudinaryAccount));
 
 // Bind MongoDBSettings from configuration
 var mongoSettings = builder.Configuration.GetSection("MongoDBSettings").Get<MongoDBSettings>();

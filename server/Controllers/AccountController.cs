@@ -1,29 +1,29 @@
 // ============================================================
-// AccountController.cs — إدارة حسابات العملاء (Razor MVC Views)
-// المسار الافتراضي: /Account/AccountList
-// يُستخدم لعرض وتعديل وحذف حسابات العملاء عبر صفحات Razor.
+// AccountController.cs — Customer account management (Razor MVC Views)
+// Default route: /Account/AccountList
+// Used to display, update, and delete customer accounts via Razor views.
 // ============================================================
 
 namespace SuperKayyem.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // مطلوب لـ ToListAsync, FirstOrDefaultAsync...
-using SuperKayyem.Data;              // مطلوب لـ AccountSeedData
-using SuperKayyem.Models;            // مطلوب لنموذجي Account و Child و SuperKayyemDbContext
+using Microsoft.EntityFrameworkCore; // Required for ToListAsync, FirstOrDefaultAsync...
+using SuperKayyem.Data;              // Required for AccountSeedData
+using SuperKayyem.Models;            // Required for Account, Child, and SuperKayyemDbContext
 
 /// <summary>
 /// Controller for managing customer accounts and children profiles via Razor views.
 /// </summary>
-// يرث من Controller (وليس ControllerBase) لأنه يُرجع Razor Views
+// Inherits from Controller (not ControllerBase) because it returns Razor Views
 public class AccountController : Controller
 {
-    // _mongoDbContext: الوصول إلى قاعدة البيانات MongoDB
+    // _mongoDbContext: Access to the MongoDB database
     private readonly SuperKayyemDbContext _mongoDbContext;
 
-    // _logger: لتسجيل الأحداث والتحذيرات في سجل التطبيق
+    // _logger: Logs events and warnings in the application log
     private readonly ILogger<AccountController> _logger;
 
-    // المُنشئ: ASP.NET يحقن SuperKayyemDbContext و ILogger تلقائياً عند إنشاء الكائن
+    // Constructor: ASP.NET injects SuperKayyemDbContext and ILogger automatically via Dependency Injection
     public AccountController(SuperKayyemDbContext mongoDbContext, ILogger<AccountController> logger)
     {
         _mongoDbContext = mongoDbContext;
@@ -36,11 +36,11 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken ct = default)
     {
-        // Task.Yield(): يحافظ على كون الدالة async حقاً حتى لو لا تنتظر عملية طويلة
+        // Task.Yield(): Keeps the method truly async even if it does not await a long operation
         await Task.Yield();
 
-        // إعادة التوجيه إلى دالة AccountList في نفس الـ Controller
-        // nameof(AccountList): أسلوب آمن لكتابة اسم الدالة بدلاً من "AccountList" كنص
+        // Redirect to AccountList action in the same Controller
+        // nameof(AccountList): Type-safe way to reference the action name instead of a hardcoded string
         return RedirectToAction(nameof(AccountList));
     }
 
@@ -50,10 +50,10 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> AccountList(CancellationToken ct = default)
     {
-        // جلب جميع حسابات العملاء من MongoDB بشكل غير متزامن
+        // Fetch all customer accounts from MongoDB asynchronously
         var accounts = await _mongoDbContext.Accounts.ToListAsync(ct);
 
-        // إذا كانت قاعدة البيانات فارغة، نملأها تلقائياً من البيانات التجريبية
+        // If the database is empty, seed it automatically from sample data
         if (!accounts.Any())
         {
             _logger.LogInformation("Accounts collection is empty. Seeding initial accounts from AccountSeedData");
@@ -63,7 +63,7 @@ public class AccountController : Controller
             accounts = seedAccounts;
         }
 
-        // تمرير القائمة لصفحة Razor Views/Account/AccountList.cshtml
+        // Pass the list to Razor view Views/Account/AccountList.cshtml
         return View(accounts);
     }
 
@@ -73,49 +73,49 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        // Task.Yield(): يحافظ على كون الدالة async
+        // Task.Yield(): Keeps the method async
         await Task.Yield();
 
-        // تمرير نموذج فارغ لصفحة إنشاء حساب جديد
+        // Pass an empty model to the create account page
         return View(new Account());
     }
 
     /// <summary>
     /// Saves the new account to MongoDB asynchronously.
     /// </summary>
-    // [HttpPost]: يستجيب لإرسال نموذج الإنشاء
-    // [ValidateAntiForgeryToken]: يحمي النموذج من هجمات CSRF
+    // [HttpPost]: Handles form submission
+    // [ValidateAntiForgeryToken]: Protects the form against CSRF attacks
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Account model, CancellationToken ct = default)
     {
-        // إزالة تحقق Password من ModelState لأنه حقل مخفي قد لا يُرسل
+        // Remove Password validation from ModelState because it is a hidden/optional field on create
         ModelState.Remove(nameof(model.Password));
 
-        // التحقق من صحة الحقول قبل الحفظ
+        // Validate model fields before saving
         if (!ModelState.IsValid)
         {
-            return View(model); // أعد عرض النموذج مع رسائل الخطأ
+            return View(model); // Re-display the form with validation error messages
         }
 
-        // حساب المعرف التالي تلقائياً
+        // Calculate the next ID automatically
         var anyAccounts = await _mongoDbContext.Accounts.AnyAsync(ct);
         int nextId = anyAccounts ? (await _mongoDbContext.Accounts.MaxAsync(a => a.Id, ct)) + 1 : 1;
         model.Id = nextId;
 
-        // تعيين كلمة مرور افتراضية إذا لم تُرسل
+        // Set a default password if not provided
         if (string.IsNullOrWhiteSpace(model.Password))
         {
             model.Password = "password123";
         }
 
-        // تهيئة قائمة الأطفال إذا كانت فارغة
+        // Initialize the children list if null
         model.Children ??= [];
 
-        // تسجيل تاريخ الإنشاء
+        // Set creation timestamp
         model.CreatedAt = DateTime.UtcNow;
 
-        // حفظ الحساب الجديد في MongoDB
+        // Save the new account to MongoDB
         await _mongoDbContext.Accounts.AddAsync(model, ct);
         await _mongoDbContext.SaveChangesAsync(ct);
 
@@ -130,7 +130,7 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> Read(int id, CancellationToken ct = default)
     {
-        // جلب الحساب بمعرفه — FirstOrDefaultAsync يُرجع null إذا لم يجد السجل
+        // Fetch the account by ID — FirstOrDefaultAsync returns null if not found
         var account = await _mongoDbContext.Accounts.FirstOrDefaultAsync(a => a.Id == id, ct);
         if (account == null)
         {
@@ -138,7 +138,7 @@ public class AccountController : Controller
             return NotFound(); // HTTP 404
         }
 
-        return View(account); // يفتح Views/Account/Read.cshtml
+        return View(account); // Opens Views/Account/Read.cshtml
     }
 
     /// <summary>
@@ -147,7 +147,7 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> Update(int id, CancellationToken ct = default)
     {
-        // جلب الحساب لملء نموذج التعديل بالبيانات الحالية
+        // Fetch the account to populate the edit form with current data
         var account = await _mongoDbContext.Accounts.FirstOrDefaultAsync(a => a.Id == id, ct);
         if (account == null)
         {
@@ -155,43 +155,43 @@ public class AccountController : Controller
             return NotFound();
         }
 
-        return View(account); // يفتح Views/Account/Update.cshtml مع بيانات الحساب
+        return View(account); // Opens Views/Account/Update.cshtml with account data
     }
 
     /// <summary>
     /// Saves the modified account details back to MongoDB asynchronously.
     /// </summary>
-    // [HttpPost]: يستجيب لإرسال نموذج التعديل
-    // [ValidateAntiForgeryToken]: يحمي النموذج من هجمات CSRF
+    // [HttpPost]: Handles edit form submission
+    // [ValidateAntiForgeryToken]: Protects the form against CSRF attacks
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Update(Account model, CancellationToken ct = default)
     {
-        // إزالة تحقق Password من ModelState لأن هذه الصفحة لا تُعدّل كلمة المرور
-        // بدون هذا السطر، سيرفض ModelState النموذج لأن Password يبدو فارغاً
+        // Remove Password from ModelState because this form does not edit password
+        // Without this line, ModelState fails validation because Password appears empty
         ModelState.Remove(nameof(model.Password));
 
-        // التحقق من صحة باقي الحقول قبل الحفظ
+        // Validate remaining fields before saving
         if (!ModelState.IsValid)
         {
-            return View(model); // أعد عرض النموذج مع رسائل الخطأ
+            return View(model); // Re-display the form with validation error messages
         }
 
-        // جلب الحساب الأصلي من MongoDB لتعديله
+        // Fetch the existing account from MongoDB to update it
         var existingAccount = await _mongoDbContext.Accounts.FirstOrDefaultAsync(a => a.Id == model.Id, ct);
         if (existingAccount == null)
         {
             return NotFound();
         }
 
-        // تطبيق التغييرات على الحساب الأصلي
+        // Apply changes to the existing account
         existingAccount.FirstName = model.FirstName;
         existingAccount.LastName = model.LastName;
         existingAccount.Email = model.Email;
         existingAccount.DateOfBirth = model.DateOfBirth;
         existingAccount.Gender = model.Gender;
 
-        // تحديث قائمة الأطفال فقط إذا أُرسلت — لتجنب حذف القائمة عند عدم إرسالها
+        // Update children list only if sent — prevents deleting the list if not provided
         if (model.Children != null)
         {
             if (existingAccount.Children == null)
@@ -205,11 +205,11 @@ public class AccountController : Controller
             }
         }
 
-        // تسجيل أن الحساب تم تعديله
+        // Mark the account as updated
         existingAccount.IsUpdated = true;
         existingAccount.UpdatedAt = DateTime.UtcNow;
 
-        // حفظ التعديلات في MongoDB
+        // Save modifications to MongoDB
         await _mongoDbContext.SaveChangesAsync(ct);
         _logger.LogInformation("Account with ID {AccountId} successfully updated.", model.Id);
 
@@ -222,7 +222,7 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> Delete(int id, CancellationToken ct = default)
     {
-        // جلب الحساب لعرض تفاصيله في صفحة تأكيد الحذف
+        // Fetch the account to show its details on the delete confirmation page
         var account = await _mongoDbContext.Accounts.FirstOrDefaultAsync(a => a.Id == id, ct);
         if (account == null)
         {
@@ -230,31 +230,31 @@ public class AccountController : Controller
             return NotFound();
         }
 
-        return View(account); // يفتح Views/Account/Delete.cshtml
+        return View(account); // Opens Views/Account/Delete.cshtml
     }
 
     /// <summary>
     /// Performs the actual deletion of the specified account from MongoDB asynchronously.
     /// </summary>
-    // [HttpPost, ActionName("Delete")]: يربط هذه الدالة بـ POST على /Account/Delete
-    // ActionName مطلوب لتمييزها عن دالة Delete [HttpGet] بنفس الاسم
+    // [HttpPost, ActionName("Delete")]: Maps this method to POST on /Account/Delete
+    // ActionName is required to distinguish from the Delete [HttpGet] action with the same name
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id, CancellationToken ct = default)
     {
-        // جلب الحساب للتحقق من وجوده قبل الحذف
+        // Fetch the account to verify it exists before deleting
         var account = await _mongoDbContext.Accounts.FirstOrDefaultAsync(a => a.Id == id, ct);
         if (account != null)
         {
-            // وضع علامة الحذف على السجل في الـ DbContext
+            // Mark the record for deletion in DbContext
             _mongoDbContext.Accounts.Remove(account);
 
-            // تنفيذ الحذف الفعلي في MongoDB
+            // Execute the actual deletion in MongoDB
             await _mongoDbContext.SaveChangesAsync(ct);
             _logger.LogInformation("Account with ID {AccountId} deleted.", id);
         }
 
-        // إعادة التوجيه لقائمة الحسابات بعد الحذف
+        // Redirect to account list after deletion
         return RedirectToAction(nameof(AccountList));
     }
 }

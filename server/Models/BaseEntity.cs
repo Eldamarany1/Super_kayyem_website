@@ -1,32 +1,32 @@
 // ============================================================
-// BaseEntity.cs — الكلاس الأساسي لجميع النماذج (Base Model)
-// كل نموذج في المشروع يرث منه ويحصل على هذه الخصائص المشتركة تلقائياً.
+// BaseEntity.cs — Base model for all entities
+// Every model in the project inherits from this class and gets these shared properties.
 // ============================================================
 
 namespace SuperKayyem.Models
 {
-    // BaseEntity: كلاس أساسي يُورَّث — بدلاً من تكرار نفس الحقول في كل نموذج
+    // BaseEntity: Base class to inherit from — avoids repeating common fields in every model
     public class BaseEntity
     {
-        // معرّف فريد لكل سجل في قاعدة البيانات (مثل رقم الهوية)
+        // Unique identifier for each record in the database (primary key)
         public int Id { get; set; }
 
-        // تاريخ ووقت إنشاء السجل (يُسجَّل تلقائياً عند الإضافة)
+        // Date and time when the record is created (set automatically when added)
         public DateTime CreatedAt { get; set; }
 
-        // علامة للحذف الناعم (Soft Delete): بدلاً من حذف السجل نهائياً، نضع true
-        // = false: القيمة الافتراضية — السجل موجود وليس محذوفاً
+        // Flag for soft delete: set to true instead of deleting the record permanently
+        // = false: default value — the record is active and not deleted
         public bool IsDeleted { get; set; } = false;
 
-        // تاريخ الحذف الناعم — يبقى null ما لم يُحذف السجل
-        // DateTime?: علامة ? تعني أن القيمة يمكن أن تكون null (nullable)
+        // Date of soft delete — stays null unless the record is deleted
+        // DateTime?: the ? means this property is nullable (can be null)
         public DateTime? DeletedAt { get; set; }
 
-        // علامة تشير إلى أن السجل تم تعديله
-        // = false: القيمة الافتراضية — لم يُعدَّل بعد
+        // Flag showing if the record was updated
+        // = false: default value — not updated yet
         public bool IsUpdated { get; set; } = false;
 
-        // تاريخ آخر تعديل — يبقى null حتى يتم التعديل الأول
+        // Date of the last update — stays null until the first update
         public DateTime? UpdatedAt { get; set; }
 
         

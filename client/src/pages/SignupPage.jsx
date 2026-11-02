@@ -124,7 +124,12 @@ export function SignupPage() {
                       <input type="text" className="form-control" placeholder="الاسم" value={child.name} onChange={(e) => handleChildChange(index, 'name', e.target.value)} required />
                     </div>
                     <div className="col-md-3">
-                      <input type="number" className="form-control" placeholder="العمر" value={child.age} onChange={(e) => handleChildChange(index, 'age', e.target.value)} required />
+                      <select className="form-control" value={child.age} onChange={(e) => handleChildChange(index, 'age', e.target.value ? parseInt(e.target.value, 10) : '')} required>
+                        <option value="" disabled>العمر</option>
+                        {[4, 5, 6, 7, 8, 9, 10, 11, 12].map((a) => (
+                          <option key={a} value={a}>{a} سنوات</option>
+                        ))}
+                      </select>
                     </div>
                     <div className="col-md-4">
                       <select className="form-control" value={child.gender} onChange={(e) => handleChildChange(index, 'gender', e.target.value)} required>

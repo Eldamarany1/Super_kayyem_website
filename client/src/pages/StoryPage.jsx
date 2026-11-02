@@ -73,7 +73,9 @@ export function StoryPage() {
   const currentPage = pages[pageIndex];
   const category = story.category || story.valueLearned || '';
   const price = parseFloat(story.price ?? 0).toFixed(2);
-  const cover = story.coverImage || story.coverImageUrl || '';
+  const cover = story.coverImage || story.coverImageUrl || story.CoverImage || story.CoverImageUrl || '';
+  const pdf = story.pdfUrl || story.PdfUrl || '';
+  const age = story.targetAge || story.targetAgeGroup;
 
   return (
     <section id="story" className="story-page-section">
@@ -86,6 +88,8 @@ export function StoryPage() {
             }`}
             style={{
               backgroundImage: cover ? `url(${cover})` : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
             }}
           >
             {!cover && 'غلاف القصة'}
@@ -105,19 +109,46 @@ export function StoryPage() {
             <h1>{story.title}</h1>
 
             <div className="story-meta">
-              {story.targetAgeGroup && (
-                <span className="tag">العمر: {story.targetAgeGroup} سنوات</span>
+              {age && (
+                <span className="tag">العمر: {age} سنوات</span>
               )}
               {category && (
                 <span className="tag tag-blue">القيمة: {category}</span>
               )}
-              {story.rating && (
-                <span className="tag">⭐ {Number(story.rating).toFixed(1)} / 5</span>
-              )}
+              <span className="tag">
+                ⭐ {story.rating != null ? `${Number(story.rating).toFixed(1)} / 5` : '—'}
+              </span>
               <span className="tag tag-yellow">{price} EGP</span>
+              {pdf && (
+                <span className="tag tag-blue" style={{ background: '#fee2e2', color: '#991b1b', borderColor: '#fca5a5' }}>
+                  📄 نسخة PDF متوفرة
+                </span>
+              )}
             </div>
 
             <p className="story-description">{story.description}</p>
+
+            {pdf && (
+              <div style={{ marginTop: '16px' }}>
+                <a
+                  href={pdf}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    textDecoration: 'none',
+                    borderRadius: 'var(--border-radius-full)',
+                    padding: '10px 20px',
+                  }}
+                >
+                  <span>📄</span>
+                  <span>قراءة أو تحميل ملف PDF</span>
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
@@ -155,6 +186,42 @@ export function StoryPage() {
                 </button>
               </div>
             </article>
+          </div>
+        ) : pdf ? (
+          <div className="story-reader-pdf-container" style={{ textAlign: 'center', padding: '30px 0' }}>
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ marginBottom: '8px' }}>📄 هذه القصة متوفرة كنسخة إلكترونية (PDF)</h3>
+              <p style={{ color: 'var(--text-secondary)' }}>يمكنك قراءتها مباشرة أدناه أو فتحها في نافذة جديدة</p>
+              <a
+                href={pdf}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary"
+                style={{
+                  marginTop: '12px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  textDecoration: 'none',
+                  borderRadius: 'var(--border-radius-full)',
+                  padding: '10px 24px',
+                }}
+              >
+                <span>📖</span>
+                <span>فتح ملف الـ PDF بحجم كامل</span>
+              </a>
+            </div>
+            <iframe
+              src={pdf}
+              title={story.title}
+              style={{
+                width: '100%',
+                height: '750px',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--border-radius-lg)',
+                boxShadow: 'var(--shadow)',
+              }}
+            />
           </div>
         ) : (
           <div className="story-reader-empty" style={{ textAlign: 'center', padding: '40px 0' }}>

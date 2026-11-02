@@ -1,22 +1,22 @@
 // ============================================================
-// Account.cs — نموذج حساب العميل
-// يمثل مستخدماً مسجلاً في المنصة مع بيانات أطفاله.
-// يرث من BaseEntity لاستخدام: Id, CreatedAt, IsDeleted...
+// Account.cs — Customer account model
+// Represents a registered user on the platform with their children's data.
+// Inherits from BaseEntity to use: Id, CreatedAt, IsDeleted...
 // ============================================================
 
-// استيراد مكتبة MongoDB.EntityFrameworkCore لاستخدام [Collection]
+// Import MongoDB.EntityFrameworkCore to use [Collection] attribute
 using MongoDB.EntityFrameworkCore;
 
 namespace SuperKayyem.Models
 {
-    // [Collection("Accounts")]: يخبر EF Core أن سجلات هذا الكلاس
-    // تُخزَّن في مجموعة "Accounts" داخل قاعدة بيانات MongoDB
+    // [Collection("Accounts")]: Tells EF Core that records of this class
+    // are stored in the "Accounts" collection in the MongoDB database
     [Collection ("Accounts")]
-    // Account يرث من BaseEntity: يحصل تلقائياً على Id, CreatedAt, IsDeleted...
+    // Account inherits from BaseEntity: gets Id, CreatedAt, IsDeleted automatically
     public class Account : BaseEntity
     {
-        // = null!: قيمة افتراضية تخبر المترجم "ستُملأ قبل الاستخدام، لا تحذّرني"
-        // هذا مطلوب لأن Nullable reference types مفعّل في المشروع
+        // = null!: Default value that tells the compiler the property will be set before use
+        // This is needed because nullable reference types are enabled
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public string Email { get; set; } = null!;
@@ -24,19 +24,19 @@ namespace SuperKayyem.Models
         public DateTime DateOfBirth { get; set; }
         public string Gender { get; set; } = null!;
 
-        // قائمة أطفال العميل — كل طفل من نوع Child (معرَّف أدناه)
-        // = []: تهيئة القائمة كفارغة لتجنب NullReferenceException
+        // List of the customer's children — each child is of type Child (defined below)
+        // = []: Initializes an empty list to prevent NullReferenceException
         public List<Child> Children { get; set; } = [];
     }
 
-    // Child: كلاس مُدمَج يُخزَّن داخل سجل Account في MongoDB (Embedded Document)
-    // يرث من BaseEntity لاستخدام Id فقط في الغالب
+    // Child: Embedded class stored inside the Account document in MongoDB (embedded document)
+    // Inherits from BaseEntity mostly to use Id
     public class Child : BaseEntity
     {
         public string Name { get; set; } = null!;
         public int Age { get; set; }
 
-        // string?: علامة ? تعني أن الجنس اختياري (يمكن أن يكون null)
+        // string?: The ? mark means Gender is optional (nullable)
         public string? Gender { get; set; } = null!;
     }
 }

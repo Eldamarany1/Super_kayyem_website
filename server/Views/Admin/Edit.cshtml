@@ -1,38 +1,33 @@
 @* ============================================================
-   Edit.cshtml — نموذج تعديل قصة موجودة
-   @model Story: بيانات القصة القادمة من AdminController.Edit(int id) [GET]
-   ستُرسَل إلى AdminController.Edit(int id, Story) [POST] عند الحفظ
+   Edit.cshtml — Form to edit an existing story
+   @model Story: Story data passed from AdminController.Edit(int id) [GET]
+   Sent to AdminController.Edit(int id, Story, IFormFile?, IFormFile?) [POST] on submit
    ============================================================ *@
 @model Story
 @{
-    @* $"...": String Interpolation — يدمج قيمة C# داخل النص مباشرة *@
+    @* $"...": String Interpolation — evaluates C# expressions inside strings *@
     ViewData["Title"] = $"تعديل: {Model.Title}";
 }
 
 <div class="form-card">
-    <form asp-action="Edit" method="post">
+    @* enctype="multipart/form-data": required for file uploads *@
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
-        @* input hidden لـ Id: ضروري لإرسال معرّف القصة مع النموذج
-           لأن الحقل المخفي لا يظهر للمستخدم لكنه يُرسَل في الطلب *@
+        @* Hidden input for Id: required to submit the story ID with the form
+           The hidden input is not visible to the user but is sent in the request *@
         <input type="hidden" asp-for="Id" />
 
         <div class="form-grid">
             <div class="form-group">
                 <label asp-for="Title" class="form-label">العنوان</label>
-                @* asp-for="Title": يملأ الحقل تلقائياً بالعنوان الحالي للقصة *@
+                @* asp-for="Title": populates the field with the current story title *@
                 <input asp-for="Title" class="form-control" required />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
 
             <div class="form-group">
-                <label asp-for="Slug" class="form-label">الرابط (Slug)</label>
-                <input asp-for="Slug" class="form-control" dir="ltr" />
-                <small class="form-hint">اتركه فارغاً للإنشاء التلقائي</small>
-            </div>
-
-            <div class="form-group">
                 <label asp-for="Category" class="form-label">الفئة (القيمة الأخلاقية)</label>
-                @* asp-for على select: يحدد الخيار المُختار تلقائياً بناءً على قيمة Category في Model *@
+                @* asp-for on select: automatically selects option matching Model.Category *@
                 <select asp-for="Category" class="form-select" required>
                     <option value="">اختر الفئة...</option>
                     <option value="التعاون">التعاون</option>
@@ -46,9 +41,20 @@
             </div>
 
             <div class="form-group">
-                <label asp-for="TargetAgeGroup" class="form-label">الفئة العمرية</label>
-                <input asp-for="TargetAgeGroup" class="form-control" required />
-                <span asp-validation-for="TargetAgeGroup" class="text-danger"></span>
+                <label asp-for="TargetAge" class="form-label">العمر المستهدف (سنوات)</label>
+                <select asp-for="TargetAge" class="form-select" required>
+                    <option value="">اختر الفئة العمرية...</option>
+                    <option value="4">4 سنوات</option>
+                    <option value="5">5 سنوات</option>
+                    <option value="6">6 سنوات</option>
+                    <option value="7">7 سنوات</option>
+                    <option value="8">8 سنوات</option>
+                    <option value="9">9 سنوات</option>
+                    <option value="10">10 سنوات</option>
+                    <option value="11">11 سنة</option>
+                    <option value="12">12 سنة</option>
+                </select>
+                <span asp-validation-for="TargetAge" class="text-danger"></span>
             </div>
 
             <div class="form-group">
@@ -57,22 +63,37 @@
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
 
+            @* Cover image upload — shows current image preview if one exists *@
             <div class="form-group">
-                <label asp-for="Rating" class="form-label">التقييم (0-5)</label>
-                <input asp-for="Rating" type="number" step="0.1" min="0" max="5" class="form-control" />
-                <span asp-validation-for="Rating" class="text-danger"></span>
+                <label for="imageFile" class="form-label">صورة الغلاف</label>
+                @if (!string.IsNullOrEmpty(Model.CoverImage))
+                {
+                    <div style="margin-bottom: 8px;">
+                        <img src="@Model.CoverImage" alt="الغلاف الحالي" style="max-width: 150px; max-height: 150px; border-radius: 8px;" />
+                        <small class="form-hint" dir="ltr">@Model.CoverImage</small>
+                    </div>
+                }
+                <input type="file" name="imageFile" id="imageFile" accept="image/*" class="form-control" />
+                <small class="form-hint">اختر صورة جديدة لاستبدال الحالية، أو اتركه فارغاً للإبقاء عليها.</small>
+            </div>
+
+            @* PDF upload — shows current PDF link if one exists *@
+            <div class="form-group">
+                <label for="pdfFile" class="form-label">ملف القصة الإلكتروني (PDF)</label>
+                @if (!string.IsNullOrEmpty(Model.PdfUrl))
+                {
+                    <div style="margin-bottom: 8px;">
+                        <a href="@Model.PdfUrl" target="_blank" class="btn-action btn-view" style="text-decoration: none;">📄 عرض الـ PDF الحالي</a>
+                    </div>
+                }
+                <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="form-control" />
+                <small class="form-hint">اختر ملف PDF جديد لاستبدال الحالي، أو اتركه فارغاً للإبقاء عليه.</small>
             </div>
 
             <div class="form-group">
                 <label asp-for="PageCount" class="form-label">عدد الصفحات</label>
                 <input asp-for="PageCount" type="number" class="form-control" />
                 <span asp-validation-for="PageCount" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="CoverImage" class="form-label">رابط صورة الغلاف</label>
-                <input asp-for="CoverImage" class="form-control" dir="ltr" />
-                <span asp-validation-for="CoverImage" class="text-danger"></span>
             </div>
         </div>
 
