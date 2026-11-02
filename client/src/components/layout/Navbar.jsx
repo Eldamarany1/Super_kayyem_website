@@ -1,6 +1,6 @@
 // ============================================================
 //  Navbar.jsx — Clean Responsive Navigation Bar
-//  Routes: الرئيسية (/), قصصنا (/library)
+//  Routes: Home (/), Library (/library)
 //  Zero cart, zero auth, zero admin links.
 // ============================================================
 import { useState } from 'react';

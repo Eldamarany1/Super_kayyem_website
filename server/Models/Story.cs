@@ -1,5 +1,7 @@
 namespace SuperKayyem.Models;
 
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.EntityFrameworkCore;
 
@@ -17,28 +19,43 @@ public class Story
     public string Category { get; set; } = string.Empty;
 
     // Compatibility alias for Category used by client components
+    [NotMapped]
     public string ValueLearned
     {
         get => Category;
         set => Category = value;
     }
 
-    public string TargetAgeGroup { get; set; } = string.Empty;
+    // Target age for children as integer (4-12 years old)
+    [Range(4, 12, ErrorMessage = "العمر المستهدف يجب أن يكون بين 4 و 12 سنة")]
+    public int? TargetAge { get; set; } = 4;
+
+    // Compatibility alias for TargetAge (NotMapped so EF Core does not try to read existing string '6-8' from MongoDB)
+    [NotMapped]
+    public int? TargetAgeGroup
+    {
+        get => TargetAge;
+        set => TargetAge = value;
+    }
 
     public string Description { get; set; } = string.Empty;
 
     public decimal Price { get; set; }
 
-    public double Rating { get; set; }
+    // Rating is nullable: calculated as average from user reviews; null/dash when no reviews yet
+    public double? Rating { get; set; }
 
     public string CoverImage { get; set; } = string.Empty;
 
     // Compatibility alias for CoverImage used by client components
+    [NotMapped]
     public string CoverImageUrl
     {
         get => CoverImage;
         set => CoverImage = value;
     }
+
+    public string? PdfUrl { get; set; }
 
     public int PageCount { get; set; }
 

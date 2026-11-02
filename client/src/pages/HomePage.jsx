@@ -1,5 +1,5 @@
 // ============================================================
-//  HomePage.jsx — الصفحة الرئيسية
+//  HomePage.jsx — Home page
 // ============================================================
 import { useState, useEffect } from 'react';
 import HeroSection from '../components/sections/HeroSection';

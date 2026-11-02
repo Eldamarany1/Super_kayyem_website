@@ -160,6 +160,7 @@
 .sdm-chip--age   { background: #fef3c7; color: #92400e; }
 .sdm-chip--value { background: var(--bg-secondary); color: var(--primary-blue); }
 .sdm-chip--pages { background: #f0fdf4; color: #166534; }
+.sdm-chip--pdf   { background: #fee2e2; color: #991b1b; }
 
 /* ── Description ────────────────────────────────────────────── */
 .sdm-description {

@@ -1,6 +1,6 @@
 // ============================================================
-//  StoryDetailsModal.jsx — تفاصيل القصة (عرض إعلامي فقط)
-//  Presentation-only modal: Displays story details and "اقرأ القصة الآن"
+//  StoryDetailsModal.jsx — Story details modal (display only)
+//  Presentation-only modal: Displays story details and "Read Story Now" button
 //  Zero cart / purchase buttons.
 // ============================================================
 import { useState, useEffect, useCallback } from 'react';
@@ -10,6 +10,7 @@ import '../../styles/StoryDetailsModal.css';
 export function StoryDetailsModal({ story, onClose }) {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   // Animate in
   useEffect(() => {
@@ -51,7 +52,9 @@ export function StoryDetailsModal({ story, onClose }) {
 
   const price = parseFloat(story.price ?? 0).toFixed(2);
   const category = story.category || story.valueLearned || '';
-  const cover = story.coverImage || story.coverImageUrl || '';
+  const cover = story.coverImage || story.coverImageUrl || story.CoverImage || story.CoverImageUrl || '';
+  const pdf = story.pdfUrl || story.PdfUrl || '';
+  const age = story.targetAge || story.targetAgeGroup;
 
   return (
     <div
@@ -70,11 +73,12 @@ export function StoryDetailsModal({ story, onClose }) {
       >
         {/* Cover Section */}
         <div className="sdm-cover">
-          {cover ? (
+          {cover && !imgError ? (
             <img
               src={cover}
               alt={story.title}
               className="sdm-cover__img"
+              onError={() => setImgError(true)}
             />
           ) : (
             <div className="sdm-cover__placeholder">📖</div>
@@ -105,9 +109,9 @@ export function StoryDetailsModal({ story, onClose }) {
 
           {/* Meta Chips */}
           <div className="sdm-meta">
-            {story.targetAgeGroup && (
+            {age && (
               <span className="sdm-chip sdm-chip--age">
-                🧒 العمر: {story.targetAgeGroup} سنوات
+                🧒 العمر: {age} سنوات
               </span>
             )}
             {category && (
@@ -115,14 +119,17 @@ export function StoryDetailsModal({ story, onClose }) {
                 💡 القيمة: {category}
               </span>
             )}
-            {story.rating && (
-              <span className="sdm-chip sdm-chip--age">
-                ⭐ {Number(story.rating).toFixed(1)} / 5
-              </span>
-            )}
+            <span className="sdm-chip sdm-chip--age">
+              ⭐ {story.rating != null ? `${Number(story.rating).toFixed(1)} / 5` : '—'}
+            </span>
             {story.pageCount && (
               <span className="sdm-chip sdm-chip--pages">
                 📄 {story.pageCount} صفحة
+              </span>
+            )}
+            {pdf && (
+              <span className="sdm-chip sdm-chip--pdf">
+                📄 نسخة إلكترونية (PDF)
               </span>
             )}
           </div>
@@ -131,8 +138,8 @@ export function StoryDetailsModal({ story, onClose }) {
             <p className="sdm-description">{story.description}</p>
           )}
 
-          {/* Action: Informational "اقرأ القصة الآن" link only, NO cart or buy buttons */}
-          <div className="sdm-actions">
+          {/* Action: Informational "Read Story Now" link & PDF link if available */}
+          <div className="sdm-actions" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <button
               type="button"
               id="story-modal-read-btn"
@@ -142,6 +149,23 @@ export function StoryDetailsModal({ story, onClose }) {
               <span className="sdm-btn-read-full__icon">📖</span>
               اقرأ القصة الآن
             </button>
+
+            {pdf && (
+              <a
+                href={pdf}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="sdm-btn-read-full sdm-btn-pdf"
+                style={{
+                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  textDecoration: 'none',
+                  boxShadow: '0 6px 24px rgba(16, 185, 129, 0.35)',
+                }}
+              >
+                <span className="sdm-btn-read-full__icon">📄</span>
+                تحميل / قراءة ملف PDF
+              </a>
+            )}
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 // ============================================================
-//  LibraryPage.jsx — متجر ومكتبة سوبر قيم (عامة للجميع)
+//  LibraryPage.jsx — Super Kayyem library and store (public)
 // ============================================================
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
@@ -16,6 +16,7 @@ export function LibraryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('الكل');
+  const [ageFilter, setAgeFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStory, setSelectedStory] = useState(null);
 
@@ -51,9 +52,12 @@ export function LibraryPage() {
       const cat = s.category || s.valueLearned || '';
       const matchCategory = filter === 'الكل' || cat === filter;
 
-      return matchSearch && matchCategory;
+      const storyAge = s.targetAge || parseInt(s.targetAgeGroup, 10);
+      const matchAge = !ageFilter || storyAge === parseInt(ageFilter, 10);
+
+      return matchSearch && matchCategory && matchAge;
     });
-  }, [stories, searchTerm, filter]);
+  }, [stories, searchTerm, filter, ageFilter]);
 
   const handleCardClick = (story) => {
     setSelectedStory(story);
@@ -62,6 +66,7 @@ export function LibraryPage() {
   const handleResetFilters = () => {
     setSearchTerm('');
     setFilter('الكل');
+    setAgeFilter('');
   };
 
   return (
@@ -104,6 +109,22 @@ export function LibraryPage() {
                 {cat}
               </button>
             ))}
+          </div>
+
+          <div className="age-filter-box">
+            <select
+              className="age-dropdown"
+              value={ageFilter}
+              onChange={(e) => setAgeFilter(e.target.value)}
+              aria-label="تصفية حسب الفئة العمرية"
+            >
+              <option value="">جميع الفئات العمرية (4 - 12)</option>
+              {[4, 5, 6, 7, 8, 9, 10, 11, 12].map((age) => (
+                <option key={age} value={age}>
+                  عمر {age} سنوات
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

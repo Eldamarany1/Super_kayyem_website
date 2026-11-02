@@ -1,21 +1,21 @@
-@* هذه الصفحة تظهر تلقائياً عند حدوث خطأ غير متوقع في التطبيق *@
-@* النموذج (Model) هو كلاس ErrorViewModel الذي يحمل معلومات الخطأ *@
+@* This page appears automatically when an unexpected error occurs in the application *@
+@* The Model is ErrorViewModel, which carries error details *@
 @model ErrorViewModel
 @{
-    @* تعيين عنوان التبويب في المتصفح *@
+    @* Set page title in the browser tab *@
     ViewData["Title"] = "خطأ";
 }
 
 <div class="error-card">
     <h1>⚠️ حدث خطأ</h1>
     <p>حدث خطأ أثناء معالجة طلبك.</p>
-    @* ShowRequestId = true تعني: اعرض معرّف الطلب الذي يساعد في تتبع الخطأ للمطور *@
-    @* ?? false يعني: إذا كان Model فارغاً (null) استخدم القيمة false افتراضياً *@
+    @* ShowRequestId = true means: display the request ID to help the developer track the issue *@
+    @* ?? false means: if Model is null, use false as default *@
     @if (Model?.ShowRequestId ?? false)
     {
-        @* Model! — علامة ! تُخبر المترجم أن Model ليس null هنا (نحن متأكدون بعد الشرط أعلاه) *@
+        @* Model! — the ! null-forgiving operator tells the compiler Model is not null here *@
         <p><strong>معرّف الطلب:</strong> <code>@Model!.RequestId</code></p>
     }
-    @* asp-controller و asp-action = Tag Helpers تُنشئ رابط HTML يوجه المستخدم إلى الصفحة الرئيسية *@
+    @* asp-controller and asp-action = Tag Helpers that generate an HTML link to the admin dashboard *@
     <a asp-controller="Admin" asp-action="Index" class="btn-admin btn-admin-primary">↩ العودة للوحة التحكم</a>
 </div>

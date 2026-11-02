@@ -1,16 +1,16 @@
 @* ============================================================
-   Details.cshtml — صفحة عرض تفاصيل قصة واحدة
-   @model Story: القصة القادمة من AdminController.Details(int id)
+   Details.cshtml — Single story details page
+   @model Story: The story passed from AdminController.Details(int id)
    ============================================================ *@
 @model Story
 @{
-    @* $"تفاصيل: {Model.Title}": يدمج عنوان القصة في عنوان الصفحة *@
+    @* Includes story title in the page title *@
     ViewData["Title"] = $"تفاصيل: {Model.Title}";
 }
 
 <div class="detail-card">
     <div class="detail-header">
-        @* عرض الصورة فقط إذا كان رابطها موجوداً وغير فارغ *@
+        @* Render cover image only if URL exists and is not empty *@
         @if (!string.IsNullOrEmpty(Model.CoverImage))
         {
             <img src="@Model.CoverImage" alt="@Model.Title" class="detail-cover" />
@@ -28,22 +28,28 @@
         </div>
         <div class="detail-item">
             <label>الرابط</label>
-            @* dir="ltr": الـ Slug بالإنجليزية — اتجاه الكتابة من اليسار لليمين *@
+            @* dir="ltr": Slug is in English — left-to-right text direction *@
             <span dir="ltr">@Model.Slug</span>
         </div>
         <div class="detail-item">
             <label>الفئة العمرية</label>
-            <span>@Model.TargetAgeGroup</span>
+            <span>@(Model.TargetAge.HasValue ? $"{Model.TargetAge.Value} سنوات" : "—")</span>
         </div>
         <div class="detail-item">
             <label>السعر</label>
-            @* .ToString("F0"): يعرض رقماً صحيحاً بدون أرقام عشرية *@
+            @* .ToString("F0"): formats integer without decimal places *@
             <span>@Model.Price.ToString("F0") EGP</span>
         </div>
         <div class="detail-item">
             <label>التقييم</label>
-            @* .ToString("F1"): يعرض رقماً عشرياً بمنزلة واحدة مثل "4.8" *@
-            <span>⭐ @Model.Rating.ToString("F1") / 5</span>
+            @if (Model.Rating.HasValue)
+            {
+                <span>⭐ @Model.Rating.Value.ToString("F1") / 5</span>
+            }
+            else
+            {
+                <span style="opacity: 0.5;">—</span>
+            }
         </div>
         <div class="detail-item">
             <label>عدد الصفحات</label>
@@ -51,16 +57,31 @@
         </div>
     </div>
 
+    @* Display PDF download link if a PDF was uploaded *@
+    @if (!string.IsNullOrEmpty(Model.PdfUrl))
+    {
+        <div class="detail-grid" style="margin-top: 16px;">
+            <div class="detail-item">
+                <label>ملف القصة (PDF)</label>
+                <span>
+                    <a href="@Model.PdfUrl" target="_blank" style="text-decoration: none; color: inherit;">
+                        📄 عرض / تحميل الـ PDF
+                    </a>
+                </span>
+            </div>
+        </div>
+    }
+
     <div class="detail-description">
         <label>الوصف</label>
         <p>@Model.Description</p>
     </div>
 
     <div class="detail-actions">
-        @* asp-route-id: يمرر Id القصة في رابط الزر مثل /Admin/Edit/3 *@
+        @* asp-route-id: passes story Id in button URL like /Admin/Edit/3 *@
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-admin btn-admin-primary">✏️ تعديل</a>
         <a asp-action="Delete" asp-route-id="@Model.Id" class="btn-admin btn-admin-danger">🗑️ حذف</a>
-        @* asp-action="Index": رابط للعودة إلى لوحة التحكم بدون id *@
+        @* asp-action="Index": link to return to dashboard without ID *@
         <a asp-action="Index" class="btn-admin btn-admin-secondary">↩ العودة</a>
     </div>
 </div>

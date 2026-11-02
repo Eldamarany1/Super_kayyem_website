@@ -1,5 +1,7 @@
 namespace SuperKayyem.Controllers;
 
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SuperKayyem.Data;
@@ -11,11 +13,13 @@ public class StoriesController : ControllerBase
 {
     private readonly SuperKayyemDbContext _context;
     private readonly ILogger<StoriesController> _logger;
+    private readonly Cloudinary _cloudinary;
 
-    public StoriesController(SuperKayyemDbContext context, ILogger<StoriesController> logger)
+    public StoriesController(SuperKayyemDbContext context, ILogger<StoriesController> logger, Cloudinary cloudinary)
     {
         _context = context;
         _logger = logger;
+        _cloudinary = cloudinary;
     }
 
     // GET: api/stories
@@ -33,6 +37,32 @@ public class StoriesController : ControllerBase
             await _context.Stories.AddRangeAsync(seedStories, ct);
             await _context.SaveChangesAsync(ct);
             stories = seedStories;
+        }
+
+        // Migrate any existing stories missing TargetAge
+        bool needsUpdate = false;
+        foreach (var s in stories)
+        {
+            if (!s.TargetAge.HasValue)
+            {
+                s.TargetAge = s.Id switch
+                {
+                    1 => 6,
+                    2 => 4,
+                    3 => 8,
+                    4 => 6,
+                    5 => 4,
+                    6 => 8,
+                    7 => 8,
+                    8 => 7,
+                    _ => 6
+                };
+                needsUpdate = true;
+            }
+        }
+        if (needsUpdate)
+        {
+            await _context.SaveChangesAsync(ct);
         }
 
         return Ok(stories);
@@ -55,7 +85,7 @@ public class StoriesController : ControllerBase
 
     // POST: api/stories
     [HttpPost]
-    public async Task<IActionResult> Add([FromBody] Story story, CancellationToken ct = default)
+    public async Task<IActionResult> Add([FromForm] Story story, IFormFile? pdfFile, IFormFile? imageFile, CancellationToken ct = default)
     {
         if (story == null)
         {
@@ -77,6 +107,35 @@ public class StoriesController : ControllerBase
 
         story.Pages ??= [];
         story.CreatedAt = DateTime.UtcNow;
+        story.Rating = null; // Unrated on creation; calculated dynamically from user reviews
+
+        // Upload cover image to Cloudinary
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            using var stream = imageFile.OpenReadStream();
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(imageFile.FileName, stream),
+                Folder = "super_kayyem/covers"
+            };
+
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+            story.CoverImage = uploadResult.SecureUrl.ToString();
+        }
+
+        // Upload PDF to Cloudinary as raw file
+        if (pdfFile != null && pdfFile.Length > 0)
+        {
+            using var pdfStream = pdfFile.OpenReadStream();
+            var rawParams = new RawUploadParams
+            {
+                File = new FileDescription(pdfFile.FileName, pdfStream),
+                Folder = "super_kayyem/pdfs"
+            };
+
+            var pdfResult = await _cloudinary.UploadAsync(rawParams);
+            story.PdfUrl = pdfResult.SecureUrl.ToString();
+        }
 
         await _context.Stories.AddAsync(story, ct);
         await _context.SaveChangesAsync(ct);
@@ -87,7 +146,7 @@ public class StoriesController : ControllerBase
 
     // PUT: api/stories/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> Edit(int id, [FromBody] Story story, CancellationToken ct = default)
+    public async Task<IActionResult> Edit(int id, [FromForm] Story story, IFormFile? imageFile, IFormFile? pdfFile, CancellationToken ct = default)
     {
         if (story == null)
         {
@@ -106,12 +165,48 @@ public class StoriesController : ControllerBase
             ? (!string.IsNullOrWhiteSpace(story.Title) ? story.Title.Replace(' ', '-').ToLowerInvariant() : existing.Slug)
             : story.Slug;
         existing.Category = story.Category;
-        existing.TargetAgeGroup = story.TargetAgeGroup;
+        existing.TargetAge = story.TargetAge;
         existing.Description = story.Description;
         existing.Price = story.Price;
-        existing.Rating = story.Rating;
-        existing.CoverImage = story.CoverImage;
+        // Rating is calculated dynamically from user reviews; preserve existing value
+        if (story.Rating.HasValue)
+        {
+            existing.Rating = story.Rating;
+        }
         existing.PageCount = story.PageCount;
+
+        // Upload new cover image to Cloudinary if provided
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            using var stream = imageFile.OpenReadStream();
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(imageFile.FileName, stream),
+                Folder = "super_kayyem/covers"
+            };
+
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+            existing.CoverImage = uploadResult.SecureUrl.ToString();
+        }
+        else if (!string.IsNullOrWhiteSpace(story.CoverImage))
+        {
+            // Keep URL from form only if no file uploaded
+            existing.CoverImage = story.CoverImage;
+        }
+
+        // Upload new PDF to Cloudinary if provided
+        if (pdfFile != null && pdfFile.Length > 0)
+        {
+            using var pdfStream = pdfFile.OpenReadStream();
+            var rawParams = new RawUploadParams
+            {
+                File = new FileDescription(pdfFile.FileName, pdfStream),
+                Folder = "super_kayyem/pdfs"
+            };
+
+            var pdfResult = await _cloudinary.UploadAsync(rawParams);
+            existing.PdfUrl = pdfResult.SecureUrl.ToString();
+        }
 
         if (story.Pages != null)
         {

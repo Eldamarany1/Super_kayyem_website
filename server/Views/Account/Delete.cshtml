@@ -1,11 +1,11 @@
-@* هذا الملف يعرض صفحة تأكيد حذف حساب عميل واحد *@
-@* النموذج (Model) هو كائن Account يحمل بيانات العميل المراد حذفه *@
+@* This page displays the confirmation screen to delete a single customer account *@
+@* The Model is an Account object carrying the details of the customer to delete *@
 @model SuperKayyem.Models.Account
 
 @{
-    @* تعيين عنوان الصفحة في المتصفح — $ تعني String Interpolation (دمج متغير داخل نص) *@
+    @* Set page title in browser — $ means String Interpolation *@
     ViewData["Title"] = $"حذف العميل: {Model.FirstName} {Model.LastName}";
-    @* حساب عدد الأطفال — ?? 0 تعني: إذا كانت القائمة فارغة (null) استخدم 0 بدلاً *@
+    @* Calculate children count — ?? 0 uses 0 if the collection is null *@
     var childrenCount = Model.Children?.Count ?? 0;
 }
 
@@ -14,10 +14,10 @@
 <div class="container-fluid py-5 bg-dark min-vh-100" data-bs-theme="dark" dir="rtl">
     <div class="container" style="max-width: 650px;">
 
-        <!-- بطاقة التحذير وتأكيد الحذف -->
+        <!-- Warning card and deletion confirmation -->
         <div class="card bg-secondary bg-opacity-10 border-danger border-opacity-50 rounded-4 p-4 shadow-lg text-center">
 
-            <!-- أيقونة تحذيرية -->
+            <!-- Warning icon -->
             <div class="rounded-circle bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
                 <i class="bi bi-exclamation-triangle-fill fs-2"></i>
             </div>
@@ -27,11 +27,11 @@
                 هل أنت متأكد من رغبتك في حذف هذا الحساب نهائياً؟ سيتم أيضاً حذف كافة بيانات الأطفال المسجلين التابعين له.
             </p>
 
-            <!-- ملخص بيانات العميل المراد حذفه -->
+            <!-- Summary of the customer account to delete -->
             <div class="card bg-dark bg-opacity-50 border-secondary border-opacity-25 rounded-3 p-3 text-end mb-4">
                 <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-25 pb-2 mb-2">
                     <span class="text-secondary small">اسم العميل:</span>
-                    @* @Model.FirstName = طباعة قيمة الخاصية مباشرةً في HTML *@
+                    @* @Model.FirstName = renders property value directly into HTML *@
                     <strong class="text-light">@Model.FirstName @Model.LastName</strong>
                 </div>
                 <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-25 pb-2 mb-2">
@@ -50,19 +50,19 @@
                 </div>
             </div>
 
-            <!-- نموذج تأكيد الحذف والأزرار -->
-            @* asp-action="Delete" = يُرسل النموذج إلى الدالة Delete في AccountController بطريقة POST *@
+            <!-- Confirmation form and action buttons -->
+            @* asp-action="Delete" = submits the form to Delete action in AccountController via POST *@
             <form asp-action="Delete" method="post" class="d-flex justify-content-center gap-3">
-                @* حقل مخفي يُرسل ID العميل مع النموذج — لا يراه المستخدم لكن الـ Controller يحتاجه *@
-                @* asp-for="Id" = يربط الحقل تلقائياً بخاصية Id في Model *@
+                @* Hidden field sending the account ID with the form — needed by the Controller *@
+                @* asp-for="Id" = automatically binds input to the Id property of the Model *@
                 <input type="hidden" asp-for="Id" />
 
-                @* زر الإلغاء والعودة لقائمة العملاء — asp-action ينشئ رابط <a> إلى AccountList *@
+                @* Cancel button returning to customer list — asp-action generates an <a> link to AccountList *@
                 <a asp-action="AccountList" class="btn btn-outline-secondary px-4 py-2 rounded-3">
                     إلغاء والعودة
                 </a>
 
-                @* زر التأكيد — type="submit" يُرسل النموذج فعلياً عند الضغط عليه *@
+                @* Confirm button — type="submit" triggers the POST request when clicked *@
                 <button type="submit" class="btn btn-danger d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold rounded-3 shadow-sm">
                     <i class="bi bi-trash-fill"></i>
                     <span>نعم، حذف الحساب</span>

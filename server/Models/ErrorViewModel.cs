@@ -1,18 +1,18 @@
 // ============================================================
-// ErrorViewModel.cs — نموذج صفحة الخطأ
-// يُستخدم من قِبَل Views/Shared/Error.cshtml لعرض معلومات الخطأ.
+// ErrorViewModel.cs — Error page view model
+// Used by Views/Shared/Error.cshtml to display error information.
 // ============================================================
 
 namespace SuperKayyem.Models;
 
 public class ErrorViewModel
 {
-    // معرّف الطلب الذي سبّب الخطأ — مفيد لتتبع المشكلة في سجلات التطبيق
-    // string?: يعني أن القيمة قد تكون null (اختيارية)
+    // Request ID that caused the error — useful for tracking issues in application logs
+    // string?: means the value can be null (optional)
     public string? RequestId { get; set; }
 
-    // خاصية محسوبة (Computed Property): تُرجع true إذا كان RequestId موجوداً وغير فارغ
-    // => تعني "يساوي" — هذه طريقة مختصرة للكتابة بدلاً من { get { return ...; } }
-    // تُستخدم في الـ View لإظهار RequestId فقط عندما تكون له قيمة
+    // Computed property: returns true if RequestId is not null or empty
+    // => expression-bodied member — short syntax for { get { return ...; } }
+    // Used in the View to display RequestId only when it has a value
     public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 }

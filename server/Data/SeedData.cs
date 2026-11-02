@@ -1,40 +1,40 @@
-// هذا الملف يحتوي على بيانات تجريبية (Seed Data) لملء قاعدة البيانات عند بداية التشغيل
-// إذا كانت قاعدة البيانات فارغة، يتم استدعاء هذه الدالة لإضافة قصص افتراضية
+// This file contains seed data to populate the database on startup
+// If the database is empty, this method is called to add default stories
 namespace SuperKayyem.Data;
 
 using SuperKayyem.Models;
 
-// الكلمة "static" تعني أن هذا الكلاس لا يحتاج إلى إنشاء كائن منه — يُستدعى مباشرةً
+// The "static" keyword means this class does not need an instance — call it directly
 public static class SeedData
 {
-    // دالة تُرجع قائمة من القصص الجاهزة لإدخالها في MongoDB
-    // List<Story> = قائمة (مصفوفة ديناميكية) من كائنات نوع Story
+    // Method that returns a list of prepared stories to insert into MongoDB
+    // List<Story> = a list of Story objects
     public static List<Story> GetStories()
     {
-        // "return new List<Story> { ... }" = أنشئ القائمة ومرّرها مباشرةً إلى المستدعي
+        // "return new List<Story> { ... }" = creates the list and returns it directly to the caller
         return new List<Story>
         {
-            // كل "new Story { ... }" = كائن قصة واحدة مُهيَّأ بقيمه مباشرةً (Object Initializer)
+            // Each "new Story { ... }" = a single Story object initialized with values (object initializer)
             new Story
             {
                 Id = 1,
                 Title = "باسم ومسبار الأمل",
-                // Slug = النص الذي يظهر في رابط URL للقصة (بدون مسافات أو أحرف خاصة)
+                // Slug = text in the URL for the story (no spaces or special characters)
                 Slug = "basem-hope-probe",
                 Category = "التعاون",
-                // الفئة العمرية المستهدفة لهذه القصة
-                TargetAgeGroup = "6-8",
+                // Target age group for this story
+                TargetAge = 6,
                 Description = "قصة شيقة عن باسم وأصدقائه يتعاونون لبناء مجسم لمسبار الفضاء. يتعلم الأطفال من خلالها أن روح الفريق تصنع المعجزات وتتجاوز كل التحديات. رحلة معرفية ملهمة تأخذ القارئ الصغير إلى آفاق السماء الواسعة.",
-                // السعر من نوع decimal (m بعد الرقم تعني decimal وليس double)
+                // Price is decimal (m suffix means decimal, not double)
                 Price = 35.00m,
                 Rating = 4.9,
-                // مسار صورة الغلاف النسبي داخل مجلد wwwroot/images
+                // Relative cover image path inside wwwroot/images folder
                 CoverImage = "/images/covers/story1.svg",
                 PageCount = 10,
-                // Pages = قائمة صفحات القصة، كل صفحة لها رقم ومحتوى نصي
+                // Pages = list of story pages, each page has a number and text content
                 Pages = new List<StoryPageItem>
                 {
-                    // new() = اختصار لـ new StoryPageItem() — يُستنتج النوع تلقائياً من السياق
+                    // new() = shortcut for new StoryPageItem() — inferred by compiler
                     new() { PageNum = 1, Content = "في ليلة هادئة، وتحت ضوء قمر فضي ناعم، كان باسم يجلس في غرفته متأملاً السماء من نافذته الصغيرة، حاملاً شغفاً لا ينتهي باكتشاف أسرار الفضاء والنجوم اللامعة." },
                     new() { PageNum = 2, Content = "أعلنت المدرسة عن مسابقة علمية لبناء مجسم مبتكر لمسبار فضائي يستكشف الكواكب البعيدة. شعر باسم بالحماس الشديد لكنه أدرك أن المهمة تتطلب مهارات متنوعة تفوق قدرة شخص واحد." },
                     new() { PageNum = 3, Content = "اجتمع باسم مع أصدقائه في باحة المدرسة: عمر المحب للهندسة والتصميم، وليلى المبدعة في الرسم والألوان، وزياد البارع في التجميع والحسابات الدقيقة." },
@@ -53,7 +53,7 @@ public static class SeedData
                 Title = "سر اللؤلؤة الزرقاء",
                 Slug = "secret-blue-pearl",
                 Category = "الشجاعة",
-                TargetAgeGroup = "4-6",
+                TargetAge = 4,
                 Description = "مغامرة بحرية مشوقة للغواص الصغير سالم في أعماق البحر بحثاً عن لؤلؤة الشجاعة. يكتشف سالم أن الشجاعة الحقيقية ليست غياب الخوف، بل مواجهته لحماية أصدقائه من المخاطر.",
                 Price = 40.00m,
                 Rating = 4.8,
@@ -77,7 +77,7 @@ public static class SeedData
                 Title = "خريطة الشجرة العتيقة",
                 Slug = "map-ancient-tree",
                 Category = "الصدق",
-                TargetAgeGroup = "8-10",
+                TargetAge = 8,
                 Description = "حكاية ليلى التي عثرت على خريطة سرية تقود إلى كنز قديم في حديقة جدتها. عندما واجهت اختباراً صعباً بين قول الحقيقة أو الفوز بالكنز، أثبتت أن الصدق هو أعظم كنز يمكن للمرء امتلاكه.",
                 Price = 45.00m,
                 Rating = 4.7,
@@ -105,7 +105,7 @@ public static class SeedData
                 Title = "حارس الواحة الصغير",
                 Slug = "little-oasis-guardian",
                 Category = "المسؤولية",
-                TargetAgeGroup = "6-8",
+                TargetAge = 6,
                 Description = "قصة ملهمة عن طارق الذي تولى رعاية جدول الماء الصغير في واحة النخيل خلال موسم الجفاف. يتعلم الأطفال معنى الالتزام وتحمل المسؤولية تجاه الطبيعة والمجتمع في بيئة عربية أصيلة.",
                 Price = 35.00m,
                 Rating = 4.9,
@@ -131,7 +131,7 @@ public static class SeedData
                 Title = "جسر النجوم الدافئ",
                 Slug = "warm-stars-bridge",
                 Category = "الصداقة",
-                TargetAgeGroup = "4-6",
+                TargetAge = 4,
                 Description = "قصة دافئة عن الصداقة النقية بين الأرنب فرفور والسنجاب سمسم في غابة الياسمين. يتحد الصديقان لمساعدة عصفور جريح في الشتاء، مجسدين معاني الوفاء والإيثار والمساندة في أوقات الشدة.",
                 Price = 30.00m,
                 Rating = 4.8,
@@ -155,7 +155,7 @@ public static class SeedData
                 Title = "بذرة الحكمة العجيبة",
                 Slug = "seed-of-wisdom",
                 Category = "الصبر",
-                TargetAgeGroup = "8-10",
+                TargetAge = 8,
                 Description = "رحلة يوسف مع البذرة النادرة التي أهداها له الحكيم والتي تتطلب رعاية يومية وصبراً طويلاً لتزهر. يتعلم يوسف من خلالها أن كل الإنجازات العظيمة في الحياة تحتاج إلى الصبر والمثابرة قبل أن تؤتي ثمارها.",
                 Price = 50.00m,
                 Rating = 4.6,

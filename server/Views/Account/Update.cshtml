@@ -1,9 +1,9 @@
-@* هذه الصفحة تعرض نموذج تعديل بيانات عميل موجود *@
-@* النموذج (Model) هو كائن Account يحمل البيانات الحالية للعميل المراد تعديله *@
+@* This page displays the edit form for an existing customer account *@
+@* The Model is an Account object carrying the current data of the customer to update *@
 @model SuperKayyem.Models.Account
 
 @{
-    @* عنوان الصفحة يتضمن اسم العميل باستخدام String Interpolation *@
+    @* Page title includes customer name using String Interpolation *@
     ViewData["Title"] = $"تعديل بيانات: {Model.FirstName} {Model.LastName}";
 }
 
@@ -12,27 +12,27 @@
 <div class="container-fluid py-4 bg-dark min-vh-100" data-bs-theme="dark" dir="rtl">
     <div class="container" style="max-width: 900px;">
 
-        <!-- شريط العنوان والرجوع -->
+        <!-- Header and Back button -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h3 class="fw-bold text-white mb-1">تعديل بيانات العميل</h3>
-                @* @Model.Id = طباعة رقم هوية الحساب من الكائن المُمرَّر من Controller *@
+                @* @Model.Id = displays account ID from the Model passed by Controller *@
                 <p class="text-secondary small mb-0">تعديل البيانات الأساسية وبيانات الأطفال لحساب #@Model.Id</p>
             </div>
-            @* asp-action="AccountList" = ينشئ رابط للعودة لصفحة قائمة العملاء *@
+            @* asp-action="AccountList" = generates link to return to the customer accounts list *@
             <a asp-action="AccountList" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 rounded-3">
                 <i class="bi bi-arrow-right"></i>
                 <span>إلغاء والعودة</span>
             </a>
         </div>
 
-        @* asp-action="Update" = يُرسل النموذج إلى دالة Update في AccountController بطريقة POST *@
+        @* asp-action="Update" = submits the form to Update action in AccountController via POST *@
         <form asp-action="Update" method="post">
-            @* حقل مخفي يُرسل ID العميل — ضروري حتى يعرف Controller أي حساب يُعدَّل *@
-            @* asp-for="Id" = يربط الحقل تلقائياً بخاصية Id في Model *@
+            @* Hidden field sending the account ID — needed so Controller knows which record to update *@
+            @* asp-for="Id" = automatically binds input to Id property in Model *@
             <input type="hidden" asp-for="Id" />
 
-            <!-- 1. بيانات العميل الأساسية -->
+            <!-- 1. Basic Customer Information -->
             <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 p-4 shadow-sm mb-4">
                 <h5 class="fw-bold text-white border-bottom border-secondary border-opacity-25 pb-3 mb-3 d-flex align-items-center gap-2">
                     <i class="bi bi-person-gear text-info"></i>
@@ -41,9 +41,9 @@
 
                 <div class="row g-3">
                     <div class="col-md-6">
-                        @* asp-for="FirstName" على label ينشئ تلقائياً for="FirstName" ويربطه بالحقل *@
+                        @* asp-for="FirstName" on label generates for="FirstName" and links to input *@
                         <label asp-for="FirstName" class="form-label text-secondary small">الاسم الأول</label>
-                        @* asp-for="FirstName" على input يملأ الحقل بقيمة Model.FirstName الحالية تلقائياً *@
+                        @* asp-for="FirstName" on input populates the input with current Model.FirstName automatically *@
                         <input asp-for="FirstName" class="form-control bg-dark border-secondary border-opacity-50 text-light" required />
                     </div>
 
@@ -59,14 +59,14 @@
 
                     <div class="col-md-3">
                         <label asp-for="DateOfBirth" class="form-label text-secondary small">تاريخ الميلاد</label>
-                        @* value="@Model.DateOfBirth.ToString("yyyy-MM-dd")" — يجب تنسيق التاريخ يدوياً *@
-                        @* لأن حقل HTML من نوع date يقبل فقط الصيغة yyyy-MM-dd وليس أي صيغة أخرى *@
+                        @* value="@Model.DateOfBirth.ToString("yyyy-MM-dd")" — must format date manually *@
+                        @* because HTML date input only accepts the format yyyy-MM-dd *@
                         <input asp-for="DateOfBirth" type="date" class="form-control bg-dark border-secondary border-opacity-50 text-light" value="@Model.DateOfBirth.ToString("yyyy-MM-dd")" required />
                     </div>
 
                     <div class="col-md-3">
                         <label asp-for="Gender" class="form-label text-secondary small">النوع</label>
-                        @* asp-for="Gender" على select يختار الخيار المناسب تلقائياً بناءً على قيمة Model.Gender *@
+                        @* asp-for="Gender" on select automatically preselects the option based on Model.Gender *@
                         <select asp-for="Gender" class="form-select bg-dark border-secondary border-opacity-50 text-light">
                             <option value="ذكر">ذكر</option>
                             <option value="أنثى">أنثى</option>
@@ -75,7 +75,7 @@
                 </div>
             </div>
 
-            <!-- 2. بيانات الأطفال المسجلين -->
+            <!-- 2. Registered Children Information -->
             <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 p-4 shadow-sm mb-4">
                 <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-25 pb-3 mb-3">
                     <h5 class="fw-bold text-white mb-0 d-flex align-items-center gap-2">
@@ -83,7 +83,7 @@
                         <span>بيانات الأطفال</span>
                     </h5>
                     <span class="badge bg-secondary bg-opacity-25 text-info px-2 py-1">
-                        @* @(...) ضرورية لأن التعبير يحتوي على عامل ?? *@
+                        @* @(...) required because expression contains ?? null-coalescing operator *@
                         @(Model.Children?.Count ?? 0) أطفال
                     </span>
                 </div>
@@ -91,18 +91,18 @@
                 @if (Model.Children != null && Model.Children.Any())
                 {
                     <div class="d-flex flex-column gap-3">
-                        @* نستخدم for بدلاً من foreach لأننا نحتاج إلى رقم i لربط الحقول *@
-                        @* Children[i].Name = نمط الربط المفهرس الذي يعرفه ASP.NET لإرجاع قائمة من الحقول *@
+                        @* We use a for loop instead of foreach because index i is required for model binding *@
+                        @* Children[i].Name = indexed model binding pattern used by ASP.NET to bind collections *@
                         @for (int i = 0; i < Model.Children.Count; i++)
                         {
-                            @* حقل مخفي يُرسل Id الطفل — ضروري حتى يُحدَّث الطفل الصحيح في قاعدة البيانات *@
-                            @* Children[i].Id = اسم الحقل المُولَّد: Children[0].Id, Children[1].Id ... *@
+                            @* Hidden field sending child Id — ensures the right child is updated in the database *@
+                            @* Children[i].Id = generated field name: Children[0].Id, Children[1].Id ... *@
                             <input type="hidden" asp-for="Children[i].Id" />
                             <div class="card bg-dark bg-opacity-50 border-secondary border-opacity-25 p-3 rounded-3">
                                 <div class="row g-2 align-items-center">
                                     <div class="col-md-5">
                                         <label class="form-label text-secondary small">اسم الطفل</label>
-                                        @* asp-for="Children[i].Name" = يربط الحقل بالطفل رقم i في قائمة الأطفال *@
+                                        @* asp-for="Children[i].Name" = binds input to child at index i in Children list *@
                                         <input asp-for="Children[i].Name" class="form-control bg-dark border-secondary border-opacity-50 text-light" required />
                                     </div>
                                     <div class="col-md-3">
@@ -129,10 +129,10 @@
                 }
             </div>
 
-            <!-- أزرار الحفظ والإلغاء -->
+            <!-- Action buttons: Save and Cancel -->
             <div class="d-flex justify-content-end gap-2">
                 <a asp-action="AccountList" class="btn btn-outline-secondary px-4 py-2 rounded-3">إلغاء</a>
-                @* type="submit" = هذا الزر يُرسل النموذج إلى Controller عند الضغط *@
+                @* type="submit" = submits the form to the controller when clicked *@
                 <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold rounded-3 shadow-sm">
                     <i class="bi bi-check-lg"></i>
                     <span>حفظ التعديلات</span>

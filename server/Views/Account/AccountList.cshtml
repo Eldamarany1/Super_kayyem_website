@@ -1,28 +1,28 @@
-@* هذه الصفحة تعرض قائمة جميع العملاء مع إحصائياتهم وبيانات أطفالهم *@
-@* النموذج (Model) هو قائمة من كائنات Account — IEnumerable يعني يمكن التكرار عليها بـ foreach *@
+@* This page displays the list of all customers with statistics and children details *@
+@* The Model is IEnumerable<Account> — can be iterated using foreach *@
 @model IEnumerable<SuperKayyem.Models.Account>
 
 @{
     ViewData["Title"] = "إدارة العملاء والأطفال";
-    @* Model?.Count() = عدد العملاء — علامة ? تحمي من الخطأ إذا كانت القائمة فارغة (null) *@
+    @* Model?.Count() = number of customers — the ? protects against null references *@
     var totalAccounts = Model?.Count() ?? 0;
-    @* Sum(...) = جمع عدد الأطفال عبر جميع الحسابات — lambda expression: a => a.Children?.Count ?? 0 *@
+    @* Sum(...) = sum of children across all accounts — lambda expression: a => a.Children?.Count ?? 0 *@
     var totalChildren = Model?.Sum(a => a.Children?.Count ?? 0) ?? 0;
-    @* حساب المتوسط — (int) يحوّل الناتج لعدد صحيح، ToString("0") يُزيل الكسر العشري *@
+    @* Calculate average — (int) casts to integer, ToString("0") formats without decimals *@
     var avgChildren = totalAccounts > 0 ? ((int)totalChildren / totalAccounts).ToString("0") : "0";
 }
 
-<!-- أيقونات Bootstrap -->
+<!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <div class="container-fluid py-4 bg-dark min-vh-100" data-bs-theme="dark" dir="rtl">
 
-    <!-- 1. كروت الإحصائيات العلوية (Stats Cards) -->
+    <!-- 1. Stats Cards -->
     <div class="row g-3 mb-4">
         <div class="col-12 col-md-4">
             <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 text-center py-4 shadow-sm h-100">
                 <div class="card-body p-0">
-                    @* @totalAccounts = طباعة المتغير المحلي الذي حسبناه في بداية الصفحة *@
+                    @* @totalAccounts = displays the local variable computed at the top of the view *@
                     <div class="display-6 fw-bold text-info mb-1">@totalAccounts</div>
                     <div class="text-secondary small fw-semibold">إجمالي العملاء</div>
                 </div>
@@ -46,7 +46,7 @@
         </div>
     </div>
 
-    <!-- 2. رأس القسم وزر الإضافة -->
+    <!-- 2. Header and Add button -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="fw-bold text-white mb-0">قائمة العملاء</h3>
         <a asp-action="Create" class="btn btn-primary d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold rounded-3 shadow-sm">
@@ -55,7 +55,7 @@
         </a>
     </div>
 
-    <!-- 3. جدول البيانات -->
+    <!-- 3. Data Table -->
     <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 overflow-hidden shadow-sm">
         <div class="table-responsive">
             <table class="table table-dark table-hover align-middle mb-0 text-end">
@@ -71,21 +71,21 @@
                     </tr>
                 </thead>
                 <tbody class="border-top-0">
-                    @* التحقق من أن القائمة غير فارغة قبل عرضها *@
+                    @* Verify that the collection is not empty before rendering *@
                     @if (Model != null && Model.Any())
                     {
-                        @* متغير عداد لترقيم الصفوف — يُزاد بواحد في نهاية كل تكرار *@
+                        @* Counter variable to number rows — incremented at the end of each iteration *@
                         int index = 1;
                         foreach (var account in Model)
                         {
-                            @* إنشاء معرف فريد لكل صف للتحكم في فتح/إغلاق قائمة الأطفال بـ Bootstrap Collapse *@
-                            @* $"..." = String Interpolation — يدمج account.Id داخل النص لجعل كل ID فريداً *@
+                            @* Generate unique collapse ID for each row to toggle children details via Bootstrap Collapse *@
+                            @* $"..." = String Interpolation — combines account.Id into text to ensure unique ID *@
                             var collapseId = $"children-details-{account.Id}";
                             <tr>
-                                <!-- الترقيم -->
+                                <!-- Row number -->
                                 <td class="text-center text-secondary fw-semibold py-3">@index</td>
 
-                                <!-- اسم العميل والأفاتار -->
+                                <!-- Customer name and avatar -->
                                 <td class="py-3 px-3">
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="rounded-2 bg-secondary bg-opacity-25 text-info d-flex align-items-center justify-content-center p-2" style="width: 38px; height: 38px;">
@@ -95,52 +95,52 @@
                                     </div>
                                 </td>
 
-                                <!-- البريد الإلكتروني -->
+                                <!-- Email -->
                                 <td class="py-3 px-3 text-secondary">@account.Email</td>
 
-                                <!-- نوع العميل -->
+                                <!-- Gender -->
                                 <td class="py-3 px-3 text-center">
-                                    @* @(...) = تعبير Razor يحتاج أقواساً لأنه يحتوي على عامل ثلاثي ternary ? : *@
+                                    @* @(...) = Razor expression in parentheses because it contains a ternary operator ? : *@
                                     <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1 fw-semibold">
                                         @(account.Gender == "Male" || account.Gender == "ذكر" ? "ذكر" : "أنثى")
                                     </span>
                                 </td>
 
-                                <!-- تاريخ الميلاد والعمر -->
+                                <!-- Date of birth and age -->
                                 <td class="py-3 px-3 text-light">
-                                    @* ToString("yyyy/MM/dd") = تنسيق التاريخ بالشكل المطلوب *@
+                                    @* ToString("yyyy/MM/dd") = formats the date for display *@
                                     @account.DateOfBirth.ToString("yyyy/MM/dd")
                                     <small class="text-secondary ms-1">
-                                        @* حساب العمر بطرح سنة الميلاد من السنة الحالية *@
+                                        @* Calculate age by subtracting birth year from current year *@
                                         (@((DateTime.Now.Year - account.DateOfBirth.Year)) سنة)
                                     </small>
                                 </td>
 
-                                <!-- بيانات الأطفال -->
+                                <!-- Registered children -->
                                 <td class="py-3 px-3">
                                     @if (account.Children != null && account.Children.Any())
                                     {
                                         <div class="d-flex flex-wrap gap-1 align-items-center">
-                                            @* .Take(2) = اعرض أول طفلين فقط، والباقي في القائمة المنسدلة *@
+                                            @* .Take(2) = displays only the first two children; remaining are in collapse dropdown *@
                                             @foreach (var child in account.Children.Take(2))
                                             {
                                                 <span class="badge rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1 d-inline-flex align-items-center gap-1">
-                                                    @* تحديد أيقونة الجنس حسب قيمة Gender للطفل *@
+                                                    @* Set gender icon based on child Gender property *@
                                                     <i class="bi @(child.Gender == "Female" || child.Gender == "أنثى" ? "bi-gender-female" : "bi-gender-male")"></i>
                                                     @child.Name (@child.Age س)
                                                 </span>
                                             }
-                                            @* إذا كان عدد الأطفال أكثر من 2، أضف زر "المزيد" *@
+                                            @* If customer has more than 2 children, show a "+X more" button *@
                                             @if (account.Children.Count > 2)
                                             {
-                                                @* data-bs-toggle="collapse" = خاصية Bootstrap تجعل الزر يفتح/يغلق قسماً آخر *@
-                                                @* data-bs-target="#@collapseId" = يستهدف الصف المخفي أسفل هذا الصف *@
+                                                @* data-bs-toggle="collapse" = Bootstrap attribute to toggle target section *@
+                                                @* data-bs-target="#@collapseId" = targets the hidden collapse row below *@
                                                 <button class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill small"
                                                         type="button"
                                                         data-bs-toggle="collapse"
                                                         data-bs-target="#@collapseId"
                                                         aria-expanded="false">
-                                                    @* @(...) ضرورية هنا لأن التعبير يحتوي على عملية طرح - *@
+                                                    @* @(...) required here because the expression contains subtraction - *@
                                                     +@(account.Children.Count - 2) المزيد
                                                 </button>
                                             }
@@ -152,25 +152,25 @@
                                     }
                                 </td>
 
-                                <!-- أزرار العمليات الثلاثية المتطابقة مع الصورة -->
+                                <!-- Action buttons -->
                                 <td class="py-3 px-3 text-center">
                                     <div class="d-flex justify-content-center gap-2">
-                                        <!-- زر العرض -->
-                                        @* asp-action="Read" asp-route-id="@account.Id" = ينشئ رابط مثل /Account/Read/5 *@
+                                        <!-- View button -->
+                                        @* asp-action="Read" asp-route-id="@account.Id" = generates link like /Account/Read/5 *@
                                         <a asp-action="Read" asp-route-id="@account.Id"
                                            class="btn btn-sm bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-2 p-1 px-2"
                                            title="عرض">
                                             <i class="bi bi-eye"></i>
                                         </a>
 
-                                        <!-- زر التعديل -->
+                                        <!-- Edit button -->
                                         <a asp-action="Update" asp-route-id="@account.Id"
                                            class="btn btn-sm bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-2 p-1 px-2"
                                            title="تعديل">
                                             <i class="bi bi-pencil"></i>
                                         </a>
 
-                                        <!-- زر الحذف -->
+                                        <!-- Delete button -->
                                         <a asp-action="Delete" asp-route-id="@account.Id"
                                            class="btn btn-sm bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-2 p-1 px-2"
                                            title="حذف">
@@ -180,21 +180,21 @@
                                 </td>
                             </tr>
 
-                            <!-- صف منسدل لعرض باقي الأطفال عند الحاجة -->
-                            @* هذا الصف مخفي افتراضياً (class="collapse") ويظهر عند ضغط زر "المزيد" *@
-                            @* id="@collapseId" يربطه بزر المزيد الذي يستهدفه عبر data-bs-target *@
+                            <!-- Collapsible row to show all children -->
+                            @* Hidden by default (class="collapse") and toggled via data-bs-target *@
+                            @* id="@collapseId" links this row to the target button *@
                             @if (account.Children != null && account.Children.Count > 2)
                             {
                                 <tr class="collapse" id="@collapseId">
-                                    @* colspan="7" يجعل الخلية تمتد على جميع الأعمدة السبعة *@
+                                    @* colspan="7" spans the cell across all 7 columns *@
                                     <td colspan="7" class="bg-black bg-opacity-25 px-4 py-2">
                                         <div class="d-flex align-items-center gap-2">
                                             <small class="text-secondary fw-semibold">جميع أطفال العميل:</small>
                                             <div class="d-flex flex-wrap gap-2">
-                                                @* هنا نعرض جميع الأطفال بدون حد — لا .Take() *@
+                                                @* Render all children without limit — no .Take() *@
                                                 @foreach (var child in account.Children)
                                                 {
-                                                    @* ?? "غير محدد" = إذا كان Gender فارغاً اعرض نصاً افتراضياً *@
+                                                    @* ?? "Unspecified" = fallback text if Gender is null *@
                                                     <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-50 px-2 py-1">
                                                         @child.Name | @child.Age سنة | @(child.Gender ?? "غير محدد")
                                                     </span>
@@ -205,13 +205,13 @@
                                 </tr>
                             }
 
-                            @* زيادة العداد بعد الانتهاء من كل صف *@
+                            @* Increment counter after each row *@
                             index++;
                         }
                     }
                     else
                     {
-                        @* رسالة تظهر عندما لا توجد بيانات في قاعدة البيانات *@
+                        @* Message shown when database collection is empty *@
                         <tr>
                             <td colspan="7" class="text-center py-5 text-secondary">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>

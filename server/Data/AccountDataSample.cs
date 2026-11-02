@@ -1,22 +1,22 @@
 // ============================================================
-// AccountDataSample.cs — بيانات تجريبية لحسابات العملاء
-// هذا الكلاس يحتوي على بيانات نموذجية ثابتة للتطوير والاختبار.
-// ملاحظة: هذه البيانات في الذاكرة فقط — لا ترتبط بقاعدة البيانات.
+// AccountDataSample.cs — Sample data for customer accounts
+// This class contains static sample data for development and testing.
+// Note: This data is in-memory only — not connected to the database.
 // ============================================================
 
 using SuperKayyem.Models;
 
 namespace SuperKayyem.Data
 {
-    // static: يعني أنك لا تحتاج لإنشاء كائن منه — تصل إليه مباشرة بالاسم
+    // static: you do not need to create an instance — access it directly by name
     public static class AccountSeedData
     {
-        // Accounts: قائمة ثابتة من حسابات العملاء النموذجية
-        // static: خاصية مشتركة بين كل أجزاء البرنامج
-        // { get; set; }: يمكن قراءتها وتعديلها من أي مكان
+        // Accounts: static list of sample customer accounts
+        // static: shared property across the entire application
+        // { get; set; }: can be read and updated from anywhere
         public static List<Account> Accounts { get; set; } = new List<Account>
     {
-                // حساب 1: أحمد الشناوي — عميل مع طفلين
+                // Account 1: Ahmed El-Shinawy — customer with two children
                 new Account
                 {
                     Id = 1,
@@ -24,7 +24,7 @@ namespace SuperKayyem.Data
                     LastName = "الشناوي",
                     Email = "ahmed.elshinawy@example.com",
                     Password = "password123",
-                    // new DateTime(السنة, الشهر, اليوم): طريقة إنشاء تاريخ ميلاد
+                    // new DateTime(year, month, day): creates a birth date
                     DateOfBirth = new DateTime(1988, 5, 14),
                     Gender = "ذكر",
                     Children = new List<Child>
@@ -33,7 +33,7 @@ namespace SuperKayyem.Data
                         new Child { Id = 102, Name = "مريم", Age = 8, Gender = "أنثى" }
                     }
                 },
-                // حساب 2: سارة محمود — عميلة مع طفل واحد
+                // Account 2: Sara Mahmoud — customer with one child
                 new Account
                 {
                     Id = 2,
@@ -48,7 +48,7 @@ namespace SuperKayyem.Data
                         new Child { Id = 103, Name = "يوسف", Age = 5, Gender = "ذكر" }
                     }
                 },
-                // حساب 3: كريم عبد العزيز — عميل مع ثلاثة أطفال
+                // Account 3: Karim Abdelaziz — customer with three children
                 new Account
                 {
                     Id = 3,
@@ -65,7 +65,7 @@ namespace SuperKayyem.Data
                         new Child { Id = 106, Name = "فريدة", Age = 7, Gender = "أنثى" }
                     }
                 },
-                // حساب 4: منى النجار — عميلة مع طفل واحد
+                // Account 4: Mona El-Naggar — customer with one child
                 new Account
                 {
                     Id = 4,
@@ -80,7 +80,7 @@ namespace SuperKayyem.Data
                         new Child { Id = 107, Name = "آدم", Age = 3, Gender = "ذكر" }
                     }
                 },
-                // حساب 5: طارق السيد — عميل مع طفلين
+                // Account 5: Tarek El-Sayed — customer with two children
                 new Account
                 {
                     Id = 5,
@@ -96,7 +96,7 @@ namespace SuperKayyem.Data
                         new Child { Id = 109, Name = "ياسين", Age = 10, Gender = "ذكر" }
                     }
                 },
-                // حساب 6: ريهام حسن — عميلة بدون أطفال مسجلين
+                // Account 6: Reham Hassan — customer without registered children
                 new Account
                 {
                     Id = 6,
@@ -106,7 +106,7 @@ namespace SuperKayyem.Data
                     Password = "password123",
                     DateOfBirth = new DateTime(1993, 7, 30),
                     Gender = "أنثى",
-                    Children = new List<Child>() // بدون أطفال
+                    Children = new List<Child>() // No children
                 }
             };
         }

@@ -1,7 +1,7 @@
 @* ============================================================
-   Create.cshtml — نموذج إضافة قصة جديدة
-   @model Story: البيانات القادمة من AdminController.Create() [GET]
-   ستُرسَل إلى AdminController.Create(Story) [POST] عند الحفظ
+   Create.cshtml — Form to create a new story
+   @model Story: Data passed from AdminController.Create() [GET]
+   Sent to AdminController.Create(Story, IFormFile?, IFormFile?) [POST] on submit
    ============================================================ *@
 @model Story
 @{
@@ -9,32 +9,26 @@
 }
 
 <div class="form-card">
-    @* asp-action="Create": يُرسل النموذج إلى /Admin/Create بطريقة POST *@
-    <form asp-action="Create" method="post">
-        @* AntiForgeryToken: يضيف حقلاً مخفياً لحماية النموذج من هجمات CSRF
-           يتوقع وجوده [ValidateAntiForgeryToken] في الـ Controller *@
+    @* asp-action="Create": submits the form to /Admin/Create via POST
+       enctype="multipart/form-data": required for file uploads *@
+    <form asp-action="Create" asp-controller="Admin" method="post" enctype="multipart/form-data">
+        @* AntiForgeryToken: adds a hidden field to protect against CSRF attacks
+           Expected by [ValidateAntiForgeryToken] in the Controller *@
         @Html.AntiForgeryToken()
 
         <div class="form-grid">
             <div class="form-group">
-                @* asp-for="Title": يربط هذا الحقل بخاصية Title في نموذج Story
-                   يولّد: name="Title" id="Title" value="..." تلقائياً *@
+                @* asp-for="Title": binds this input to Title in the Story model
+                   Generates: name="Title" id="Title" value="..." automatically *@
                 <label asp-for="Title" class="form-label">العنوان</label>
                 <input asp-for="Title" class="form-control" placeholder="عنوان القصة" required />
-                @* asp-validation-for: يعرض رسالة الخطأ إذا فشل التحقق من الحقل *@
+                @* asp-validation-for: displays error message if validation fails *@
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
 
             <div class="form-group">
-                <label asp-for="Slug" class="form-label">الرابط (Slug)</label>
-                @* dir="ltr": اتجاه الكتابة من اليسار لليمين لأن الـ Slug بالإنجليزية *@
-                <input asp-for="Slug" class="form-control" dir="ltr" placeholder="story-slug" />
-                <small class="form-hint">اتركه فارغاً للإنشاء التلقائي</small>
-            </div>
-
-            <div class="form-group">
                 <label asp-for="Category" class="form-label">الفئة (القيمة الأخلاقية)</label>
-                @* asp-for على select: يحدد الخيار المُختار تلقائياً إذا كانت القيمة موجودة في الـ Model *@
+                @* asp-for on select: selects the option matching the Model value *@
                 <select asp-for="Category" class="form-select" required>
                     <option value="">اختر الفئة...</option>
                     <option value="التعاون">التعاون</option>
@@ -48,23 +42,41 @@
             </div>
 
             <div class="form-group">
-                <label asp-for="TargetAgeGroup" class="form-label">الفئة العمرية</label>
-                <input asp-for="TargetAgeGroup" class="form-control" placeholder="مثال: 6-8 سنوات" required />
-                <span asp-validation-for="TargetAgeGroup" class="text-danger"></span>
+                <label asp-for="TargetAge" class="form-label">العمر المستهدف (سنوات)</label>
+                <select asp-for="TargetAge" class="form-select" required>
+                    <option value="">اختر الفئة العمرية...</option>
+                    <option value="4">4 سنوات</option>
+                    <option value="5">5 سنوات</option>
+                    <option value="6">6 سنوات</option>
+                    <option value="7">7 سنوات</option>
+                    <option value="8">8 سنوات</option>
+                    <option value="9">9 سنوات</option>
+                    <option value="10">10 سنوات</option>
+                    <option value="11">11 سنة</option>
+                    <option value="12">12 سنة</option>
+                </select>
+                <span asp-validation-for="TargetAge" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="Price" class="form-label">السعر (EGP)</label>
-                @* type="number" step="0.01": يسمح بإدخال أرقام عشرية مثل 35.50 *@
+                @* type="number" step="0.01": allows decimal numbers like 35.50 *@
                 <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="0.00" required />
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
 
+            @* File upload for cover image — name must match IFormFile parameter name in controller *@
             <div class="form-group">
-                <label asp-for="Rating" class="form-label">التقييم (0-5)</label>
-                @* min="0" max="5": يحدد الحد الأدنى والأقصى للتقييم *@
-                <input asp-for="Rating" type="number" step="0.1" min="0" max="5" class="form-control" placeholder="4.5" />
-                <span asp-validation-for="Rating" class="text-danger"></span>
+                <label for="imageFile" class="form-label">صورة الغلاف</label>
+                <input type="file" name="imageFile" id="imageFile" accept="image/*" class="form-control" />
+                <small class="form-hint">سيتم رفع الصورة تلقائياً إلى Cloudinary.</small>
+            </div>
+
+            @* File upload for PDF — name must match IFormFile parameter name in controller *@
+            <div class="form-group">
+                <label for="pdfFile" class="form-label">ملف القصة الإلكتروني (PDF)</label>
+                <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="form-control" />
+                <small class="form-hint">ملف الـ PDF الكامل للقصة ليتمكن الأطفال من قراءته أو تحميله.</small>
             </div>
 
             <div class="form-group">
@@ -72,32 +84,26 @@
                 <input asp-for="PageCount" type="number" class="form-control" placeholder="20" />
                 <span asp-validation-for="PageCount" class="text-danger"></span>
             </div>
-
-            <div class="form-group">
-                <label asp-for="CoverImage" class="form-label">رابط صورة الغلاف</label>
-                <input asp-for="CoverImage" class="form-control" dir="ltr" placeholder="https://example.com/cover.jpg" />
-                <span asp-validation-for="CoverImage" class="text-danger"></span>
-            </div>
         </div>
 
         <div class="form-group form-group-full">
             <label asp-for="Description" class="form-label">الوصف</label>
-            @* textarea: حقل نص متعدد الأسطر — rows="4": يحدد ارتفاعه *@
+            @* textarea: multi-line text input — rows="4": sets input height *@
             <textarea asp-for="Description" class="form-control" rows="4" placeholder="وصف القصة..."></textarea>
             <span asp-validation-for="Description" class="text-danger"></span>
         </div>
 
         <div class="form-actions">
-            @* type="submit": يُرسل النموذج عند الضغط عليه *@
+            @* type="submit": submits the form when clicked *@
             <button type="submit" class="btn-admin btn-admin-primary">💾 حفظ القصة</button>
-            @* asp-action="Index": رابط للعودة إلى صفحة القائمة بدون حفظ *@
+            @* asp-action="Index": link to return to the list page without saving *@
             <a asp-action="Index" class="btn-admin btn-admin-secondary">↩ إلغاء</a>
         </div>
     </form>
 </div>
 
-@* section Scripts: منطقة خاصة لتحميل JavaScript إضافي في نهاية الصفحة
-   _ValidationScriptsPartial: يُحمّل سكريبتات التحقق الفوري من صحة الحقول (jQuery Validation) *@
+@* section Scripts: special section to render page scripts at the bottom of the layout
+   _ValidationScriptsPartial: loads client-side validation scripts (jQuery Validation) *@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }

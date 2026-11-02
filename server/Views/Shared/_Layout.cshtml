@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-@* هذا ملف القالب المشترك (Shared Layout) الذي تستخدمه جميع صفحات لوحة التحكم *@
-@* يحتوي على: الشريط الجانبي (Sidebar) + الهيدر + منطقة المحتوى الرئيسية *@
+@* Shared layout file used by all admin dashboard views *@
+@* Contains: Sidebar + Header + Main content area *@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    @* @ViewData["Title"] = يُجلب من كل صفحة عبر ViewData["Title"] = "..." في بداية الصفحة *@
+    @* @ViewData["Title"] = retrieved from each view via ViewData["Title"] = "..." at the top of the page *@
     <title>@ViewData["Title"] - سوبر قيّم | لوحة التحكم</title>
-    @* خط Cairo العربي من Google Fonts لتحسين مظهر النص العربي *@
+    @* Cairo Arabic font from Google Fonts to enhance Arabic text appearance *@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    @* Bootstrap RTL (Right-to-Left) = نسخة Bootstrap مخصصة للغات من اليمين إلى اليسار *@
+    @* Bootstrap RTL (Right-to-Left) = Bootstrap version designed for right-to-left languages *@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
-    @* ملف CSS مخصص للوحة التحكم — asp-append-version يضيف رقم إصدار لمنع التخزين المؤقت *@
+    @* Custom CSS file for the admin dashboard — asp-append-version adds a version hash to prevent caching *@
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
 </head>
 <body>
@@ -23,8 +23,8 @@
                 <span class="brand-text">سوبر قيّم</span>
             </div>
             <nav class="sidebar-nav">
-                @* @Url.Action("Index", "Admin") = ينشئ رابط /Admin/Index ديناميكياً *@
-                @* ViewContext.RouteData.Values["action"] = قراءة اسم الدالة الحالية لتحديد الرابط النشط *@
+                @* @Url.Action("Index", "Admin") = generates /Admin/Index URL dynamically *@
+                @* ViewContext.RouteData.Values["action"] = reads current action name to highlight active link *@
                 <a href="@Url.Action("Index", "Admin")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
                     <span class="link-icon">🏠</span>
                     <span>لوحة التحكم</span>
@@ -38,7 +38,7 @@
                 </a>
             </nav>
             <div class="sidebar-footer">
-                @* @DateTime.Now.Year = يعرض السنة الحالية تلقائياً بدون الحاجة لتحديثه يدوياً *@
+                @* @DateTime.Now.Year = displays the current year automatically without manual updates *@
                 <small>© @DateTime.Now.Year سوبر قيّم</small>
             </div>
         </aside>
@@ -46,28 +46,28 @@
         <!-- Main Content -->
         <div class="admin-main">
             <header class="admin-header">
-                @* زر القائمة يظهر فقط على الشاشات الصغيرة (d-lg-none = مخفي على الشاشات الكبيرة) *@
-                @* onclick يُضيف/يُزيل class "show" من الشريط الجانبي لإظهاره أو إخفائه *@
+                @* Menu button displayed only on small screens (d-lg-none = hidden on large screens) *@
+                @* onclick toggles "show" class on sidebar to show or hide it *@
                 <button class="sidebar-toggle d-lg-none" onclick="document.querySelector('.admin-sidebar').classList.toggle('show')">
                     ☰
                 </button>
-                @* عنوان الصفحة المُعيَّن في ViewData["Title"] يظهر هنا في الهيدر *@
+                @* Page title set in ViewData["Title"] appears here in the header *@
                 <h1 class="header-title">@ViewData["Title"]</h1>
             </header>
             <main class="admin-content">
-                @* @RenderBody() = هنا يُدرج محتوى كل صفحة .cshtml — هذا هو قلب القالب *@
-                @* كل صفحة تُضع محتواها هنا تلقائياً بدون الحاجة لكتابة الهيدر أو الشريط الجانبي من جديد *@
+                @* @RenderBody() = renders the content of each child .cshtml view — core of the layout *@
+                @* Each view puts its content here automatically without rewriting the header or sidebar *@
                 @RenderBody()
             </main>
         </div>
     </div>
 
-    @* مكتبة Bootstrap JS مع Popper (للنوافذ المنبثقة والقوائم المنسدلة) *@
+    @* Bootstrap JS library with Popper (for modals and dropdowns) *@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    @* ملف JS مخصص للوحة التحكم *@
+    @* Custom JS file for the admin dashboard *@
     <script src="~/js/admin.js" asp-append-version="true"></script>
-    @* @await RenderSectionAsync("Scripts", required: false) = تُدرج هنا السكريبتات الإضافية *@
-    @* التي تُعرِّفها أي صفحة باستخدام @section Scripts { ... } — required: false تعني اختيارية *@
+    @* @await RenderSectionAsync("Scripts", required: false) = renders optional page scripts defined in child views *@
+    @* Child views declare them using @section Scripts { ... } — required: false means optional *@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

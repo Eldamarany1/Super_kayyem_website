@@ -55,6 +55,34 @@
   margin-bottom: 16px;
 }
 
+/* Age Filter Dropdown */
+.age-filter-box {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.age-dropdown {
+  max-width: 260px;
+  padding: 8px 16px;
+  border-radius: var(--border-radius-full, 9999px);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary, #ffffff);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.age-dropdown:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
 /* ── Results count bar ──────────────────────────────────────── */
 .library-results-count {
   color: var(--text-secondary);
