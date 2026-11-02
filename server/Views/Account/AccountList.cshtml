@@ -88,9 +88,16 @@
                                 <!-- Customer name and avatar -->
                                 <td class="py-3 px-3">
                                     <div class="d-flex align-items-center gap-2">
-                                        <div class="rounded-2 bg-secondary bg-opacity-25 text-info d-flex align-items-center justify-content-center p-2" style="width: 38px; height: 38px;">
-                                            <i class="bi bi-person-fill fs-5"></i>
-                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(account.ProfilePictureUrl))
+                                        {
+                                            <img src="@account.ProfilePictureUrl" alt="@account.FirstName" class="rounded-circle object-fit-cover border border-info border-opacity-25" style="width: 38px; height: 38px;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="rounded-2 bg-secondary bg-opacity-25 text-info d-flex align-items-center justify-content-center p-2" style="width: 38px; height: 38px;">
+                                                <i class="bi bi-person-fill fs-5"></i>
+                                            </div>
+                                        }
                                         <span class="fw-bold text-light">@account.FirstName @account.LastName</span>
                                     </div>
                                 </td>

@@ -4,6 +4,7 @@
 // Inherits from BaseEntity to use: Id, CreatedAt, IsDeleted...
 // ============================================================
 
+using System.ComponentModel.DataAnnotations.Schema;
 // Import MongoDB.EntityFrameworkCore to use [Collection] attribute
 using MongoDB.EntityFrameworkCore;
 
@@ -23,6 +24,20 @@ namespace SuperKayyem.Models
         public string Password { get; set; } = null!;
         public DateTime DateOfBirth { get; set; }
         public string Gender { get; set; } = null!;
+
+        // User's profile picture URL (stored in Cloudinary or avatar preset)
+        public string? ProfilePictureUrl { get; set; }
+
+        // Compatibility alias for frontend components
+        [NotMapped]
+        public string? AvatarUrl
+        {
+            get => ProfilePictureUrl;
+            set => ProfilePictureUrl = value;
+        }
+
+        // List of owned/purchased story IDs (nullable so existing MongoDB documents without this field don't throw)
+        public List<int>? OwnedStoryIds { get; set; } = [];
 
         // List of the customer's children — each child is of type Child (defined below)
         // = []: Initializes an empty list to prevent NullReferenceException

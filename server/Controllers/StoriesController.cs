@@ -247,4 +247,75 @@ public class StoriesController : ControllerBase
         _logger.LogInformation("Story with ID {Id} deleted successfully", id);
         return NoContent();
     }
+
+    // POST: api/stories/5/rate
+    [HttpPost("{id}/rate")]
+    public async Task<IActionResult> Rate(int id, [FromBody] RateStoryDto rateDto, CancellationToken ct = default)
+    {
+        if (rateDto == null || rateDto.Rating < 1 || rateDto.Rating > 5)
+        {
+            return BadRequest(new { error = "التقييم يجب أن يكون بين 1 و 5 نجوم" });
+        }
+
+        var story = await _context.Stories.FirstOrDefaultAsync(s => s.Id == id, ct);
+        if (story == null)
+        {
+            return NotFound(new { error = "القصة غير موجودة" });
+        }
+
+        var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == rateDto.AccountId, ct);
+        if (account == null)
+        {
+            return Unauthorized(new { error = "يجب تسجيل الدخول لتقييم القصة" });
+        }
+
+        // Verify story ownership: account owns it if story ID is in account.OwnedStoryIds
+        account.OwnedStoryIds ??= [];
+        if (!account.OwnedStoryIds.Contains(id))
+        {
+            return BadRequest(new { error = "يمكنك فقط تقييم القصص التي تمتلكها في مكتبتك" });
+        }
+
+        story.Ratings ??= [];
+        var existingRating = story.Ratings.FirstOrDefault(r => r.AccountId == rateDto.AccountId);
+        if (existingRating != null)
+        {
+            existingRating.Score = rateDto.Rating;
+            existingRating.AccountName = $"{account.FirstName} {account.LastName}".Trim();
+            existingRating.CreatedAt = DateTime.UtcNow;
+        }
+        else
+        {
+            story.Ratings.Add(new StoryRating
+            {
+                AccountId = rateDto.AccountId,
+                AccountName = $"{account.FirstName} {account.LastName}".Trim(),
+                Score = rateDto.Rating,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        // Recalculate average rating rounded to 1 decimal place
+        story.Rating = Math.Round(story.Ratings.Average(r => r.Score), 1);
+        story.IsUpdated = true;
+        story.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(ct);
+        _logger.LogInformation("Story {Id} rated {Rating} by Account {AccountId}. New average: {Avg}", id, rateDto.Rating, rateDto.AccountId, story.Rating);
+
+        return Ok(new
+        {
+            storyId = story.Id,
+            rating = story.Rating,
+            ratingCount = story.Ratings.Count,
+            userRating = rateDto.Rating,
+            message = "تم تسجيل تقييمك بنجاح"
+        });
+    }
+}
+
+public class RateStoryDto
+{
+    public int AccountId { get; set; }
+    public double Rating { get; set; }
 }
