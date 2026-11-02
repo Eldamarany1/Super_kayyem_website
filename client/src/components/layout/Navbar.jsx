@@ -45,12 +45,16 @@ export function Navbar() {
               </Link>
             </li>
             <li className="nav-auth-mobile">
+              <Link to="/login" className="btn btn-sec nav-auth-btn-mobile" onClick={closeMenu}>تسجيل الدخول</Link>
+              <Link to="/signup" className="btn btn-primary nav-auth-btn-mobile" onClick={closeMenu}>إنشاء حساب</Link>
               <ThemeToggle />
             </li>
           </ul>
 
-          {/* Desktop Controls: Theme toggle */}
+          {/* Desktop Controls: Auth and Theme */}
           <div className="nav-controls">
+                      <Link to="/login" className="btn btn-sec nav-auth-btn" onClick={closeMenu}>تسجيل الدخول</Link>
+            <Link to="/signup" className="btn btn-primary nav-auth-btn" onClick={closeMenu}>إنشاء حساب</Link>
             <ThemeToggle />
           </div>
 

@@ -2,6 +2,7 @@
 //  LibraryPage.jsx — متجر ومكتبة سوبر قيم (عامة للجميع)
 // ============================================================
 import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { STORIES as fallbackStories } from '../data/stories';
 import StoryCard from '../components/ui/StoryCard';
 import SkeletonCard from '../components/ui/SkeletonCard';
@@ -72,6 +73,10 @@ export function LibraryPage() {
         <p className="library-hero__subtitle">
           اكتشف قصصاً تغرس أسمى القيم والأخلاق — اختر قصتك واقرأ فوراً
         </p>
+        <div style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
+          <Link to="/login" className="btn btn-outline" style={{ borderColor: 'white', color: 'white', borderRadius: 'var(--border-radius-full)' }}>دخول</Link>
+          <Link to="/signup" className="btn btn-primary" style={{ background: 'var(--primary-yellow)', color: '#1e293b', border: 'none', borderRadius: 'var(--border-radius-full)' }}>حساب جديد</Link>
+        </div>
       </div>
 
       <div className="container">

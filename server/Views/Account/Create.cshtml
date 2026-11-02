@@ -1,0 +1,82 @@
+@* هذه الصفحة تعرض نموذج إنشاء حساب عميل جديد *@
+@* النموذج (Model) هو كائن Account فارغ لملء بياناته *@
+@model SuperKayyem.Models.Account
+
+@{
+    ViewData["Title"] = "إضافة عميل جديد";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="container-fluid py-4 bg-dark min-vh-100" data-bs-theme="dark" dir="rtl">
+    <div class="container" style="max-width: 900px;">
+
+        <!-- شريط العنوان والرجوع -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-white mb-1">إضافة عميل جديد</h3>
+                <p class="text-secondary small mb-0">أدخل البيانات الأساسية لإنشاء حساب عميل جديد في المنصة</p>
+            </div>
+            @* asp-action="AccountList" = ينشئ رابط للعودة لصفحة قائمة العملاء *@
+            <a asp-action="AccountList" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 rounded-3">
+                <i class="bi bi-arrow-right"></i>
+                <span>إلغاء والعودة</span>
+            </a>
+        </div>
+
+        @* asp-action="Create" = يُرسل النموذج إلى دالة Create في AccountController بطريقة POST *@
+        <form asp-action="Create" method="post">
+
+            <!-- 1. بيانات العميل الأساسية -->
+            <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 p-4 shadow-sm mb-4">
+                <h5 class="fw-bold text-white border-bottom border-secondary border-opacity-25 pb-3 mb-3 d-flex align-items-center gap-2">
+                    <i class="bi bi-person-plus text-info"></i>
+                    <span>البيانات الشخصية</span>
+                </h5>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        @* asp-for="FirstName" على label ينشئ تلقائياً for="FirstName" ويربطه بالحقل *@
+                        <label asp-for="FirstName" class="form-label text-secondary small">الاسم الأول</label>
+                        <input asp-for="FirstName" class="form-control bg-dark border-secondary border-opacity-50 text-light" placeholder="مثال: أحمد" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="LastName" class="form-label text-secondary small">اسم العائلة</label>
+                        <input asp-for="LastName" class="form-control bg-dark border-secondary border-opacity-50 text-light" placeholder="مثال: الشناوي" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label text-secondary small">البريد الإلكتروني</label>
+                        <input asp-for="Email" type="email" class="form-control bg-dark border-secondary border-opacity-50 text-light" placeholder="مثال: ahmed@example.com" required />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="DateOfBirth" class="form-label text-secondary small">تاريخ الميلاد</label>
+                        <input asp-for="DateOfBirth" type="date" class="form-control bg-dark border-secondary border-opacity-50 text-light" required />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="Gender" class="form-label text-secondary small">النوع</label>
+                        <select asp-for="Gender" class="form-select bg-dark border-secondary border-opacity-50 text-light">
+                            <option value="ذكر">ذكر</option>
+                            <option value="أنثى">أنثى</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- أزرار الحفظ والإلغاء -->
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="AccountList" class="btn btn-outline-secondary px-4 py-2 rounded-3">إلغاء</a>
+                @* type="submit" = هذا الزر يُرسل النموذج إلى Controller عند الضغط *@
+                <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold rounded-3 shadow-sm">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>إنشاء الحساب</span>
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+

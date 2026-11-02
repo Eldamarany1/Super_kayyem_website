@@ -1,0 +1,159 @@
+/* ============================================================
+   Auth.css — Login and Signup pages
+   ============================================================ */
+
+.auth-page {
+  min-height: calc(100vh - var(--nav-height));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-hero);
+  padding: 2rem 1rem;
+}
+
+.auth-card {
+  background: var(--bg-card);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 3rem 2rem;
+  width: 100%;
+  max-width: 480px;
+  border: 1px solid var(--border-color);
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.auth-title {
+  color: var(--text-primary);
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+}
+
+.auth-subtitle {
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.auth-form .form-label {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.auth-form .form-control {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: var(--border-radius-sm);
+  padding: 0.75rem 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-form .form-control:focus {
+  background-color: var(--bg-secondary);
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+  color: var(--text-primary);
+}
+
+.auth-form .btn-primary {
+  background-color: var(--primary-blue);
+  border: none;
+  border-radius: var(--border-radius-full);
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.auth-form .btn-primary:hover {
+  background-color: var(--primary-blue-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 2rem;
+  color: var(--text-secondary);
+}
+
+.auth-footer a {
+  color: var(--primary-blue);
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.auth-footer a:hover {
+  color: var(--primary-blue-hover);
+  text-decoration: underline;
+}
+
+.form-step {
+  animation: slideInFade 0.4s ease forwards;
+  will-change: transform, opacity;
+}
+
+.child-card {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color) !important;
+}
+
+.child-add-btn {
+  border: 1px dashed var(--primary-blue);
+  color: var(--primary-blue);
+  background: transparent;
+  border-radius: var(--border-radius-sm);
+  padding: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.child-add-btn:hover {
+  background-color: rgba(37, 99, 235, 0.05);
+  border-color: var(--primary-blue-hover);
+  color: var(--primary-blue-hover);
+}
+
+.btn-sec {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  font-weight: 700;
+  border-radius: var(--border-radius-full);
+  padding: 0.75rem 1.5rem;
+  transition: all 0.25s ease;
+}
+
+.btn-sec:hover {
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFade {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="warmBg6" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fdf4ff" />
+      <stop offset="50%" stop-color="#fae8ff" />
+      <stop offset="100%" stop-color="#f5d0fe" />
+    </linearGradient>
+    <linearGradient id="potGrad6" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c2410c" />
+      <stop offset="50%" stop-color="#ea580c" />
+      <stop offset="100%" stop-color="#9a3412" />
+    </linearGradient>
+    <radialGradient id="flowerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f472b6" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#a855f7" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#warmBg6)" />
+  <!-- Sparkles of Wisdom in Background -->
+  <polygon points="120,50 123,56 130,57 124,62 126,69 120,65 114,69 116,62 110,57 117,56" fill="#a855f7" opacity="0.6" />
+  <polygon points="280,60 282,64 287,65 283,69 284,74 280,71 276,74 277,69 273,65 278,64" fill="#ec4899" opacity="0.6" />
+  <polygon points="90,120 92,124 97,125 93,129 94,134 90,131 86,134 87,129 83,125 88,124" fill="#fbbf24" opacity="0.7" />
+  <polygon points="310,130 312,134 317,135 313,139 314,144 310,141 306,144 307,139 303,135 308,134" fill="#fbbf24" opacity="0.7" />
+  <!-- Plant Stem & Leaves -->
+  <path d="M 200,180 Q 195,140 200,95" fill="none" stroke="#16a34a" stroke-width="6" stroke-linecap="round" />
+  <!-- Leaves -->
+  <path d="M 198,150 Q 165,140 160,155 Q 185,165 198,155" fill="#22c55e" />
+  <path d="M 202,125 Q 235,115 240,130 Q 215,140 202,130" fill="#22c55e" />
+  <!-- Magical Flower Glowing -->
+  <circle cx="200" cy="90" r="40" fill="url(#flowerGlow)" />
+  <!-- Petals -->
+  <ellipse cx="200" cy="72" rx="12" ry="18" fill="#c084fc" opacity="0.9" />
+  <ellipse cx="200" cy="108" rx="12" ry="18" fill="#c084fc" opacity="0.9" />
+  <ellipse cx="182" cy="90" rx="18" ry="12" fill="#d8b4fe" opacity="0.9" />
+  <ellipse cx="218" cy="90" rx="18" ry="12" fill="#d8b4fe" opacity="0.9" />
+  <ellipse cx="187" cy="77" rx="14" ry="14" fill="#e879f9" opacity="0.95" />
+  <ellipse cx="213" cy="77" rx="14" ry="14" fill="#e879f9" opacity="0.95" />
+  <ellipse cx="187" cy="103" rx="14" ry="14" fill="#e879f9" opacity="0.95" />
+  <ellipse cx="213" cy="103" rx="14" ry="14" fill="#e879f9" opacity="0.95" />
+  <!-- Flower Center -->
+  <circle cx="200" cy="90" r="13" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" />
+  <!-- Flower Sparkle -->
+  <circle cx="197" cy="87" r="3" fill="#ffffff" />
+  <!-- Clay Pot -->
+  <polygon points="165,185 235,185 225,245 175,245" fill="url(#potGrad6)" stroke="#7c2d12" stroke-width="2" />
+  <rect x="160" y="175" width="80" height="14" rx="4" fill="#ea580c" stroke="#7c2d12" stroke-width="2" />
+  <!-- Soil in Pot -->
+  <ellipse cx="200" cy="177" rx="35" ry="4" fill="#451a03" />
+  <!-- Arabic Badge -->
+  <rect x="110" y="245" width="180" height="34" rx="17" fill="rgba(126, 34, 206, 0.88)" stroke="#f5d0fe" stroke-width="1.5" />
+  <text x="200" y="267" text-anchor="middle" fill="#ffffff" font-family="'Cairo', sans-serif" font-size="14" font-weight="bold">بذرة الحكمة العجيبة</text>
+</svg>

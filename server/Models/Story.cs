@@ -1,21 +1,22 @@
 namespace SuperKayyem.Models;
 
-public class StoryPageItem
-{
-    public int PageNum { get; set; }
-    public string Content { get; set; } = string.Empty;
-}
+using Microsoft.EntityFrameworkCore;
+using MongoDB.EntityFrameworkCore;
 
+// Maps this entity to the "Stories" collection in MongoDB
+[Collection("Stories")]
 public class Story
 {
+    // Primary key identifier as integer (used by frontend /api/stories/{id})
     public int Id { get; set; }
+
     public string Title { get; set; } = string.Empty;
+
     public string Slug { get; set; } = string.Empty;
+
     public string Category { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Compatibility alias for Category used by legacy components.
-    /// </summary>
+    // Compatibility alias for Category used by client components
     public string ValueLearned
     {
         get => Category;
@@ -23,14 +24,16 @@ public class Story
     }
 
     public string TargetAgeGroup { get; set; } = string.Empty;
+
     public string Description { get; set; } = string.Empty;
+
     public decimal Price { get; set; }
+
     public double Rating { get; set; }
+
     public string CoverImage { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Compatibility alias for CoverImage used by legacy components.
-    /// </summary>
+    // Compatibility alias for CoverImage used by client components
     public string CoverImageUrl
     {
         get => CoverImage;
@@ -38,5 +41,27 @@ public class Story
     }
 
     public int PageCount { get; set; }
-    public List<StoryPageItem> Pages { get; set; } = new();
+
+    // Collection of story pages embedded as owned entities
+    public List<StoryPageItem> Pages { get; set; } = [];
+
+    // Audit and soft-delete properties
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public bool IsDeleted { get; set; } = false;
+
+    public DateTime? DeletedAt { get; set; }
+
+    public bool IsUpdated { get; set; } = false;
+
+    public DateTime? UpdatedAt { get; set; }
+}
+
+// Owned entity configuration for story pages embedded inside Story
+[Owned]
+public class StoryPageItem
+{
+    public int PageNum { get; set; }
+
+    public string Content { get; set; } = string.Empty;
 }

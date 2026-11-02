@@ -1,0 +1,49 @@
+@* ============================================================
+   Delete.cshtml — صفحة تأكيد حذف قصة
+   @model Story: القصة المراد حذفها القادمة من AdminController.Delete(int id) [GET]
+   عند الضغط على "احذف" يُرسَل نموذج POST إلى AdminController.DeleteConfirmed(int id)
+   ============================================================ *@
+@model Story
+@{
+    ViewData["Title"] = $"حذف: {Model.Title}";
+}
+
+<div class="delete-card">
+    <div class="delete-warning">
+        <span class="warning-icon">⚠️</span>
+        <h2>هل أنت متأكد من حذف هذه القصة؟</h2>
+        <p>لا يمكن التراجع عن هذا الإجراء.</p>
+    </div>
+
+    @* عرض ملخص بيانات القصة قبل تأكيد الحذف *@
+    <div class="detail-grid">
+        <div class="detail-item">
+            <label>العنوان</label>
+            <span>@Model.Title</span>
+        </div>
+        <div class="detail-item">
+            <label>الفئة</label>
+            <span class="category-badge">@Model.Category</span>
+        </div>
+        <div class="detail-item">
+            <label>السعر</label>
+            <span>@Model.Price.ToString("F0") EGP</span>
+        </div>
+        <div class="detail-item">
+            <label>التقييم</label>
+            <span>⭐ @Model.Rating.ToString("F1")</span>
+        </div>
+    </div>
+
+    @* asp-action="Delete" مع method="post": يستدعي DeleteConfirmed في الـ Controller
+       لأن [ActionName("Delete")] على DeleteConfirmed يجعلها تستجيب لـ POST /Admin/Delete *@
+    <form asp-action="Delete" method="post">
+        @* AntiForgeryToken: حماية ضرورية لنماذج الحذف والتعديل *@
+        @Html.AntiForgeryToken()
+        <div class="delete-actions">
+            <button type="submit" class="btn-admin btn-admin-danger">🗑️ نعم، احذف القصة</button>
+            @* هذا الرابط لا يُرسِل النموذج — مجرد رابط للعودة للأمان *@
+            <a asp-action="Index" class="btn-admin btn-admin-secondary">↩ إلغاء</a>
+        </div>
+    </form>
+</div>

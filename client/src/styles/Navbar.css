@@ -74,6 +74,14 @@
   gap: 12px;
 }
 
+.nav-auth-btn {
+  padding: 6px 14px;
+  border-radius: var(--border-radius-full);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .hamburger {
   display: none;
   background: none;
@@ -143,8 +151,20 @@
   }
 
   .nav-auth-mobile {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     margin-top: 10px;
+    width: 100%;
+  }
+  
+  .nav-auth-btn-mobile {
+    width: 100%;
+    text-align: center;
+    padding: 8px;
+    border-radius: var(--border-radius-sm);
+    font-weight: 700;
+    text-decoration: none;
   }
 
   .nav-backdrop {

@@ -1,16 +1,27 @@
 using System.Text.Json;
-using SuperKayyem.Services;
+using Microsoft.EntityFrameworkCore;
+using SuperKayyem.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add Controllers with camelCase JSON property naming
-builder.Services.AddControllers()
+// Add MVC Controllers and Views with camelCase JSON serialization
+builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
 
-// Configure CORS for frontend clients (Vite dev server, local preview)
+// Bind MongoDBSettings from configuration
+var mongoSettings = builder.Configuration.GetSection("MongoDBSettings").Get<MongoDBSettings>();
+builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("MongoDBSettings"));
+
+// Register SuperKayyemDbContext using MongoDB EF Core provider
+builder.Services.AddDbContext<SuperKayyemDbContext>(options =>
+    options.UseMongoDB(
+        mongoSettings?.AtlasURI ?? "",
+        mongoSettings?.DatabaseName ?? "SuperKayyemDb"));
+
+// Configure CORS for frontend
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -25,17 +36,23 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Register Application Services
-builder.Services.AddSingleton<IStoryService, StoryService>();
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Admin/Error");
+    app.UseHsts();
+}
+
 app.UseStaticFiles();
 
 app.UseRouting();
 
 app.UseCors("AllowFrontend");
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Admin}/{action=Index}/{id?}");
 
 app.MapControllers();
 
