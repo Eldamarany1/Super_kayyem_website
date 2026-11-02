@@ -8,8 +8,8 @@ namespace SuperKayyem.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // مطلوب لـ ToListAsync, FirstOrDefaultAsync...
-using SuperKayyem.Models;            // مطلوب لنموذجي Account و Child
-using SuperKayyem.Services;          // مطلوب لـ MongoDbContext
+using SuperKayyem.Data;              // مطلوب لـ AccountSeedData
+using SuperKayyem.Models;            // مطلوب لنموذجي Account و Child و SuperKayyemDbContext
 
 /// <summary>
 /// Controller for managing customer accounts and children profiles via Razor views.
@@ -18,13 +18,13 @@ using SuperKayyem.Services;          // مطلوب لـ MongoDbContext
 public class AccountController : Controller
 {
     // _mongoDbContext: الوصول إلى قاعدة البيانات MongoDB
-    private readonly MongoDbContext _mongoDbContext;
+    private readonly SuperKayyemDbContext _mongoDbContext;
 
     // _logger: لتسجيل الأحداث والتحذيرات في سجل التطبيق
     private readonly ILogger<AccountController> _logger;
 
-    // المُنشئ: ASP.NET يحقن MongoDbContext و ILogger تلقائياً عند إنشاء الكائن
-    public AccountController(MongoDbContext mongoDbContext, ILogger<AccountController> logger)
+    // المُنشئ: ASP.NET يحقن SuperKayyemDbContext و ILogger تلقائياً عند إنشاء الكائن
+    public AccountController(SuperKayyemDbContext mongoDbContext, ILogger<AccountController> logger)
     {
         _mongoDbContext = mongoDbContext;
         _logger = logger;
@@ -53,8 +53,75 @@ public class AccountController : Controller
         // جلب جميع حسابات العملاء من MongoDB بشكل غير متزامن
         var accounts = await _mongoDbContext.Accounts.ToListAsync(ct);
 
+        // إذا كانت قاعدة البيانات فارغة، نملأها تلقائياً من البيانات التجريبية
+        if (!accounts.Any())
+        {
+            _logger.LogInformation("Accounts collection is empty. Seeding initial accounts from AccountSeedData");
+            var seedAccounts = AccountSeedData.Accounts;
+            await _mongoDbContext.Accounts.AddRangeAsync(seedAccounts, ct);
+            await _mongoDbContext.SaveChangesAsync(ct);
+            accounts = seedAccounts;
+        }
+
         // تمرير القائمة لصفحة Razor Views/Account/AccountList.cshtml
         return View(accounts);
+    }
+
+    /// <summary>
+    /// Displays the form for creating a new account.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Create()
+    {
+        // Task.Yield(): يحافظ على كون الدالة async
+        await Task.Yield();
+
+        // تمرير نموذج فارغ لصفحة إنشاء حساب جديد
+        return View(new Account());
+    }
+
+    /// <summary>
+    /// Saves the new account to MongoDB asynchronously.
+    /// </summary>
+    // [HttpPost]: يستجيب لإرسال نموذج الإنشاء
+    // [ValidateAntiForgeryToken]: يحمي النموذج من هجمات CSRF
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Account model, CancellationToken ct = default)
+    {
+        // إزالة تحقق Password من ModelState لأنه حقل مخفي قد لا يُرسل
+        ModelState.Remove(nameof(model.Password));
+
+        // التحقق من صحة الحقول قبل الحفظ
+        if (!ModelState.IsValid)
+        {
+            return View(model); // أعد عرض النموذج مع رسائل الخطأ
+        }
+
+        // حساب المعرف التالي تلقائياً
+        var anyAccounts = await _mongoDbContext.Accounts.AnyAsync(ct);
+        int nextId = anyAccounts ? (await _mongoDbContext.Accounts.MaxAsync(a => a.Id, ct)) + 1 : 1;
+        model.Id = nextId;
+
+        // تعيين كلمة مرور افتراضية إذا لم تُرسل
+        if (string.IsNullOrWhiteSpace(model.Password))
+        {
+            model.Password = "password123";
+        }
+
+        // تهيئة قائمة الأطفال إذا كانت فارغة
+        model.Children ??= [];
+
+        // تسجيل تاريخ الإنشاء
+        model.CreatedAt = DateTime.UtcNow;
+
+        // حفظ الحساب الجديد في MongoDB
+        await _mongoDbContext.Accounts.AddAsync(model, ct);
+        await _mongoDbContext.SaveChangesAsync(ct);
+
+        _logger.LogInformation("Account '{FirstName} {LastName}' (ID: {Id}) created.", model.FirstName, model.LastName, model.Id);
+
+        return RedirectToAction(nameof(AccountList));
     }
 
     /// <summary>
@@ -127,7 +194,15 @@ public class AccountController : Controller
         // تحديث قائمة الأطفال فقط إذا أُرسلت — لتجنب حذف القائمة عند عدم إرسالها
         if (model.Children != null)
         {
-            existingAccount.Children = model.Children;
+            if (existingAccount.Children == null)
+            {
+                existingAccount.Children = new List<Child>(model.Children);
+            }
+            else
+            {
+                existingAccount.Children.Clear();
+                existingAccount.Children.AddRange(model.Children);
+            }
         }
 
         // تسجيل أن الحساب تم تعديله

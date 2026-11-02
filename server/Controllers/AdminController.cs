@@ -9,8 +9,7 @@ namespace SuperKayyem.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // مطلوب لـ ToListAsync, FirstOrDefaultAsync...
 using SuperKayyem.Data;              // مطلوب لـ SeedData
-using SuperKayyem.Models;            // مطلوب لنموذج Story
-using SuperKayyem.Services;          // مطلوب لـ MongoDbContext
+using SuperKayyem.Models;            // مطلوب لنموذج Story و SuperKayyemDbContext
 
 /// <summary>
 /// MVC Controller for the Super Kayyem Admin Dashboard and story management views.
@@ -20,13 +19,13 @@ using SuperKayyem.Services;          // مطلوب لـ MongoDbContext
 public class AdminController : Controller
 {
     // _context: الوصول إلى قاعدة البيانات MongoDB
-    private readonly MongoDbContext _context;
+    private readonly SuperKayyemDbContext _context;
 
     // _logger: لتسجيل الأحداث في سجل التطبيق
     private readonly ILogger<AdminController> _logger;
 
-    // المُنشئ: ASP.NET يحقن MongoDbContext و ILogger تلقائياً (Dependency Injection)
-    public AdminController(MongoDbContext context, ILogger<AdminController> logger)
+    // المُنشئ: ASP.NET يحقن SuperKayyemDbContext و ILogger تلقائياً (Dependency Injection)
+    public AdminController(SuperKayyemDbContext context, ILogger<AdminController> logger)
     {
         _context = context;
         _logger = logger;
@@ -119,6 +118,7 @@ public class AdminController : Controller
                 : $"story-{nextId}";
         }
 
+        story.Pages ??= [];
         story.CreatedAt = DateTime.UtcNow;
         await _context.Stories.AddAsync(story, ct);
         await _context.SaveChangesAsync(ct); // الحفظ الفعلي في MongoDB
@@ -192,7 +192,15 @@ public class AdminController : Controller
         // تحديث الصفحات فقط إذا أُرسلت في الطلب
         if (story.Pages != null)
         {
-            existing.Pages = story.Pages;
+            if (existing.Pages == null)
+            {
+                existing.Pages = new List<StoryPageItem>(story.Pages);
+            }
+            else
+            {
+                existing.Pages.Clear();
+                existing.Pages.AddRange(story.Pages);
+            }
         }
 
         existing.IsUpdated = true;

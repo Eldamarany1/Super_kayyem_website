@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="desertSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fdba74" />
+      <stop offset="40%" stop-color="#fed7aa" />
+      <stop offset="100%" stop-color="#fef3c7" />
+    </linearGradient>
+    <linearGradient id="duneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="waterGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0ea5e9" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#desertSky)" />
+  <!-- Golden Sun -->
+  <circle cx="200" cy="80" r="40" fill="#f59e0b" opacity="0.9" />
+  <circle cx="200" cy="80" r="50" fill="#fef08a" opacity="0.4" />
+  <!-- Distant Dunes -->
+  <path d="M -20,180 Q 80,140 200,165 T 420,150 L 420,300 L -20,300 Z" fill="url(#duneGrad)" />
+  <!-- Palm Trees Left -->
+  <g transform="translate(100, 175)">
+    <!-- Trunk -->
+    <path d="M 0,0 Q -15,-45 -5,-90 Q -2,-90 5,-90 Q -5,-45 8,0 Z" fill="#78350f" />
+    <!-- Fronds -->
+    <path d="M -5,-90 Q -40,-110 -65,-95 Q -40,-85 -5,-90" fill="#15803d" />
+    <path d="M -5,-90 Q -30,-125 -10,-130 Q -10,-105 -5,-90" fill="#16a34a" />
+    <path d="M -5,-90 Q 25,-125 35,-110 Q 15,-95 -5,-90" fill="#22c55e" />
+    <path d="M -5,-90 Q 45,-90 60,-75 Q 30,-75 -5,-90" fill="#15803d" />
+    <!-- Dates -->
+    <circle cx="-12" cy="-80" r="4" fill="#b45309" />
+    <circle cx="2" cy="-82" r="4" fill="#b45309" />
+  </g>
+  <!-- Palm Trees Right -->
+  <g transform="translate(300, 185) scale(0.85)">
+    <path d="M 0,0 Q 15,-45 5,-90 Q 2,-90 -5,-90 Q 5,-45 -8,0 Z" fill="#78350f" />
+    <path d="M 5,-90 Q 40,-110 65,-95 Q 40,-85 5,-90" fill="#15803d" />
+    <path d="M 5,-90 Q 30,-125 10,-130 Q 10,-105 5,-90" fill="#16a34a" />
+    <path d="M 5,-90 Q -25,-125 -35,-110 Q -15,-95 5,-90" fill="#22c55e" />
+  </g>
+  <!-- Oasis Water Stream -->
+  <path d="M 0,260 Q 120,210 200,225 T 400,210 L 400,300 L 0,300 Z" fill="url(#waterGrad)" />
+  <ellipse cx="200" cy="245" rx="60" ry="12" fill="#bae6fd" opacity="0.6" />
+  <!-- Water sparkles -->
+  <circle cx="150" cy="240" r="3" fill="#ffffff" />
+  <circle cx="240" cy="235" r="2.5" fill="#ffffff" />
+  <circle cx="290" cy="250" r="2" fill="#ffffff" />
+  <!-- Arabic Badge -->
+  <rect x="110" y="245" width="180" height="34" rx="17" fill="rgba(180, 83, 9, 0.88)" stroke="#fef08a" stroke-width="1.5" />
+  <text x="200" y="267" text-anchor="middle" fill="#ffffff" font-family="'Cairo', sans-serif" font-size="14" font-weight="bold">حارس الواحة الصغير</text>
+</svg>
