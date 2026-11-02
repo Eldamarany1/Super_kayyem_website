@@ -12,6 +12,8 @@ import './App.css';
 import HomePage from './pages/HomePage';
 import LibraryPage from './pages/LibraryPage';
 import StoryPage from './pages/StoryPage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
 
 // Layout Components
 import Navbar from './components/layout/Navbar';
@@ -37,6 +39,8 @@ function AppContent() {
           <Route path="/" element={<HomePage />} />
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/story/:id" element={<StoryPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

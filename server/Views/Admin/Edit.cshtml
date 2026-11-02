@@ -1,0 +1,94 @@
+@* ============================================================
+   Edit.cshtml — نموذج تعديل قصة موجودة
+   @model Story: بيانات القصة القادمة من AdminController.Edit(int id) [GET]
+   ستُرسَل إلى AdminController.Edit(int id, Story) [POST] عند الحفظ
+   ============================================================ *@
+@model Story
+@{
+    @* $"...": String Interpolation — يدمج قيمة C# داخل النص مباشرة *@
+    ViewData["Title"] = $"تعديل: {Model.Title}";
+}
+
+<div class="form-card">
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        @* input hidden لـ Id: ضروري لإرسال معرّف القصة مع النموذج
+           لأن الحقل المخفي لا يظهر للمستخدم لكنه يُرسَل في الطلب *@
+        <input type="hidden" asp-for="Id" />
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label asp-for="Title" class="form-label">العنوان</label>
+                @* asp-for="Title": يملأ الحقل تلقائياً بالعنوان الحالي للقصة *@
+                <input asp-for="Title" class="form-control" required />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Slug" class="form-label">الرابط (Slug)</label>
+                <input asp-for="Slug" class="form-control" dir="ltr" />
+                <small class="form-hint">اتركه فارغاً للإنشاء التلقائي</small>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Category" class="form-label">الفئة (القيمة الأخلاقية)</label>
+                @* asp-for على select: يحدد الخيار المُختار تلقائياً بناءً على قيمة Category في Model *@
+                <select asp-for="Category" class="form-select" required>
+                    <option value="">اختر الفئة...</option>
+                    <option value="التعاون">التعاون</option>
+                    <option value="الشجاعة">الشجاعة</option>
+                    <option value="الصدق">الصدق</option>
+                    <option value="المسؤولية">المسؤولية</option>
+                    <option value="الصداقة">الصداقة</option>
+                    <option value="الصبر">الصبر</option>
+                </select>
+                <span asp-validation-for="Category" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="TargetAgeGroup" class="form-label">الفئة العمرية</label>
+                <input asp-for="TargetAgeGroup" class="form-control" required />
+                <span asp-validation-for="TargetAgeGroup" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Price" class="form-label">السعر (EGP)</label>
+                <input asp-for="Price" type="number" step="0.01" class="form-control" required />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Rating" class="form-label">التقييم (0-5)</label>
+                <input asp-for="Rating" type="number" step="0.1" min="0" max="5" class="form-control" />
+                <span asp-validation-for="Rating" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="PageCount" class="form-label">عدد الصفحات</label>
+                <input asp-for="PageCount" type="number" class="form-control" />
+                <span asp-validation-for="PageCount" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CoverImage" class="form-label">رابط صورة الغلاف</label>
+                <input asp-for="CoverImage" class="form-control" dir="ltr" />
+                <span asp-validation-for="CoverImage" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group form-group-full">
+            <label asp-for="Description" class="form-label">الوصف</label>
+            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-admin btn-admin-primary">💾 حفظ التعديلات</button>
+            <a asp-action="Index" class="btn-admin btn-admin-secondary">↩ إلغاء</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

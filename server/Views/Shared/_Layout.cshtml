@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+@* هذا ملف القالب المشترك (Shared Layout) الذي تستخدمه جميع صفحات لوحة التحكم *@
+@* يحتوي على: الشريط الجانبي (Sidebar) + الهيدر + منطقة المحتوى الرئيسية *@
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @* @ViewData["Title"] = يُجلب من كل صفحة عبر ViewData["Title"] = "..." في بداية الصفحة *@
+    <title>@ViewData["Title"] - سوبر قيّم | لوحة التحكم</title>
+    @* خط Cairo العربي من Google Fonts لتحسين مظهر النص العربي *@
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    @* Bootstrap RTL (Right-to-Left) = نسخة Bootstrap مخصصة للغات من اليمين إلى اليسار *@
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
+    @* ملف CSS مخصص للوحة التحكم — asp-append-version يضيف رقم إصدار لمنع التخزين المؤقت *@
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-brand">
+                <span class="brand-icon">📚</span>
+                <span class="brand-text">سوبر قيّم</span>
+            </div>
+            <nav class="sidebar-nav">
+                @* @Url.Action("Index", "Admin") = ينشئ رابط /Admin/Index ديناميكياً *@
+                @* ViewContext.RouteData.Values["action"] = قراءة اسم الدالة الحالية لتحديد الرابط النشط *@
+                <a href="@Url.Action("Index", "Admin")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                    <span class="link-icon">🏠</span>
+                    <span>لوحة التحكم</span>
+                </a>
+                <a href="@Url.Action("AccountList", "Account")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "AccountList" ? "active" : "")">
+                    <span>عرض حسابات العملاء</span>
+                </a>
+                <a href="@Url.Action("Create", "Admin")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Create" ? "active" : "")">
+                    <span class="link-icon">➕</span>
+                    <span>إضافة قصة</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                @* @DateTime.Now.Year = يعرض السنة الحالية تلقائياً بدون الحاجة لتحديثه يدوياً *@
+                <small>© @DateTime.Now.Year سوبر قيّم</small>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="admin-main">
+            <header class="admin-header">
+                @* زر القائمة يظهر فقط على الشاشات الصغيرة (d-lg-none = مخفي على الشاشات الكبيرة) *@
+                @* onclick يُضيف/يُزيل class "show" من الشريط الجانبي لإظهاره أو إخفائه *@
+                <button class="sidebar-toggle d-lg-none" onclick="document.querySelector('.admin-sidebar').classList.toggle('show')">
+                    ☰
+                </button>
+                @* عنوان الصفحة المُعيَّن في ViewData["Title"] يظهر هنا في الهيدر *@
+                <h1 class="header-title">@ViewData["Title"]</h1>
+            </header>
+            <main class="admin-content">
+                @* @RenderBody() = هنا يُدرج محتوى كل صفحة .cshtml — هذا هو قلب القالب *@
+                @* كل صفحة تُضع محتواها هنا تلقائياً بدون الحاجة لكتابة الهيدر أو الشريط الجانبي من جديد *@
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    @* مكتبة Bootstrap JS مع Popper (للنوافذ المنبثقة والقوائم المنسدلة) *@
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @* ملف JS مخصص للوحة التحكم *@
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+    @* @await RenderSectionAsync("Scripts", required: false) = تُدرج هنا السكريبتات الإضافية *@
+    @* التي تُعرِّفها أي صفحة باستخدام @section Scripts { ... } — required: false تعني اختيارية *@
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

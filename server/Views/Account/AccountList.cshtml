@@ -1,0 +1,222 @@
+@* هذه الصفحة تعرض قائمة جميع العملاء مع إحصائياتهم وبيانات أطفالهم *@
+@* النموذج (Model) هو قائمة من كائنات Account — IEnumerable يعني يمكن التكرار عليها بـ foreach *@
+@model IEnumerable<SuperKayyem.Models.Account>
+
+@{
+    ViewData["Title"] = "إدارة العملاء والأطفال";
+    @* Model?.Count() = عدد العملاء — علامة ? تحمي من الخطأ إذا كانت القائمة فارغة (null) *@
+    var totalAccounts = Model?.Count() ?? 0;
+    @* Sum(...) = جمع عدد الأطفال عبر جميع الحسابات — lambda expression: a => a.Children?.Count ?? 0 *@
+    var totalChildren = Model?.Sum(a => a.Children?.Count ?? 0) ?? 0;
+    @* حساب المتوسط — (int) يحوّل الناتج لعدد صحيح، ToString("0") يُزيل الكسر العشري *@
+    var avgChildren = totalAccounts > 0 ? ((int)totalChildren / totalAccounts).ToString("0") : "0";
+}
+
+<!-- أيقونات Bootstrap -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="container-fluid py-4 bg-dark min-vh-100" data-bs-theme="dark" dir="rtl">
+
+    <!-- 1. كروت الإحصائيات العلوية (Stats Cards) -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 text-center py-4 shadow-sm h-100">
+                <div class="card-body p-0">
+                    @* @totalAccounts = طباعة المتغير المحلي الذي حسبناه في بداية الصفحة *@
+                    <div class="display-6 fw-bold text-info mb-1">@totalAccounts</div>
+                    <div class="text-secondary small fw-semibold">إجمالي العملاء</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 text-center py-4 shadow-sm h-100">
+                <div class="card-body p-0">
+                    <div class="display-6 fw-bold text-info mb-1">@totalChildren</div>
+                    <div class="text-secondary small fw-semibold">إجمالي الأطفال</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 text-center py-4 shadow-sm h-100">
+                <div class="card-body p-0">
+                    <div class="display-6 fw-bold text-info mb-1">@avgChildren</div>
+                    <div class="text-secondary small fw-semibold">متوسط الأطفال لكل عميل</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. رأس القسم وزر الإضافة -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold text-white mb-0">قائمة العملاء</h3>
+    </div>
+
+    <!-- 3. جدول البيانات -->
+    <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 overflow-hidden shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0 text-end">
+                <thead class="table-active border-bottom border-secondary border-opacity-25">
+                    <tr class="text-secondary small">
+                        <th scope="col" class="py-3 px-3 text-center" style="width: 50px;">#</th>
+                        <th scope="col" class="py-3 px-3 text-start">اسم العميل</th>
+                        <th scope="col" class="py-3 px-3 text-start">البريد الإلكتروني</th>
+                        <th scope="col" class="py-3 px-3 text-start">النوع</th>
+                        <th scope="col" class="py-3 px-3 text-start">تاريخ الميلاد</th>
+                        <th scope="col" class="py-3 px-3 text-start">الأطفال المسجلين</th>
+                        <th scope="col" class="py-3 px-3 text-center" style="width: 150px;">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    @* التحقق من أن القائمة غير فارغة قبل عرضها *@
+                    @if (Model != null && Model.Any())
+                    {
+                        @* متغير عداد لترقيم الصفوف — يُزاد بواحد في نهاية كل تكرار *@
+                        int index = 1;
+                        foreach (var account in Model)
+                        {
+                            @* إنشاء معرف فريد لكل صف للتحكم في فتح/إغلاق قائمة الأطفال بـ Bootstrap Collapse *@
+                            @* $"..." = String Interpolation — يدمج account.Id داخل النص لجعل كل ID فريداً *@
+                            var collapseId = $"children-details-{account.Id}";
+                            <tr>
+                                <!-- الترقيم -->
+                                <td class="text-center text-secondary fw-semibold py-3">@index</td>
+
+                                <!-- اسم العميل والأفاتار -->
+                                <td class="py-3 px-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-2 bg-secondary bg-opacity-25 text-info d-flex align-items-center justify-content-center p-2" style="width: 38px; height: 38px;">
+                                            <i class="bi bi-person-fill fs-5"></i>
+                                        </div>
+                                        <span class="fw-bold text-light">@account.FirstName @account.LastName</span>
+                                    </div>
+                                </td>
+
+                                <!-- البريد الإلكتروني -->
+                                <td class="py-3 px-3 text-secondary">@account.Email</td>
+
+                                <!-- نوع العميل -->
+                                <td class="py-3 px-3 text-center">
+                                    @* @(...) = تعبير Razor يحتاج أقواساً لأنه يحتوي على عامل ثلاثي ternary ? : *@
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1 fw-semibold">
+                                        @(account.Gender == "Male" || account.Gender == "ذكر" ? "ذكر" : "أنثى")
+                                    </span>
+                                </td>
+
+                                <!-- تاريخ الميلاد والعمر -->
+                                <td class="py-3 px-3 text-light">
+                                    @* ToString("yyyy/MM/dd") = تنسيق التاريخ بالشكل المطلوب *@
+                                    @account.DateOfBirth.ToString("yyyy/MM/dd")
+                                    <small class="text-secondary ms-1">
+                                        @* حساب العمر بطرح سنة الميلاد من السنة الحالية *@
+                                        (@((DateTime.Now.Year - account.DateOfBirth.Year)) سنة)
+                                    </small>
+                                </td>
+
+                                <!-- بيانات الأطفال -->
+                                <td class="py-3 px-3">
+                                    @if (account.Children != null && account.Children.Any())
+                                    {
+                                        <div class="d-flex flex-wrap gap-1 align-items-center">
+                                            @* .Take(2) = اعرض أول طفلين فقط، والباقي في القائمة المنسدلة *@
+                                            @foreach (var child in account.Children.Take(2))
+                                            {
+                                                <span class="badge rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1 d-inline-flex align-items-center gap-1">
+                                                    @* تحديد أيقونة الجنس حسب قيمة Gender للطفل *@
+                                                    <i class="bi @(child.Gender == "Female" || child.Gender == "أنثى" ? "bi-gender-female" : "bi-gender-male")"></i>
+                                                    @child.Name (@child.Age س)
+                                                </span>
+                                            }
+                                            @* إذا كان عدد الأطفال أكثر من 2، أضف زر "المزيد" *@
+                                            @if (account.Children.Count > 2)
+                                            {
+                                                @* data-bs-toggle="collapse" = خاصية Bootstrap تجعل الزر يفتح/يغلق قسماً آخر *@
+                                                @* data-bs-target="#@collapseId" = يستهدف الصف المخفي أسفل هذا الصف *@
+                                                <button class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill small"
+                                                        type="button"
+                                                        data-bs-toggle="collapse"
+                                                        data-bs-target="#@collapseId"
+                                                        aria-expanded="false">
+                                                    @* @(...) ضرورية هنا لأن التعبير يحتوي على عملية طرح - *@
+                                                    +@(account.Children.Count - 2) المزيد
+                                                </button>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-secondary small">لا يوجد أطفال</span>
+                                    }
+                                </td>
+
+                                <!-- أزرار العمليات الثلاثية المتطابقة مع الصورة -->
+                                <td class="py-3 px-3 text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <!-- زر العرض -->
+                                        @* asp-action="Read" asp-route-id="@account.Id" = ينشئ رابط مثل /Account/Read/5 *@
+                                        <a asp-action="Read" asp-route-id="@account.Id"
+                                           class="btn btn-sm bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-2 p-1 px-2"
+                                           title="عرض">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+
+                                        <!-- زر التعديل -->
+                                        <a asp-action="Update" asp-route-id="@account.Id"
+                                           class="btn btn-sm bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-2 p-1 px-2"
+                                           title="تعديل">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+
+                                        <!-- زر الحذف -->
+                                        <a asp-action="Delete" asp-route-id="@account.Id"
+                                           class="btn btn-sm bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-2 p-1 px-2"
+                                           title="حذف">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- صف منسدل لعرض باقي الأطفال عند الحاجة -->
+                            @* هذا الصف مخفي افتراضياً (class="collapse") ويظهر عند ضغط زر "المزيد" *@
+                            @* id="@collapseId" يربطه بزر المزيد الذي يستهدفه عبر data-bs-target *@
+                            @if (account.Children != null && account.Children.Count > 2)
+                            {
+                                <tr class="collapse" id="@collapseId">
+                                    @* colspan="7" يجعل الخلية تمتد على جميع الأعمدة السبعة *@
+                                    <td colspan="7" class="bg-black bg-opacity-25 px-4 py-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <small class="text-secondary fw-semibold">جميع أطفال العميل:</small>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @* هنا نعرض جميع الأطفال بدون حد — لا .Take() *@
+                                                @foreach (var child in account.Children)
+                                                {
+                                                    @* ?? "غير محدد" = إذا كان Gender فارغاً اعرض نصاً افتراضياً *@
+                                                    <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-50 px-2 py-1">
+                                                        @child.Name | @child.Age سنة | @(child.Gender ?? "غير محدد")
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+
+                            @* زيادة العداد بعد الانتهاء من كل صف *@
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        @* رسالة تظهر عندما لا توجد بيانات في قاعدة البيانات *@
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-secondary">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                لا توجد حسابات عملاء مسجلة حالياً
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

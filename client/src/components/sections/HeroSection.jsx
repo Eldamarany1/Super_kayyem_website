@@ -31,9 +31,17 @@ export function HeroSection({ onExploreClick }) {
             <span>استكشف جميع القصص</span>
           </Link>
 
+          <Link
+            to="/signup"
+            className="hero-section__btn-sec"
+          >
+            أنشئ حساباً مجانياً
+          </Link>
+
           <button
             type="button"
             className="hero-section__btn-sec"
+            style={{ border: 'none', background: 'transparent' }}
             onClick={onExploreClick}
           >
             قصص مختارة أدناه ↓

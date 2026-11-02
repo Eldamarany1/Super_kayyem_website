@@ -1,0 +1,66 @@
+@* ============================================================
+   Details.cshtml — صفحة عرض تفاصيل قصة واحدة
+   @model Story: القصة القادمة من AdminController.Details(int id)
+   ============================================================ *@
+@model Story
+@{
+    @* $"تفاصيل: {Model.Title}": يدمج عنوان القصة في عنوان الصفحة *@
+    ViewData["Title"] = $"تفاصيل: {Model.Title}";
+}
+
+<div class="detail-card">
+    <div class="detail-header">
+        @* عرض الصورة فقط إذا كان رابطها موجوداً وغير فارغ *@
+        @if (!string.IsNullOrEmpty(Model.CoverImage))
+        {
+            <img src="@Model.CoverImage" alt="@Model.Title" class="detail-cover" />
+        }
+        <div class="detail-info">
+            <h2>@Model.Title</h2>
+            <span class="category-badge">@Model.Category</span>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-item">
+            <label>المعرّف</label>
+            <span>@Model.Id</span>
+        </div>
+        <div class="detail-item">
+            <label>الرابط</label>
+            @* dir="ltr": الـ Slug بالإنجليزية — اتجاه الكتابة من اليسار لليمين *@
+            <span dir="ltr">@Model.Slug</span>
+        </div>
+        <div class="detail-item">
+            <label>الفئة العمرية</label>
+            <span>@Model.TargetAgeGroup</span>
+        </div>
+        <div class="detail-item">
+            <label>السعر</label>
+            @* .ToString("F0"): يعرض رقماً صحيحاً بدون أرقام عشرية *@
+            <span>@Model.Price.ToString("F0") EGP</span>
+        </div>
+        <div class="detail-item">
+            <label>التقييم</label>
+            @* .ToString("F1"): يعرض رقماً عشرياً بمنزلة واحدة مثل "4.8" *@
+            <span>⭐ @Model.Rating.ToString("F1") / 5</span>
+        </div>
+        <div class="detail-item">
+            <label>عدد الصفحات</label>
+            <span>@Model.PageCount</span>
+        </div>
+    </div>
+
+    <div class="detail-description">
+        <label>الوصف</label>
+        <p>@Model.Description</p>
+    </div>
+
+    <div class="detail-actions">
+        @* asp-route-id: يمرر Id القصة في رابط الزر مثل /Admin/Edit/3 *@
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-admin btn-admin-primary">✏️ تعديل</a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn-admin btn-admin-danger">🗑️ حذف</a>
+        @* asp-action="Index": رابط للعودة إلى لوحة التحكم بدون id *@
+        <a asp-action="Index" class="btn-admin btn-admin-secondary">↩ العودة</a>
+    </div>
+</div>
