@@ -83,6 +83,39 @@ public class StoriesController : ControllerBase
         return Ok(story);
     }
 
+    // GET: api/stories/{id}/pdf
+    [HttpGet("{id}/pdf")]
+    public async Task<IActionResult> GetStoryPdf(int id, CancellationToken ct = default)
+    {
+        var story = await _context.Stories
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == id, ct);
+
+        if (story == null || string.IsNullOrWhiteSpace(story.PdfUrl))
+        {
+            return NotFound(new { error = "PDF not found for this story" });
+        }
+
+        try
+        {
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync(story.PdfUrl, ct);
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode((int)response.StatusCode, new { error = "Failed to fetch PDF from storage" });
+            }
+
+            var pdfBytes = await response.Content.ReadAsByteArrayAsync(ct);
+            Response.Headers["Content-Disposition"] = $"inline; filename=\"story-{id}.pdf\"";
+            return File(pdfBytes, "application/pdf");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error streaming PDF for story {StoryId}", id);
+            return StatusCode(500, new { error = "Could not stream PDF file" });
+        }
+    }
+
     // POST: api/stories
     [HttpPost]
     public async Task<IActionResult> Add([FromForm] Story story, IFormFile? pdfFile, IFormFile? imageFile, CancellationToken ct = default)
@@ -127,14 +160,26 @@ public class StoriesController : ControllerBase
         if (pdfFile != null && pdfFile.Length > 0)
         {
             using var pdfStream = pdfFile.OpenReadStream();
+            var cleanFileName = Path.GetFileNameWithoutExtension(pdfFile.FileName)
+                .Replace(" ", "_");
+
             var rawParams = new RawUploadParams
             {
                 File = new FileDescription(pdfFile.FileName, pdfStream),
-                Folder = "super_kayyem/pdfs"
+                Folder = "super_kayyem/pdfs",
+                // Explicitly preserve .pdf extension so Cloudinary & browsers recognize it as a PDF document
+                PublicId = $"{cleanFileName}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}.pdf"
             };
 
             var pdfResult = await _cloudinary.UploadAsync(rawParams);
-            story.PdfUrl = pdfResult.SecureUrl.ToString();
+            if (pdfResult.Error != null)
+            {
+                _logger.LogError("Cloudinary PDF upload error: {Error}", pdfResult.Error.Message);
+            }
+            else if (pdfResult.SecureUrl != null)
+            {
+                story.PdfUrl = pdfResult.SecureUrl.ToString();
+            }
         }
 
         await _context.Stories.AddAsync(story, ct);
@@ -198,14 +243,26 @@ public class StoriesController : ControllerBase
         if (pdfFile != null && pdfFile.Length > 0)
         {
             using var pdfStream = pdfFile.OpenReadStream();
+            var cleanFileName = Path.GetFileNameWithoutExtension(pdfFile.FileName)
+                .Replace(" ", "_");
+
             var rawParams = new RawUploadParams
             {
                 File = new FileDescription(pdfFile.FileName, pdfStream),
-                Folder = "super_kayyem/pdfs"
+                Folder = "super_kayyem/pdfs",
+                // Explicitly preserve .pdf extension so Cloudinary & browsers recognize it as a PDF document
+                PublicId = $"{cleanFileName}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}.pdf"
             };
 
             var pdfResult = await _cloudinary.UploadAsync(rawParams);
-            existing.PdfUrl = pdfResult.SecureUrl.ToString();
+            if (pdfResult.Error != null)
+            {
+                _logger.LogError("Cloudinary PDF upload error: {Error}", pdfResult.Error.Message);
+            }
+            else if (pdfResult.SecureUrl != null)
+            {
+                existing.PdfUrl = pdfResult.SecureUrl.ToString();
+            }
         }
 
         if (story.Pages != null)
