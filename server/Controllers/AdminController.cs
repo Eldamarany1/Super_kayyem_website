@@ -173,14 +173,26 @@ public class AdminController : Controller
         if (pdfFile != null && pdfFile.Length > 0)
         {
             using var pdfStream = pdfFile.OpenReadStream();
+            var cleanFileName = Path.GetFileNameWithoutExtension(pdfFile.FileName)
+                .Replace(" ", "_");
+
             var rawParams = new RawUploadParams
             {
                 File = new FileDescription(pdfFile.FileName, pdfStream),
-                Folder = "super_kayyem/pdfs"
+                Folder = "super_kayyem/pdfs",
+                // Explicitly preserve .pdf extension so Cloudinary & browsers recognize it as a PDF document
+                PublicId = $"{cleanFileName}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}.pdf"
             };
 
             var pdfResult = await _cloudinary.UploadAsync(rawParams);
-            story.PdfUrl = pdfResult.SecureUrl.ToString();
+            if (pdfResult.Error != null)
+            {
+                _logger.LogError("Cloudinary PDF upload error: {Error}", pdfResult.Error.Message);
+            }
+            else if (pdfResult.SecureUrl != null)
+            {
+                story.PdfUrl = pdfResult.SecureUrl.ToString();
+            }
         }
 
         await _context.Stories.AddAsync(story, ct);
@@ -270,14 +282,26 @@ public class AdminController : Controller
         if (pdfFile != null && pdfFile.Length > 0)
         {
             using var pdfStream = pdfFile.OpenReadStream();
+            var cleanFileName = Path.GetFileNameWithoutExtension(pdfFile.FileName)
+                .Replace(" ", "_");
+
             var rawParams = new RawUploadParams
             {
                 File = new FileDescription(pdfFile.FileName, pdfStream),
-                Folder = "super_kayyem/pdfs"
+                Folder = "super_kayyem/pdfs",
+                // Explicitly preserve .pdf extension so Cloudinary & browsers recognize it as a PDF document
+                PublicId = $"{cleanFileName}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}.pdf"
             };
 
             var pdfResult = await _cloudinary.UploadAsync(rawParams);
-            existing.PdfUrl = pdfResult.SecureUrl.ToString();
+            if (pdfResult.Error != null)
+            {
+                _logger.LogError("Cloudinary PDF upload error: {Error}", pdfResult.Error.Message);
+            }
+            else if (pdfResult.SecureUrl != null)
+            {
+                existing.PdfUrl = pdfResult.SecureUrl.ToString();
+            }
         }
 
         // Update pages only if sent in the request

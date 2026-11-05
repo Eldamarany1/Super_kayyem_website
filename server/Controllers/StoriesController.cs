@@ -83,6 +83,39 @@ public class StoriesController : ControllerBase
         return Ok(story);
     }
 
+    // GET: api/stories/{id}/pdf
+    [HttpGet("{id}/pdf")]
+    public async Task<IActionResult> GetStoryPdf(int id, CancellationToken ct = default)
+    {
+        var story = await _context.Stories
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == id, ct);
+
+        if (story == null || string.IsNullOrWhiteSpace(story.PdfUrl))
+        {
+            return NotFound(new { error = "PDF not found for this story" });
+        }
+
+        try
+        {
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync(story.PdfUrl, ct);
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode((int)response.StatusCode, new { error = "Failed to fetch PDF from storage" });
+            }
+
+            var pdfBytes = await response.Content.ReadAsByteArrayAsync(ct);
+            Response.Headers["Content-Disposition"] = $"inline; filename=\"story-{id}.pdf\"";
+            return File(pdfBytes, "application/pdf");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error streaming PDF for story {StoryId}", id);
+            return StatusCode(500, new { error = "Could not stream PDF file" });
+        }
+    }
+
     // POST: api/stories
     [HttpPost]
     public async Task<IActionResult> Add([FromForm] Story story, IFormFile? pdfFile, IFormFile? imageFile, CancellationToken ct = default)
@@ -127,14 +160,26 @@ public class StoriesController : ControllerBase
         if (pdfFile != null && pdfFile.Length > 0)
         {
             using var pdfStream = pdfFile.OpenReadStream();
+            var cleanFileName = Path.GetFileNameWithoutExtension(pdfFile.FileName)
+                .Replace(" ", "_");
+
             var rawParams = new RawUploadParams
             {
                 File = new FileDescription(pdfFile.FileName, pdfStream),
-                Folder = "super_kayyem/pdfs"
+                Folder = "super_kayyem/pdfs",
+                // Explicitly preserve .pdf extension so Cloudinary & browsers recognize it as a PDF document
+                PublicId = $"{cleanFileName}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}.pdf"
             };
 
             var pdfResult = await _cloudinary.UploadAsync(rawParams);
-            story.PdfUrl = pdfResult.SecureUrl.ToString();
+            if (pdfResult.Error != null)
+            {
+                _logger.LogError("Cloudinary PDF upload error: {Error}", pdfResult.Error.Message);
+            }
+            else if (pdfResult.SecureUrl != null)
+            {
+                story.PdfUrl = pdfResult.SecureUrl.ToString();
+            }
         }
 
         await _context.Stories.AddAsync(story, ct);
@@ -198,14 +243,26 @@ public class StoriesController : ControllerBase
         if (pdfFile != null && pdfFile.Length > 0)
         {
             using var pdfStream = pdfFile.OpenReadStream();
+            var cleanFileName = Path.GetFileNameWithoutExtension(pdfFile.FileName)
+                .Replace(" ", "_");
+
             var rawParams = new RawUploadParams
             {
                 File = new FileDescription(pdfFile.FileName, pdfStream),
-                Folder = "super_kayyem/pdfs"
+                Folder = "super_kayyem/pdfs",
+                // Explicitly preserve .pdf extension so Cloudinary & browsers recognize it as a PDF document
+                PublicId = $"{cleanFileName}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}.pdf"
             };
 
             var pdfResult = await _cloudinary.UploadAsync(rawParams);
-            existing.PdfUrl = pdfResult.SecureUrl.ToString();
+            if (pdfResult.Error != null)
+            {
+                _logger.LogError("Cloudinary PDF upload error: {Error}", pdfResult.Error.Message);
+            }
+            else if (pdfResult.SecureUrl != null)
+            {
+                existing.PdfUrl = pdfResult.SecureUrl.ToString();
+            }
         }
 
         if (story.Pages != null)
@@ -247,4 +304,75 @@ public class StoriesController : ControllerBase
         _logger.LogInformation("Story with ID {Id} deleted successfully", id);
         return NoContent();
     }
+
+    // POST: api/stories/5/rate
+    [HttpPost("{id}/rate")]
+    public async Task<IActionResult> Rate(int id, [FromBody] RateStoryDto rateDto, CancellationToken ct = default)
+    {
+        if (rateDto == null || rateDto.Rating < 1 || rateDto.Rating > 5)
+        {
+            return BadRequest(new { error = "التقييم يجب أن يكون بين 1 و 5 نجوم" });
+        }
+
+        var story = await _context.Stories.FirstOrDefaultAsync(s => s.Id == id, ct);
+        if (story == null)
+        {
+            return NotFound(new { error = "القصة غير موجودة" });
+        }
+
+        var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Id == rateDto.AccountId, ct);
+        if (account == null)
+        {
+            return Unauthorized(new { error = "يجب تسجيل الدخول لتقييم القصة" });
+        }
+
+        // Verify story ownership: account owns it if story ID is in account.OwnedStoryIds
+        account.OwnedStoryIds ??= [];
+        if (!account.OwnedStoryIds.Contains(id))
+        {
+            return BadRequest(new { error = "يمكنك فقط تقييم القصص التي تمتلكها في مكتبتك" });
+        }
+
+        story.Ratings ??= [];
+        var existingRating = story.Ratings.FirstOrDefault(r => r.AccountId == rateDto.AccountId);
+        if (existingRating != null)
+        {
+            existingRating.Score = rateDto.Rating;
+            existingRating.AccountName = $"{account.FirstName} {account.LastName}".Trim();
+            existingRating.CreatedAt = DateTime.UtcNow;
+        }
+        else
+        {
+            story.Ratings.Add(new StoryRating
+            {
+                AccountId = rateDto.AccountId,
+                AccountName = $"{account.FirstName} {account.LastName}".Trim(),
+                Score = rateDto.Rating,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        // Recalculate average rating rounded to 1 decimal place
+        story.Rating = Math.Round(story.Ratings.Average(r => r.Score), 1);
+        story.IsUpdated = true;
+        story.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(ct);
+        _logger.LogInformation("Story {Id} rated {Rating} by Account {AccountId}. New average: {Avg}", id, rateDto.Rating, rateDto.AccountId, story.Rating);
+
+        return Ok(new
+        {
+            storyId = story.Id,
+            rating = story.Rating,
+            ratingCount = story.Ratings.Count,
+            userRating = rateDto.Rating,
+            message = "تم تسجيل تقييمك بنجاح"
+        });
+    }
+}
+
+public class RateStoryDto
+{
+    public int AccountId { get; set; }
+    public double Rating { get; set; }
 }

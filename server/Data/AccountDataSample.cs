@@ -27,6 +27,8 @@ namespace SuperKayyem.Data
                     // new DateTime(year, month, day): creates a birth date
                     DateOfBirth = new DateTime(1988, 5, 14),
                     Gender = "ذكر",
+                    ProfilePictureUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80",
+                    OwnedStoryIds = new List<int> { 1, 2, 3, 4 },
                     Children = new List<Child>
                     {
                         new Child { Id = 101, Name = "عمر", Age = 6, Gender = "ذكر" },
@@ -43,6 +45,8 @@ namespace SuperKayyem.Data
                     Password = "password123",
                     DateOfBirth = new DateTime(1992, 11, 23),
                     Gender = "أنثى",
+                    ProfilePictureUrl = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80",
+                    OwnedStoryIds = new List<int> { 1, 2 },
                     Children = new List<Child>
                     {
                         new Child { Id = 103, Name = "يوسف", Age = 5, Gender = "ذكر" }
@@ -58,6 +62,8 @@ namespace SuperKayyem.Data
                     Password = "password123",
                     DateOfBirth = new DateTime(1985, 3, 10),
                     Gender = "ذكر",
+                    ProfilePictureUrl = "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80",
+                    OwnedStoryIds = new List<int> { 1, 3, 5 },
                     Children = new List<Child>
                     {
                         new Child { Id = 104, Name = "نور", Age = 9, Gender = "أنثى" },
@@ -75,6 +81,8 @@ namespace SuperKayyem.Data
                     Password = "password123",
                     DateOfBirth = new DateTime(1995, 8, 19),
                     Gender = "أنثى",
+                    ProfilePictureUrl = "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80",
+                    OwnedStoryIds = new List<int> { 2, 4, 6 },
                     Children = new List<Child>
                     {
                         new Child { Id = 107, Name = "آدم", Age = 3, Gender = "ذكر" }
@@ -90,6 +98,8 @@ namespace SuperKayyem.Data
                     Password = "password123",
                     DateOfBirth = new DateTime(1990, 1, 5),
                     Gender = "ذكر",
+                    ProfilePictureUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+                    OwnedStoryIds = new List<int> { 1, 2, 3, 4, 5, 6 },
                     Children = new List<Child>
                     {
                         new Child { Id = 108, Name = "جودي", Age = 7, Gender = "أنثى" },
@@ -106,6 +116,8 @@ namespace SuperKayyem.Data
                     Password = "password123",
                     DateOfBirth = new DateTime(1993, 7, 30),
                     Gender = "أنثى",
+                    ProfilePictureUrl = "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80",
+                    OwnedStoryIds = new List<int> { 1 },
                     Children = new List<Child>() // No children
                 }
             };

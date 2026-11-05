@@ -56,19 +56,29 @@
 
                 <!-- Quick summary card -->
                 <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 text-center p-4 shadow-sm mb-4">
-                    <div class="rounded-circle bg-secondary bg-opacity-25 text-info d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
-                        <i class="bi bi-person-circle display-4"></i>
-                    </div>
+                    @if (!string.IsNullOrWhiteSpace(Model.ProfilePictureUrl))
+                    {
+                        <img src="@Model.ProfilePictureUrl" alt="@Model.FirstName" class="rounded-circle border border-info border-opacity-50 object-fit-cover mx-auto mb-3 shadow" style="width: 80px; height: 80px;" />
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-secondary bg-opacity-25 text-info d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                            <i class="bi bi-person-circle display-4"></i>
+                        </div>
+                    }
                     <h5 class="fw-bold text-white mb-1">@Model.FirstName @Model.LastName</h5>
                     <p class="text-secondary small mb-3">@Model.Email</p>
 
-                    <div class="d-flex justify-content-center gap-2">
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
                         @* @(...) required because the expression contains logical OR || and ternary operator ? : *@
                         <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-3 py-2">
                             الجنس: @(Model.Gender == "Male" || Model.Gender == "ذكر" ? "ذكر" : "أنثى")
                         </span>
                         <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-2">
                             العمر: @clientAge سنة
+                        </span>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2">
+                            قصص ممتلكة: @(Model.OwnedStoryIds?.Count ?? 0)
                         </span>
                     </div>
                 </div>

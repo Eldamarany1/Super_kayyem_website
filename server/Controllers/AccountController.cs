@@ -6,10 +6,13 @@
 
 namespace SuperKayyem.Controllers;
 
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // Required for ToListAsync, FirstOrDefaultAsync...
 using SuperKayyem.Data;              // Required for AccountSeedData
 using SuperKayyem.Models;            // Required for Account, Child, and SuperKayyemDbContext
+using Account = SuperKayyem.Models.Account;
 
 /// <summary>
 /// Controller for managing customer accounts and children profiles via Razor views.
@@ -23,11 +26,15 @@ public class AccountController : Controller
     // _logger: Logs events and warnings in the application log
     private readonly ILogger<AccountController> _logger;
 
-    // Constructor: ASP.NET injects SuperKayyemDbContext and ILogger automatically via Dependency Injection
-    public AccountController(SuperKayyemDbContext mongoDbContext, ILogger<AccountController> logger)
+    // _cloudinary: Cloudinary client for uploading profile pictures
+    private readonly Cloudinary _cloudinary;
+
+    // Constructor: ASP.NET injects SuperKayyemDbContext, ILogger, and Cloudinary automatically via Dependency Injection
+    public AccountController(SuperKayyemDbContext mongoDbContext, ILogger<AccountController> logger, Cloudinary cloudinary)
     {
         _mongoDbContext = mongoDbContext;
         _logger = logger;
+        _cloudinary = cloudinary;
     }
 
     /// <summary>
@@ -63,6 +70,21 @@ public class AccountController : Controller
             accounts = seedAccounts;
         }
 
+        // Migrate/ensure existing accounts have OwnedStoryIds
+        bool needsSave = false;
+        foreach (var acc in accounts)
+        {
+            if (acc.OwnedStoryIds == null || !acc.OwnedStoryIds.Any())
+            {
+                acc.OwnedStoryIds = [1, 2, 3];
+                needsSave = true;
+            }
+        }
+        if (needsSave)
+        {
+            await _mongoDbContext.SaveChangesAsync(ct);
+        }
+
         // Pass the list to Razor view Views/Account/AccountList.cshtml
         return View(accounts);
     }
@@ -82,12 +104,13 @@ public class AccountController : Controller
 
     /// <summary>
     /// Saves the new account to MongoDB asynchronously.
+    /// Uploads profile picture to Cloudinary if file is provided.
     /// </summary>
     // [HttpPost]: Handles form submission
     // [ValidateAntiForgeryToken]: Protects the form against CSRF attacks
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Account model, CancellationToken ct = default)
+    public async Task<IActionResult> Create(Account model, IFormFile? avatarFile, CancellationToken ct = default)
     {
         // Remove Password validation from ModelState because it is a hidden/optional field on create
         ModelState.Remove(nameof(model.Password));
@@ -109,8 +132,23 @@ public class AccountController : Controller
             model.Password = "password123";
         }
 
-        // Initialize the children list if null
+        // Initialize the children and owned stories lists if null
         model.Children ??= [];
+        model.OwnedStoryIds ??= [1, 2, 3];
+
+        // Upload profile picture to Cloudinary if a file was provided
+        if (avatarFile != null && avatarFile.Length > 0)
+        {
+            using var stream = avatarFile.OpenReadStream();
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(avatarFile.FileName, stream),
+                Folder = "super_kayyem/avatars"
+            };
+
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+            model.ProfilePictureUrl = uploadResult.SecureUrl.ToString();
+        }
 
         // Set creation timestamp
         model.CreatedAt = DateTime.UtcNow;
@@ -160,12 +198,13 @@ public class AccountController : Controller
 
     /// <summary>
     /// Saves the modified account details back to MongoDB asynchronously.
+    /// Uploads new profile picture to Cloudinary if file is provided.
     /// </summary>
     // [HttpPost]: Handles edit form submission
     // [ValidateAntiForgeryToken]: Protects the form against CSRF attacks
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Update(Account model, CancellationToken ct = default)
+    public async Task<IActionResult> Update(Account model, IFormFile? avatarFile, CancellationToken ct = default)
     {
         // Remove Password from ModelState because this form does not edit password
         // Without this line, ModelState fails validation because Password appears empty
@@ -190,6 +229,24 @@ public class AccountController : Controller
         existingAccount.Email = model.Email;
         existingAccount.DateOfBirth = model.DateOfBirth;
         existingAccount.Gender = model.Gender;
+
+        // Upload new profile picture to Cloudinary if provided
+        if (avatarFile != null && avatarFile.Length > 0)
+        {
+            using var stream = avatarFile.OpenReadStream();
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(avatarFile.FileName, stream),
+                Folder = "super_kayyem/avatars"
+            };
+
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+            existingAccount.ProfilePictureUrl = uploadResult.SecureUrl.ToString();
+        }
+        else if (!string.IsNullOrWhiteSpace(model.ProfilePictureUrl))
+        {
+            existingAccount.ProfilePictureUrl = model.ProfilePictureUrl;
+        }
 
         // Update children list only if sent — prevents deleting the list if not provided
         if (model.Children != null)

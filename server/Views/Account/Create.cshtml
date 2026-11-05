@@ -25,7 +25,7 @@
         </div>
 
         @* asp-action="Create" = submits the form to the Create action in AccountController via POST *@
-        <form asp-action="Create" method="post">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
 
             <!-- 1. Basic Customer Information -->
             <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 p-4 shadow-sm mb-4">
@@ -62,6 +62,12 @@
                             <option value="ذكر">ذكر</option>
                             <option value="أنثى">أنثى</option>
                         </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label text-secondary small">الصورة الشخصية (Cloudinary)</label>
+                        <input type="file" name="avatarFile" accept="image/*" class="form-control bg-dark border-secondary border-opacity-50 text-light" />
+                        <div class="form-text text-secondary small">يمكنك رفع صورة شخصية للعميل وسيتم حفظها على Cloudinary مباشرة.</div>
                     </div>
                 </div>
             </div>

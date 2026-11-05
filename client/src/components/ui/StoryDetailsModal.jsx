@@ -5,12 +5,14 @@
 // ============================================================
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import StarRating from './StarRating';
 import '../../styles/StoryDetailsModal.css';
 
 export function StoryDetailsModal({ story, onClose }) {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [liveRating, setLiveRating] = useState(story?.rating);
 
   // Animate in
   useEffect(() => {
@@ -120,7 +122,7 @@ export function StoryDetailsModal({ story, onClose }) {
               </span>
             )}
             <span className="sdm-chip sdm-chip--age">
-              ⭐ {story.rating != null ? `${Number(story.rating).toFixed(1)} / 5` : '—'}
+              ⭐ {liveRating != null ? `${Number(liveRating).toFixed(1)} / 5` : '—'}
             </span>
             {story.pageCount && (
               <span className="sdm-chip sdm-chip--pages">
@@ -137,6 +139,13 @@ export function StoryDetailsModal({ story, onClose }) {
           {story.description && (
             <p className="sdm-description">{story.description}</p>
           )}
+
+          {/* Interactive Rating Component */}
+          <StarRating
+            storyId={story.id}
+            currentRating={liveRating}
+            onRatingUpdated={(newRating) => setLiveRating(newRating)}
+          />
 
           {/* Action: Informational "Read Story Now" link & PDF link if available */}
           <div className="sdm-actions" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

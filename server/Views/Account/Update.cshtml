@@ -27,10 +27,11 @@
         </div>
 
         @* asp-action="Update" = submits the form to Update action in AccountController via POST *@
-        <form asp-action="Update" method="post">
+        <form asp-action="Update" method="post" enctype="multipart/form-data">
             @* Hidden field sending the account ID — needed so Controller knows which record to update *@
             @* asp-for="Id" = automatically binds input to Id property in Model *@
             <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ProfilePictureUrl" />
 
             <!-- 1. Basic Customer Information -->
             <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 p-4 shadow-sm mb-4">
@@ -40,6 +41,27 @@
                 </h5>
 
                 <div class="row g-3">
+                    <!-- Avatar Preview & Change -->
+                    <div class="col-12 mb-2">
+                        <label class="form-label text-secondary small d-block">الصورة الشخصية</label>
+                        <div class="d-flex align-items-center gap-3">
+                            @if (!string.IsNullOrWhiteSpace(Model.ProfilePictureUrl))
+                            {
+                                <img src="@Model.ProfilePictureUrl" alt="@Model.FirstName" class="rounded-circle border border-info border-opacity-50 object-fit-cover shadow-sm" style="width: 64px; height: 64px;" />
+                            }
+                            else
+                            {
+                                <div class="rounded-circle bg-secondary bg-opacity-25 text-info d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                                    <i class="bi bi-person fs-2"></i>
+                                </div>
+                            }
+                            <div class="flex-grow-1">
+                                <input type="file" name="avatarFile" accept="image/*" class="form-control bg-dark border-secondary border-opacity-50 text-light" />
+                                <div class="form-text text-secondary small">اختر ملف صورة جديد إذا رغبت في تغيير الصورة الشخصية الحالية (Cloudinary).</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="col-md-6">
                         @* asp-for="FirstName" on label generates for="FirstName" and links to input *@
                         <label asp-for="FirstName" class="form-label text-secondary small">الاسم الأول</label>

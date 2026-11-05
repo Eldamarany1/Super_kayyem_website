@@ -62,6 +62,9 @@ public class Story
     // Collection of story pages embedded as owned entities
     public List<StoryPageItem> Pages { get; set; } = [];
 
+    // Collection of user ratings embedded as owned entities
+    public List<StoryRating> Ratings { get; set; } = [];
+
     // Audit and soft-delete properties
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -81,4 +84,17 @@ public class StoryPageItem
     public int PageNum { get; set; }
 
     public string Content { get; set; } = string.Empty;
+}
+
+// Owned entity configuration for user ratings embedded inside Story
+[Owned]
+public class StoryRating
+{
+    public int AccountId { get; set; }
+
+    public string? AccountName { get; set; }
+
+    public double Score { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

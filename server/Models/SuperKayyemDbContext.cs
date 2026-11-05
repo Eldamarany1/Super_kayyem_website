@@ -15,10 +15,11 @@ public class SuperKayyemDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Configure Story and its owned Pages subdocuments
+        // Configure Story and its owned Pages and Ratings subdocuments
         modelBuilder.Entity<Story>(entity =>
         {
             entity.OwnsMany(s => s.Pages);
+            entity.OwnsMany(s => s.Ratings);
         });
 
         modelBuilder.Entity<Account>(entity =>
