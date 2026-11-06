@@ -1,0 +1,140 @@
+@model SuperKayyem.Models.Article
+
+@{
+    ViewData["Title"] = "تعديل المقال التوعوي";
+}
+
+<div class="row justify-content-center" dir="rtl">
+    <div class="col-lg-10">
+        <div class="card bg-dark border-secondary border-opacity-25 p-4 p-md-5 rounded-4 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                <div>
+                    <h3 class="fw-bold mb-1">✏️ تعديل المقال: @Model.Title</h3>
+                    <p class="text-secondary small mb-0">تحديث محتوى المقال أو تغيير صورته التوضيحية</p>
+                </div>
+                <a asp-controller="AdminArticles" asp-action="Index" class="btn btn-outline-secondary btn-sm px-3">
+                    🔙 عودة للمقالات
+                </a>
+            </div>
+
+            <form id="articleForm" asp-controller="AdminArticles" asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label asp-for="Title" class="form-label fw-bold">عنوان المقال</label>
+                        <input asp-for="Title" class="form-control bg-black text-light border-secondary" placeholder="عنوان المقال" required />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Category" class="form-label fw-bold">التصنيف التربوي</label>
+                        <select asp-for="Category" class="form-select bg-black text-light border-secondary">
+                            <option value="التربية الإيجابية">التربية الإيجابية</option>
+                            <option value="غرس القيم">غرس القيم</option>
+                            <option value="تعديل السلوك">تعديل السلوك</option>
+                            <option value="الصحة النفسية للطفل">الصحة النفسية للطفل</option>
+                            <option value="عادات القراءة">عادات القراءة</option>
+                            <option value="التوعية الأسرية">التوعية الأسرية</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label asp-for="AuthorName" class="form-label fw-bold">اسم كاتب / ناشر المقال</label>
+                        <input asp-for="AuthorName" class="form-control bg-black text-light border-secondary" required />
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <label for="imageFile" class="form-label fw-bold">تغيير الصورة التوضيحية (اختياري)</label>
+                        <input type="file" name="imageFile" id="imageFile" accept="image/*" class="form-control bg-black text-light border-secondary" />
+                        @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                        {
+                            <div class="mt-2 d-flex align-items-center gap-2">
+                                <span class="text-secondary small">الصورة الحالية:</span>
+                                <img src="@Model.ImageUrl" alt="@Model.Title" style="height: 44px; width: 68px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(255,255,255,0.2);" />
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- 1. Article Introduction -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-info">1️⃣ مقدمة المقال (Introduction)</label>
+                    <textarea asp-for="Introduction" id="IntroInput" style="display:none;"></textarea>
+                    <div class="sk-rte-wrapper">
+                        <div class="sk-rte-toolbar">
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteIntro', 'bold')" title="عريض"><b>B</b> عريض</button>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteIntro', 'italic')" title="مائل"><i>I</i> مائل</button>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteIntro', 'underline')" title="تسطير"><u>U</u> تسطير</button>
+                            <div class="sk-rte-divider"></div>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteIntro', 'formatBlock', 'H2')">عنوان رئيسي (Headline)</button>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteIntro', 'formatBlock', 'H3')">عنوان فرعي (Subheadline)</button>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteIntro', 'formatBlock', 'P')">نص عادي (Normal)</button>
+                            <div class="sk-rte-divider"></div>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteIntro', 'insertUnorderedList')">• قائمة نقطية</button>
+                        </div>
+                        <div id="rteIntro" class="sk-rte-editor" contenteditable="true" data-target="IntroInput"></div>
+                    </div>
+                    <span asp-validation-for="Introduction" class="text-danger small"></span>
+                </div>
+
+                <!-- 2. Article Main Body -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-warning">2️⃣ موضوع المقال التفصيلي (Main Topic & Body)</label>
+                    <textarea asp-for="BodyContent" id="BodyInput" style="display:none;"></textarea>
+                    <div class="sk-rte-wrapper">
+                        <div class="sk-rte-toolbar">
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteBody', 'bold')" title="عريض"><b>B</b> عريض</button>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteBody', 'italic')" title="مائل"><i>I</i> مائل</button>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteBody', 'underline')" title="تسطير"><u>U</u> تسطير</button>
+                            <div class="sk-rte-divider"></div>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteBody', 'formatBlock', 'H2')">عنوان رئيسي (Headline)</button>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteBody', 'formatBlock', 'H3')">عنوان فرعي (Subheadline)</button>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteBody', 'formatBlock', 'P')">نص عادي (Normal)</button>
+                            <div class="sk-rte-divider"></div>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteBody', 'insertUnorderedList')">• قائمة نقطية</button>
+                        </div>
+                        <div id="rteBody" class="sk-rte-editor sk-rte-editor--large" contenteditable="true" data-target="BodyInput"></div>
+                    </div>
+                    <span asp-validation-for="BodyContent" class="text-danger small"></span>
+                </div>
+
+                <!-- 3. Article Conclusion -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-success">3️⃣ خاتمة المقال والتوصيات (Conclusion)</label>
+                    <textarea asp-for="Conclusion" id="ConclusionInput" style="display:none;"></textarea>
+                    <div class="sk-rte-wrapper">
+                        <div class="sk-rte-toolbar">
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteConclusion', 'bold')" title="عريض"><b>B</b> عريض</button>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteConclusion', 'italic')" title="مائل"><i>I</i> مائل</button>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteConclusion', 'underline')" title="تسطير"><u>U</u> تسطير</button>
+                            <div class="sk-rte-divider"></div>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteConclusion', 'formatBlock', 'H2')">عنوان رئيسي (Headline)</button>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteConclusion', 'formatBlock', 'H3')">عنوان فرعي (Subheadline)</button>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteConclusion', 'formatBlock', 'P')">نص عادي (Normal)</button>
+                            <div class="sk-rte-divider"></div>
+                            <button type="button" class="sk-rte-btn" onclick="execRteCommand('rteConclusion', 'insertUnorderedList')">• قائمة نقطية</button>
+                        </div>
+                        <div id="rteConclusion" class="sk-rte-editor" contenteditable="true" data-target="ConclusionInput"></div>
+                    </div>
+                    <span asp-validation-for="Conclusion" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+                    <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">
+                        💾 حفظ التعديلات
+                    </button>
+                    <a asp-controller="AdminArticles" asp-action="Index" class="btn btn-outline-secondary px-4">
+                        إلغاء
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<partial name="_RichTextEditorAssets" />

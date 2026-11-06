@@ -52,6 +52,10 @@
                     <span class="link-icon">➕</span>
                     <span>إضافة قصة</span>
                 </a>
+                <a href="@Url.Action("Index", "AdminArticles")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminArticles" ? "active" : "")">
+                    <span class="link-icon">📝</span>
+                    <span>مقالات توعوية للآباء</span>
+                </a>
                 @if (User.IsInRole("SuperAdmin"))
                 {
                     <a href="@Url.Action("TeamRequests", "Admin")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "TeamRequests" ? "active" : "") d-flex justify-content-between align-items-center">

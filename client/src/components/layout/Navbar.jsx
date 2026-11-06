@@ -73,6 +73,15 @@ export function Navbar() {
                 قصصنا
               </Link>
             </li>
+            <li>
+              <Link
+                to="/articles"
+                className={currentPath.startsWith('/articles') ? 'active' : ''}
+                onClick={closeMenu}
+              >
+                مقالات توعوية للآباء
+              </Link>
+            </li>
 
             {/* Mobile Auth Section */}
             <li className="nav-auth-mobile">
@@ -143,6 +152,9 @@ export function Navbar() {
                     </Link>
                     <Link to="/library" className="nav-dropdown-item" onClick={closeMenu}>
                       📚 مكتبة القصص
+                    </Link>
+                    <Link to="/articles" className="nav-dropdown-item" onClick={closeMenu}>
+                      📝 مقالات الآباء
                     </Link>
                     <hr className="my-1" />
                     <button type="button" className="nav-dropdown-item text-danger" onClick={handleLogout}>
