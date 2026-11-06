@@ -8,7 +8,9 @@ namespace SuperKayyem.Controllers;
 
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore; // Required for ToListAsync, FirstOrDefaultAsync...
 using SuperKayyem.Data;              // Required for AccountSeedData
 using SuperKayyem.Models;            // Required for Account, Child, and SuperKayyemDbContext
@@ -18,6 +20,7 @@ using Account = SuperKayyem.Models.Account;
 /// Controller for managing customer accounts and children profiles via Razor views.
 /// </summary>
 // Inherits from Controller (not ControllerBase) because it returns Razor Views
+[Authorize(Roles = "SuperAdmin,Admin")]
 public class AccountController : Controller
 {
     // _mongoDbContext: Access to the MongoDB database
@@ -35,6 +38,22 @@ public class AccountController : Controller
         _mongoDbContext = mongoDbContext;
         _logger = logger;
         _cloudinary = cloudinary;
+    }
+
+    public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    {
+        if (User.IsInRole("SuperAdmin"))
+        {
+            try
+            {
+                ViewBag.PendingRequestsCount = await _mongoDbContext.AdminUsers.CountAsync(u => u.Status == "Pending");
+            }
+            catch
+            {
+                // Fallback if db is not reachable
+            }
+        }
+        await next();
     }
 
     /// <summary>

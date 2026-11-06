@@ -1,6 +1,7 @@
 namespace SuperKayyem.Models;
 
 using Microsoft.EntityFrameworkCore;
+using MongoDB.EntityFrameworkCore.Extensions;
 
 public class SuperKayyemDbContext : DbContext
 {
@@ -10,6 +11,7 @@ public class SuperKayyemDbContext : DbContext
 
     public DbSet<Story> Stories { get; set; }
     public DbSet<Account> Accounts { get; set; }
+    public DbSet<AdminUser> AdminUsers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -18,13 +20,20 @@ public class SuperKayyemDbContext : DbContext
         // Configure Story and its owned Pages and Ratings subdocuments
         modelBuilder.Entity<Story>(entity =>
         {
+            entity.ToCollection("Stories");
             entity.OwnsMany(s => s.Pages);
             entity.OwnsMany(s => s.Ratings);
         });
 
         modelBuilder.Entity<Account>(entity =>
         {
+            entity.ToCollection("Accounts");
             entity.OwnsMany(a => a.Children);
+        });
+
+        modelBuilder.Entity<AdminUser>(entity =>
+        {
+            entity.ToCollection("admin_users");
         });
     }
 }

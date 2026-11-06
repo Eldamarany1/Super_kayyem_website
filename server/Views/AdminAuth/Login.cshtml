@@ -1,0 +1,99 @@
+@model SuperKayyem.ViewModels.AdminLoginViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "تسجيل الدخول — لوحة تحكم سوبر قيم";
+}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body class="sk-auth-body">
+
+    <!-- Animated Ambient Glow Orbs -->
+    <div class="sk-auth-orb sk-auth-orb--primary"></div>
+    <div class="sk-auth-orb sk-auth-orb--gold"></div>
+    <div class="sk-auth-orb sk-auth-orb--cyan"></div>
+
+    <div class="sk-auth-card">
+        <div class="sk-auth-logo-badge">🚀</div>
+        <h1 class="sk-auth-title">بوابة إدارة سوبر قيم</h1>
+        <p class="sk-auth-subtitle">سجّل دخولك للوصول إلى لوحة التحكم وإدارة المنصة</p>
+
+        @if (TempData["SuccessRequestMessage"] != null)
+        {
+            <div class="alert alert-success border-0 rounded-3 small mb-3" style="background: rgba(16, 185, 129, 0.16); color: #6ee7b7;">
+                @TempData["SuccessRequestMessage"]
+            </div>
+        }
+
+        @if (ViewData["WarningMessage"] != null)
+        {
+            <div class="alert alert-warning border-0 rounded-3 small mb-3" style="background: rgba(245, 158, 11, 0.16); color: #fcd34d;">
+                @ViewData["WarningMessage"]
+            </div>
+        }
+
+        @if (ViewData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger border-0 rounded-3 small mb-3" style="background: rgba(239, 68, 68, 0.16); color: #fca5a5;">
+                @ViewData["ErrorMessage"]
+            </div>
+        }
+
+        <form asp-controller="AdminAuth" asp-action="Login" method="post" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label fw-bold small text-light">البريد الإلكتروني</label>
+                <input asp-for="Email" type="email" class="form-control sk-auth-input" placeholder="example@gmail.com" dir="ltr" required />
+                <span asp-validation-for="Email" class="text-danger small d-block mt-1"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Password" class="form-label fw-bold small text-light">كلمة المرور</label>
+                <div class="sk-auth-input-group">
+                    <input asp-for="Password" type="password" id="loginPassword" class="form-control sk-auth-input ps-5" placeholder="••••••••" dir="ltr" required />
+                    <button type="button" class="sk-password-toggle" onclick="togglePass('loginPassword', this)" title="إظهار/إخفاء كلمة المرور">
+                        👁️
+                    </button>
+                </div>
+                <span asp-validation-for="Password" class="text-danger small d-block mt-1"></span>
+            </div>
+
+            <button type="submit" class="sk-auth-submit-btn">
+                🔐 تسجيل الدخول إلى اللوحة
+            </button>
+        </form>
+
+        <div class="sk-auth-join-box">
+            <p class="text-secondary small mb-2">هل ترغب في الانضمام كمسؤول في فريق سوبر قيم؟</p>
+            <a asp-controller="AdminAuth" asp-action="JoinTeam" class="sk-auth-join-btn">
+                ✨ انضم إلى فريقنا (Join Our Team)
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function togglePass(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+    </script>
+</body>
+</html>

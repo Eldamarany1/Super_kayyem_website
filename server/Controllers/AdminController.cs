@@ -8,7 +8,9 @@ namespace SuperKayyem.Controllers;
 
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore; // Required for ToListAsync, FirstOrDefaultAsync...
 using SuperKayyem.Data;              // Required for SeedData
 using SuperKayyem.Models;            // Required for Story and SuperKayyemDbContext
@@ -18,6 +20,7 @@ using SuperKayyem.Models;            // Required for Story and SuperKayyemDbCont
 /// </summary>
 // No [ApiController] here because this controller returns HTML pages (Views), not JSON
 // Inherits from Controller (not ControllerBase) because it needs View() and RedirectToAction()
+[Authorize(Roles = "SuperAdmin,Admin")]
 public class AdminController : Controller
 {
     // _context: Access to the MongoDB database
@@ -35,6 +38,22 @@ public class AdminController : Controller
         _context = context;
         _logger = logger;
         _cloudinary = cloudinary;
+    }
+
+    public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    {
+        if (User.IsInRole("SuperAdmin"))
+        {
+            try
+            {
+                ViewBag.PendingRequestsCount = await _context.AdminUsers.CountAsync(u => u.Status == "Pending");
+            }
+            catch
+            {
+                // Fallback if db is not reachable
+            }
+        }
+        await next();
     }
 
     /// <summary>
@@ -369,5 +388,107 @@ public class AdminController : Controller
         _logger.LogInformation("Story (ID: {Id}) deleted.", id);
 
         return RedirectToAction(nameof(Index));
+    }
+
+    // =====================================================================
+    // 🛡️ SUPER ADMIN EXCLUSIVE: TEAM & ACCESS REQUESTS MANAGEMENT
+    // =====================================================================
+
+    // GET: /Admin/TeamRequests
+    [HttpGet]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<IActionResult> TeamRequests(CancellationToken ct = default)
+    {
+        await AdminUserSeedData.EnsureSuperAdminSeededAsync(_context, ct);
+
+        var allUsers = await _context.AdminUsers
+            .OrderByDescending(u => u.RequestedAt)
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        ViewBag.PendingRequestsCount = allUsers.Count(u => u.Status == "Pending");
+        return View(allUsers);
+    }
+
+    // POST: /Admin/ApproveRequest
+    [HttpPost]
+    [Authorize(Roles = "SuperAdmin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ApproveRequest(int id, CancellationToken ct = default)
+    {
+        var user = await _context.AdminUsers.FirstOrDefaultAsync(u => u.Id == id, ct);
+        if (user != null && user.Role != "SuperAdmin")
+        {
+            user.Status = "Approved";
+            user.ReviewedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync(ct);
+            TempData["SuccessMessage"] = $"✅ تم قبول طلب ({user.FullName}) ومنحه صلاحية الدخول للوحة التحكم.";
+        }
+        return RedirectToAction(nameof(TeamRequests));
+    }
+
+    // POST: /Admin/RejectRequest
+    [HttpPost]
+    [Authorize(Roles = "SuperAdmin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RejectRequest(int id, CancellationToken ct = default)
+    {
+        var user = await _context.AdminUsers.FirstOrDefaultAsync(u => u.Id == id, ct);
+        if (user != null)
+        {
+            if (user.Role == "SuperAdmin")
+            {
+                TempData["ErrorMessage"] = "⚠️ لا يمكن رفض حساب قائد الفريق (SuperAdmin).";
+            }
+            else
+            {
+                user.Status = "Rejected";
+                user.ReviewedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync(ct);
+                TempData["SuccessMessage"] = $"❌ تم رفض طلب الانضمام الخاص بـ ({user.FullName}).";
+            }
+        }
+        return RedirectToAction(nameof(TeamRequests));
+    }
+
+    // POST: /Admin/RevokeAccess
+    [HttpPost]
+    [Authorize(Roles = "SuperAdmin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RevokeAccess(int id, CancellationToken ct = default)
+    {
+        var user = await _context.AdminUsers.FirstOrDefaultAsync(u => u.Id == id, ct);
+        if (user != null)
+        {
+            if (user.Role == "SuperAdmin")
+            {
+                TempData["ErrorMessage"] = "⚠️ لا يمكن سحب صلاحية قائد الفريق (SuperAdmin).";
+            }
+            else
+            {
+                user.Status = "Revoked";
+                user.ReviewedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync(ct);
+                TempData["SuccessMessage"] = $"🔒 تم سحب صلاحية الدخول من ({user.FullName}) بنجاح.";
+            }
+        }
+        return RedirectToAction(nameof(TeamRequests));
+    }
+
+    // POST: /Admin/RestoreAccess
+    [HttpPost]
+    [Authorize(Roles = "SuperAdmin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RestoreAccess(int id, CancellationToken ct = default)
+    {
+        var user = await _context.AdminUsers.FirstOrDefaultAsync(u => u.Id == id, ct);
+        if (user != null && user.Role != "SuperAdmin")
+        {
+            user.Status = "Approved";
+            user.ReviewedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync(ct);
+            TempData["SuccessMessage"] = $"🔓 تمت إعادة تفعيل صلاحية الدخول لـ ({user.FullName}) بنجاح!";
+        }
+        return RedirectToAction(nameof(TeamRequests));
     }
 }
