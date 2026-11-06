@@ -1,3 +1,22 @@
+@inject SuperKayyem.Models.SuperKayyemDbContext DbContext
+@{
+    int pendingRequestsCount = 0;
+    if (ViewBag.PendingRequestsCount != null)
+    {
+        pendingRequestsCount = (int)ViewBag.PendingRequestsCount;
+    }
+    else if (User.IsInRole("SuperAdmin"))
+    {
+        try
+        {
+            pendingRequestsCount = DbContext.AdminUsers.Count(u => u.Status == "Pending");
+        }
+        catch
+        {
+            // DB count fallback
+        }
+    }
+}
 <!DOCTYPE html>
 @* Shared layout file used by all admin dashboard views *@
 @* Contains: Sidebar + Header + Main content area *@
@@ -5,13 +24,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    @* @ViewData["Title"] = retrieved from each view via ViewData["Title"] = "..." at the top of the page *@
     <title>@ViewData["Title"] - سوبر قيّم | لوحة التحكم</title>
-    @* Cairo Arabic font from Google Fonts to enhance Arabic text appearance *@
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    @* Bootstrap RTL (Right-to-Left) = Bootstrap version designed for right-to-left languages *@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
-    @* Custom CSS file for the admin dashboard — asp-append-version adds a version hash to prevent caching *@
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
 </head>
 <body>
@@ -23,51 +40,95 @@
                 <span class="brand-text">سوبر قيّم</span>
             </div>
             <nav class="sidebar-nav">
-                @* @Url.Action("Index", "Admin") = generates /Admin/Index URL dynamically *@
-                @* ViewContext.RouteData.Values["action"] = reads current action name to highlight active link *@
-                <a href="@Url.Action("Index", "Admin")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                <a href="@Url.Action("Index", "Admin")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
                     <span class="link-icon">🏠</span>
                     <span>لوحة التحكم</span>
                 </a>
-                <a href="@Url.Action("AccountList", "Account")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "AccountList" ? "active" : "")">
+                <a href="@Url.Action("AccountList", "Account")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Account" ? "active" : "")">
+                    <span class="link-icon">👥</span>
                     <span>عرض حسابات العملاء</span>
                 </a>
-                <a href="@Url.Action("Create", "Admin")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Create" ? "active" : "")">
+                <a href="@Url.Action("Create", "Admin")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Create" ? "active" : "")">
                     <span class="link-icon">➕</span>
                     <span>إضافة قصة</span>
                 </a>
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <a href="@Url.Action("TeamRequests", "Admin")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "TeamRequests" ? "active" : "") d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="link-icon">🛡️</span>
+                            <span>فريق الإدارة والطلبات</span>
+                        </div>
+                        @if (pendingRequestsCount > 0)
+                        {
+                            <span class="badge bg-danger rounded-pill">@pendingRequestsCount</span>
+                        }
+                    </a>
+                }
             </nav>
             <div class="sidebar-footer">
-                @* @DateTime.Now.Year = displays the current year automatically without manual updates *@
+                @if (User.Identity is { IsAuthenticated: true })
+                {
+                    <div class="mb-2 pb-2 border-bottom border-secondary border-opacity-25 text-start">
+                        <div class="small fw-bold text-light text-truncate">@(User.Identity.Name ?? "مشرف")</div>
+                        <div class="text-secondary small">@(User.IsInRole("SuperAdmin") ? "👑 قائد الفريق (SuperAdmin)" : "مشرف (Admin)")</div>
+                    </div>
+                }
                 <small>© @DateTime.Now.Year سوبر قيّم</small>
             </div>
         </aside>
 
         <!-- Main Content -->
         <div class="admin-main">
-            <header class="admin-header">
-                @* Menu button displayed only on small screens (d-lg-none = hidden on large screens) *@
-                @* onclick toggles "show" class on sidebar to show or hide it *@
-                <button class="sidebar-toggle d-lg-none" onclick="document.querySelector('.admin-sidebar').classList.toggle('show')">
-                    ☰
-                </button>
-                @* Page title set in ViewData["Title"] appears here in the header *@
-                <h1 class="header-title">@ViewData["Title"]</h1>
+            <header class="admin-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <button class="sidebar-toggle d-lg-none" onclick="document.querySelector('.admin-sidebar').classList.toggle('show')">
+                        ☰
+                    </button>
+                    <h1 class="header-title mb-0">@ViewData["Title"]</h1>
+                </div>
+
+                @if (User.Identity is { IsAuthenticated: true })
+                {
+                    <div class="d-flex align-items-center gap-3">
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <a href="@Url.Action("TeamRequests", "Admin")" class="btn btn-sm btn-outline-warning d-none d-md-inline-flex align-items-center gap-1 position-relative" title="طلبات الانضمام">
+                                <span>🛡️ الطلبات</span>
+                                @if (pendingRequestsCount > 0)
+                                {
+                                    <span class="badge bg-danger rounded-pill">@pendingRequestsCount</span>
+                                }
+                            </a>
+                        }
+
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="d-none d-sm-block text-end">
+                                <div class="fw-bold text-light small" style="line-height: 1.2;">@(User.Identity.Name ?? "مشرف")</div>
+                                <span class="badge @(User.IsInRole("SuperAdmin") ? "bg-primary" : "bg-secondary")" style="font-size: 0.72rem;">
+                                    @(User.IsInRole("SuperAdmin") ? "قائد الفريق (SuperAdmin)" : "مشرف (Admin)")
+                                </span>
+                            </div>
+                        </div>
+
+                        <form asp-controller="AdminAuth" asp-action="Logout" method="post" class="d-inline m-0">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1 px-3 py-1 fw-bold" title="تسجيل الخروج">
+                                <span>🚪</span>
+                                <span class="d-none d-md-inline">تسجيل الخروج</span>
+                            </button>
+                        </form>
+                    </div>
+                }
             </header>
             <main class="admin-content">
-                @* @RenderBody() = renders the content of each child .cshtml view — core of the layout *@
-                @* Each view puts its content here automatically without rewriting the header or sidebar *@
                 @RenderBody()
             </main>
         </div>
     </div>
 
-    @* Bootstrap JS library with Popper (for modals and dropdowns) *@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    @* Custom JS file for the admin dashboard *@
     <script src="~/js/admin.js" asp-append-version="true"></script>
-    @* @await RenderSectionAsync("Scripts", required: false) = renders optional page scripts defined in child views *@
-    @* Child views declare them using @section Scripts { ... } — required: false means optional *@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

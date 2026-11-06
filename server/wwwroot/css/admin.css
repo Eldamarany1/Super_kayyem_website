@@ -498,3 +498,278 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   Admin Auth Gate (Login & Join Our Team) - Animated Dark Navy Theme
+   ========================================================================== */
+
+.sk-auth-body {
+    min-height: 100vh;
+    margin: 0;
+    background: radial-gradient(circle at 15% 20%, #162447 0%, #0b1120 55%, #070b14 100%);
+    color: var(--sk-text-primary, #f1f5f9);
+    font-family: 'Cairo', 'Tajawal', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow-x: hidden;
+    padding: 2rem 1rem;
+}
+
+/* Floating Animated Ambient Orbs */
+.sk-auth-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(85px);
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+    animation: skOrbFloat 12s ease-in-out infinite alternate;
+}
+
+.sk-auth-orb--primary {
+    width: 380px;
+    height: 380px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    top: -90px;
+    right: -80px;
+}
+
+.sk-auth-orb--gold {
+    width: 320px;
+    height: 320px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    bottom: -90px;
+    left: -70px;
+    animation-delay: -5s;
+}
+
+.sk-auth-orb--cyan {
+    width: 240px;
+    height: 240px;
+    background: linear-gradient(135deg, #06b6d4, #6366f1);
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.2;
+    animation-duration: 16s;
+}
+
+@keyframes skOrbFloat {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(-25px, 20px) scale(1.08);
+    }
+    100% {
+        transform: translate(20px, -25px) scale(0.95);
+    }
+}
+
+/* Glassmorphic Card */
+.sk-auth-card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 470px;
+    background: rgba(21, 30, 50, 0.82);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 22px;
+    padding: 2.5rem 2.2rem;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(59, 130, 246, 0.12);
+    animation: skCardEntrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes skCardEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(28px) scale(0.97);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.sk-auth-logo-badge {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 1rem;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(245, 158, 11, 0.2));
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: 0 10px 25px rgba(245, 158, 11, 0.15);
+    animation: skPulseLogo 3.5s ease-in-out infinite;
+}
+
+@keyframes skPulseLogo {
+    0%, 100% {
+        transform: translateY(0);
+        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.15);
+    }
+    50% {
+        transform: translateY(-4px);
+        box-shadow: 0 14px 32px rgba(59, 130, 246, 0.28);
+    }
+}
+
+.sk-auth-title {
+    font-weight: 800;
+    font-size: 1.55rem;
+    color: #f8fafc;
+    text-align: center;
+    margin-bottom: 0.35rem;
+}
+
+.sk-auth-subtitle {
+    color: #94a3b8;
+    font-size: 0.92rem;
+    text-align: center;
+    margin-bottom: 1.8rem;
+}
+
+.sk-auth-input-group {
+    position: relative;
+}
+
+.sk-auth-input {
+    background: rgba(11, 17, 32, 0.85) !important;
+    border: 1px solid rgba(148, 163, 184, 0.22) !important;
+    color: #f8fafc !important;
+    border-radius: 12px !important;
+    padding: 0.78rem 1rem !important;
+    font-size: 0.95rem !important;
+    transition: all 0.25s ease !important;
+}
+
+.sk-auth-input:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18) !important;
+    transform: translateY(-1px);
+}
+
+.sk-auth-submit-btn {
+    width: 100%;
+    padding: 0.85rem 1.2rem;
+    border-radius: 12px;
+    border: none;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #fff;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+    transition: all 0.25s ease;
+}
+
+.sk-auth-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.5);
+    background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+}
+
+.sk-auth-join-box {
+    margin-top: 1.6rem;
+    padding-top: 1.35rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+}
+
+.sk-auth-join-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.93rem;
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.sk-auth-join-btn:hover {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fde68a;
+    transform: translateY(-2px);
+}
+
+.sk-password-toggle {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1.05rem;
+    padding: 0.25rem;
+}
+
+.sk-password-toggle:hover {
+    color: #f8fafc;
+}
+
+/* Ensure LTR password inputs have proper left clearance for toggle icon in RTL layout */
+.sk-auth-input-group .sk-auth-input[dir="ltr"] {
+    padding-left: 2.8rem !important;
+    padding-right: 1rem !important;
+}
+
+/* SK Card and Table Utility Classes for Team Management */
+.sk-card {
+    background: var(--admin-surface, #1e293b);
+    border: 1px solid var(--admin-border, #334155);
+    border-radius: 0.85rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.sk-table {
+    color: var(--admin-text, #f1f5f9);
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--admin-text, #f1f5f9);
+    border-color: var(--admin-border, #334155);
+}
+
+.sk-table th {
+    background: var(--admin-surface-hover, #334155);
+    color: var(--admin-text-muted, #94a3b8);
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid var(--admin-border, #334155);
+}
+
+.sk-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--admin-border, #334155);
+    vertical-align: middle;
+}
+
+.sk-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.06);
+}
+
+.sk-btn-primary {
+    background: var(--admin-primary, #3b82f6);
+    color: #fff;
+    border: none;
+}
+
+.sk-btn-primary:hover {
+    background: var(--admin-primary-hover, #2563eb);
+    color: #fff;
+}
+
