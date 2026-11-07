@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import HeroSection from '../components/sections/HeroSection';
 import StoriesSection from '../components/sections/StoriesSection';
+import ParentArticlesSection from '../components/sections/ParentArticlesSection';
 import StoryDetailsModal from '../components/ui/StoryDetailsModal';
 import { STORIES as fallbackStories } from '../data/stories';
 import '../styles/HomePage.css';
@@ -50,6 +51,8 @@ export function HomePage() {
         loading={loading}
         onStoryClick={(story) => setSelectedStory(story)}
       />
+
+      <ParentArticlesSection />
 
       {selectedStory && (
         <StoryDetailsModal

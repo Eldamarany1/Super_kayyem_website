@@ -5,13 +5,14 @@ using MongoDB.EntityFrameworkCore.Extensions;
 
 public class SuperKayyemDbContext : DbContext
 {
-    public SuperKayyemDbContext(DbContextOptions<SuperKayyemDbContext> options) : base(options)
+    public SuperKayyemDbContext(DbContextOptions options) : base(options)
     {
     }
 
     public DbSet<Story> Stories { get; set; }
     public DbSet<Account> Accounts { get; set; }
     public DbSet<AdminUser> AdminUsers { get; set; }
+    public DbSet<Article> Articles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,6 +35,11 @@ public class SuperKayyemDbContext : DbContext
         modelBuilder.Entity<AdminUser>(entity =>
         {
             entity.ToCollection("admin_users");
+        });
+
+        modelBuilder.Entity<Article>(entity =>
+        {
+            entity.ToCollection("articles");
         });
     }
 }

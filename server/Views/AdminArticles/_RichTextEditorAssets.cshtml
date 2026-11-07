@@ -1,0 +1,159 @@
+<style>
+    .sk-rte-wrapper {
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(11, 17, 32, 0.9);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .sk-rte-wrapper:focus-within {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    .sk-rte-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.55rem 0.75rem;
+        background: rgba(30, 41, 59, 0.85);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    }
+    .sk-rte-btn {
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        color: #e2e8f0;
+        border-radius: 8px;
+        padding: 0.3rem 0.65rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        user-select: none;
+    }
+    .sk-rte-btn:hover {
+        background: #3b82f6;
+        color: #ffffff;
+        border-color: #3b82f6;
+    }
+    .sk-rte-divider {
+        width: 1px;
+        height: 22px;
+        background: rgba(148, 163, 184, 0.25);
+        margin: 0 0.25rem;
+    }
+    .sk-rte-editor {
+        min-height: 150px;
+        padding: 1rem;
+        color: #f8fafc;
+        font-size: 1rem;
+        line-height: 1.8;
+        outline: none;
+        overflow-y: auto;
+        direction: rtl;
+        text-align: right;
+    }
+    .sk-rte-editor--large {
+        min-height: 260px;
+    }
+    .sk-rte-editor h2 {
+        font-size: 1.45rem;
+        font-weight: 800;
+        color: #fbbf24;
+        margin: 0.9rem 0 0.5rem;
+    }
+    .sk-rte-editor h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #60a5fa;
+        margin: 0.75rem 0 0.4rem;
+    }
+    .sk-rte-editor p {
+        margin-bottom: 0.75rem;
+    }
+    .sk-rte-editor ul {
+        padding-right: 1.5rem;
+        margin-bottom: 0.75rem;
+        list-style-type: disc;
+    }
+    .sk-rte-editor li {
+        margin-bottom: 0.35rem;
+    }
+</style>
+
+<script>
+    function execRteCommand(editorId, command, value = null) {
+        const editor = document.getElementById(editorId);
+        if (!editor) return;
+        editor.focus();
+        if (command === 'formatBlock' && value && !value.startsWith('<')) {
+            value = '<' + value + '>';
+        }
+        document.execCommand(command, false, value);
+        syncRteField(editorId);
+    }
+
+    function syncRteField(editorId) {
+        const editor = document.getElementById(editorId);
+        if (!editor) return;
+        const targetId = editor.getAttribute('data-target');
+        const hiddenInput = document.getElementById(targetId);
+        if (!hiddenInput) return;
+
+        const rawHtml = editor.innerHTML.trim();
+        const text = editor.textContent.trim();
+        if (!text && (!rawHtml || rawHtml === '<p><br></p>' || rawHtml === '<br>' || rawHtml === '<div><br></div>')) {
+            hiddenInput.value = '';
+        } else {
+            hiddenInput.value = rawHtml;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Prevent selection loss when clicking toolbar buttons
+        document.querySelectorAll('.sk-rte-btn').forEach(btn => {
+            btn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+            });
+        });
+
+        // Initialize editor content from hidden inputs
+        document.querySelectorAll('.sk-rte-editor').forEach(editor => {
+            const targetId = editor.getAttribute('data-target');
+            const hiddenInput = document.getElementById(targetId);
+            if (hiddenInput && hiddenInput.value) {
+                editor.innerHTML = hiddenInput.value;
+            }
+            editor.addEventListener('input', () => syncRteField(editor.id));
+            editor.addEventListener('blur', () => syncRteField(editor.id));
+        });
+
+        const form = document.getElementById('articleForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                document.querySelectorAll('.sk-rte-editor').forEach(editor => {
+                    syncRteField(editor.id);
+                });
+
+                // Client-side guard for required rich text editors
+                const intro = document.getElementById('IntroInput')?.value.trim();
+                const body = document.getElementById('BodyInput')?.value.trim();
+                const concl = document.getElementById('ConclusionInput')?.value.trim();
+
+                if (!intro || !body || !concl) {
+                    e.preventDefault();
+                    let missing = [];
+                    if (!intro) missing.push('مقدمة المقال');
+                    if (!body) missing.push('موضوع المقال');
+                    if (!concl) missing.push('خاتمة المقال');
+
+                    alert('⚠️ يرجى كتابة محتوى الأقسام التالية قبل الحفظ:\n• ' + missing.join('\n• '));
+
+                    if (!intro) document.getElementById('rteIntro')?.focus();
+                    else if (!body) document.getElementById('rteBody')?.focus();
+                    else if (!concl) document.getElementById('rteConclusion')?.focus();
+                }
+            });
+        }
+    });
+</script>
