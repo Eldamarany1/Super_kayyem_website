@@ -5,6 +5,7 @@
 // ============================================================
 
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 // Import MongoDB.EntityFrameworkCore to use [Collection] attribute
 using MongoDB.EntityFrameworkCore;
 
@@ -37,11 +38,34 @@ namespace SuperKayyem.Models
         }
 
         // List of owned/purchased story IDs (nullable so existing MongoDB documents without this field don't throw)
-        public List<int>? OwnedStoryIds { get; set; } = [];
+        private List<int>? _ownedStoryIds = [];
+        public List<int>? OwnedStoryIds
+        {
+            get => _ownedStoryIds ??= [];
+            set => _ownedStoryIds = value ?? [];
+        }
+
+        // Detailed purchase history for analytical and sales tracking (nullable so existing MongoDB documents without this field don't throw)
+        private List<StoryPurchaseRecord>? _purchasedStories = [];
+        public List<StoryPurchaseRecord>? PurchasedStories
+        {
+            get => _purchasedStories ??= [];
+            set => _purchasedStories = value ?? [];
+        }
 
         // List of the customer's children — each child is of type Child (defined below)
         // = []: Initializes an empty list to prevent NullReferenceException
         public List<Child> Children { get; set; } = [];
+    }
+
+    // StoryPurchaseRecord: Embedded record for story purchases
+    [Owned]
+    public class StoryPurchaseRecord
+    {
+        public int StoryId { get; set; }
+        public string? StoryTitle { get; set; } = string.Empty;
+        public decimal PricePaid { get; set; }
+        public DateTime PurchasedAt { get; set; } = DateTime.UtcNow;
     }
 
     // Child: Embedded class stored inside the Account document in MongoDB (embedded document)
@@ -53,5 +77,13 @@ namespace SuperKayyem.Models
 
         // string?: The ? mark means Gender is optional (nullable)
         public string? Gender { get; set; } = null!;
+
+        // Interests and favorite educational values selected by or for the child (nullable so existing MongoDB documents without this field don't throw)
+        private List<string>? _interests = [];
+        public List<string>? Interests
+        {
+            get => _interests ??= [];
+            set => _interests = value ?? [];
+        }
     }
 }

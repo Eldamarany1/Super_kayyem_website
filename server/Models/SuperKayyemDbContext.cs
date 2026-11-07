@@ -29,7 +29,11 @@ public class SuperKayyemDbContext : DbContext
         modelBuilder.Entity<Account>(entity =>
         {
             entity.ToCollection("Accounts");
-            entity.OwnsMany(a => a.Children);
+            entity.OwnsMany(a => a.Children, child =>
+            {
+                child.Property(c => c.Interests).IsRequired(false);
+            });
+            entity.OwnsMany(a => a.PurchasedStories);
         });
 
         modelBuilder.Entity<AdminUser>(entity =>

@@ -231,6 +231,50 @@
                     }
                 </div>
 
+                <!-- Story Purchases Card -->
+                <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 p-4 shadow-sm mb-4">
+                    <h5 class="fw-bold text-white mb-3 d-flex align-items-center justify-content-between border-bottom border-secondary border-opacity-25 pb-3">
+                        <span class="d-flex align-items-center gap-2">
+                            <i class="bi bi-bag-check text-warning"></i>
+                            <span>سجل مشتريات القصص</span>
+                        </span>
+                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">
+                            @(Model.PurchasedStories?.Count ?? 0) قصة
+                        </span>
+                    </h5>
+
+                    @if (Model.PurchasedStories != null && Model.PurchasedStories.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle mb-0">
+                                <thead class="table-dark text-secondary small border-bottom border-secondary border-opacity-25">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>عنوان القصة</th>
+                                        <th>السعر المدفوع</th>
+                                        <th>تاريخ الشراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var purchase in Model.PurchasedStories.OrderByDescending(p => p.PurchasedAt))
+                                    {
+                                        <tr>
+                                            <td class="text-secondary small">#@purchase.StoryId</td>
+                                            <td class="fw-bold text-light">@purchase.StoryTitle</td>
+                                            <td class="text-warning">@purchase.PricePaid.ToString("F2") EGP</td>
+                                            <td class="text-secondary small">@purchase.PurchasedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-secondary small py-2">لا توجد عمليات شراء مسجلة لهذا الحساب.</div>
+                    }
+                </div>
+
             </div>
 
         </div>
