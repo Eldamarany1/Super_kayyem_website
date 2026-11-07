@@ -1,0 +1,147 @@
+@model IEnumerable<SuperKayyem.Models.Story>
+
+@{
+    ViewData["Title"] = "إدارة القصص التفاعلية";
+}
+
+<div class="container-fluid py-2" dir="rtl">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1 text-light">إدارة القصص التفاعلية</h2>
+            <p class="text-secondary mb-0">عرض وتعديل وحذف قصص الأطفال وإدارة محتواها النصي والمصور</p>
+        </div>
+        <a asp-controller="Stories" asp-action="Create" class="btn btn-primary fw-semibold px-4 py-2">
+            إضافة قصة جديدة
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success border-0 rounded-3 shadow-sm mb-4" style="background: rgba(16, 185, 129, 0.16); color: #6ee7b7;">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <!-- Search & Filter Card -->
+    <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-3 mb-4 shadow-sm">
+        <form method="get" asp-controller="Stories" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-12 col-md-6 col-lg-5">
+                <input type="text" name="search" class="form-control bg-dark text-light border-secondary border-opacity-50"
+                       placeholder="ابحث بالعنوان أو الوصف..." value="@ViewBag.Search" />
+            </div>
+            <div class="col-12 col-md-4 col-lg-3">
+                <select name="category" class="form-select bg-dark text-light border-secondary border-opacity-50">
+                    <option value="">جميع القيم الأخلاقية</option>
+                    <option value="التعاون" selected="@(ViewBag.Category == "التعاون")">التعاون</option>
+                    <option value="الشجاعة" selected="@(ViewBag.Category == "الشجاعة")">الشجاعة</option>
+                    <option value="الصدق" selected="@(ViewBag.Category == "الصدق")">الصدق</option>
+                    <option value="المسؤولية" selected="@(ViewBag.Category == "المسؤولية")">المسؤولية</option>
+                    <option value="الصداقة" selected="@(ViewBag.Category == "الصداقة")">الصداقة</option>
+                    <option value="الصبر" selected="@(ViewBag.Category == "الصبر")">الصبر</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-3">بحث</button>
+                @if (!string.IsNullOrWhiteSpace(ViewBag.Search) || !string.IsNullOrWhiteSpace(ViewBag.Category))
+                {
+                    <a asp-controller="Stories" asp-action="Index" class="btn btn-outline-secondary">إعادة ضبط</a>
+                }
+            </div>
+        </form>
+    </div>
+
+    <!-- Stories Table -->
+    <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-3 p-md-4 shadow-sm">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-secondary">
+                <h5>لا توجد قصص مطابقة لمعايير البحث</h5>
+                <p class="small">جرّب تغيير كلمات البحث أو إضافة قصة جديدة.</p>
+                <a asp-controller="Stories" asp-action="Create" class="btn btn-primary mt-2">إضافة قصة جديدة</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead class="table-dark text-secondary small border-bottom border-secondary border-opacity-25">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th style="width: 80px;">الغلاف</th>
+                            <th>العنوان</th>
+                            <th>القيمة الأخلاقية</th>
+                            <th>الفئة العمرية</th>
+                            <th>السعر</th>
+                            <th>نوع المحتوى</th>
+                            <th>الصفحات</th>
+                            <th class="text-center" style="width: 220px;">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var story in Model)
+                        {
+                            <tr>
+                                <td class="text-secondary small">#@story.Id</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(story.CoverImage))
+                                    {
+                                        <img src="@story.CoverImage" alt="@story.Title" style="width: 52px; height: 52px; object-fit: cover; border-radius: 6px;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-secondary bg-opacity-25 rounded d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                                            <span class="small text-secondary">بدون</span>
+                                        </div>
+                                    }
+                                </td>
+                                <td class="fw-bold text-light">
+                                    @story.Title
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary bg-opacity-50 text-light">@story.Category</span>
+                                </td>
+                                <td>
+                                    @(story.TargetAge.HasValue ? $"{story.TargetAge.Value} سنوات" : "—")
+                                </td>
+                                <td class="text-light">
+                                    @story.Price.ToString("F0") EGP
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(story.PdfUrl))
+                                    {
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">ملف PDF</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">صفحات نصية مصورة</span>
+                                    }
+                                </td>
+                                <td class="text-secondary small">
+                                    @story.PageCount صفحة
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-inline-flex gap-1">
+                                        <a asp-controller="Stories" asp-action="Details" asp-route-id="@story.Id"
+                                           class="btn btn-sm btn-outline-info">
+                                            عرض التفاصيل
+                                        </a>
+                                        <a asp-controller="Stories" asp-action="Edit" asp-route-id="@story.Id"
+                                           class="btn btn-sm btn-outline-warning">
+                                            تعديل
+                                        </a>
+                                        <a asp-controller="Stories" asp-action="Delete" asp-route-id="@story.Id"
+                                           class="btn btn-sm btn-outline-danger">
+                                            حذف
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+</div>

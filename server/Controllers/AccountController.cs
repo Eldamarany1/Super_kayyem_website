@@ -223,10 +223,11 @@ public class AccountController : Controller
     // [ValidateAntiForgeryToken]: Protects the form against CSRF attacks
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Update(Account model, IFormFile? avatarFile, CancellationToken ct = default)
+    public async Task<IActionResult> Update(int? id, Account model, IFormFile? avatarFile, CancellationToken ct = default)
     {
-        // Remove Password from ModelState because this form does not edit password
-        // Without this line, ModelState fails validation because Password appears empty
+        int targetId = (id.HasValue && id.Value > 0) ? id.Value : model.Id;
+
+        // Remove Password from ModelState so it doesn't fail if empty
         ModelState.Remove(nameof(model.Password));
 
         // Validate remaining fields before saving
@@ -236,7 +237,7 @@ public class AccountController : Controller
         }
 
         // Fetch the existing account from MongoDB to update it
-        var existingAccount = await _mongoDbContext.Accounts.FirstOrDefaultAsync(a => a.Id == model.Id, ct);
+        var existingAccount = await _mongoDbContext.Accounts.FirstOrDefaultAsync(a => a.Id == targetId, ct);
         if (existingAccount == null)
         {
             return NotFound();
@@ -248,6 +249,12 @@ public class AccountController : Controller
         existingAccount.Email = model.Email;
         existingAccount.DateOfBirth = model.DateOfBirth;
         existingAccount.Gender = model.Gender;
+
+        // Update password if provided
+        if (!string.IsNullOrWhiteSpace(model.Password))
+        {
+            existingAccount.Password = model.Password.Trim();
+        }
 
         // Upload new profile picture to Cloudinary if provided
         if (avatarFile != null && avatarFile.Length > 0)

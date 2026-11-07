@@ -1,106 +1,308 @@
-@* ============================================================
-   Index.cshtml — Story management admin dashboard
-   @model: Specifies the model type passed from AdminController.Index()
-   IEnumerable<Story>: Collection of stories that can be iterated with foreach
-   ============================================================ *@
-@model IEnumerable<Story>
-@{
-    @* ViewData["Title"]: Sets the page title displayed in the browser tab *@
-    ViewData["Title"] = "إدارة القصص";
+@model SuperKayyem.ViewModels.AdminDashboardViewModel
 
-    var ratedStories = Model.Where(s => s.Rating.HasValue).ToList();
-    var avgRating = ratedStories.Any() ? ratedStories.Average(s => s.Rating!.Value).ToString("F1") : "—";
+@{
+    ViewData["Title"] = "لوحة القيادة الشاملة";
+    bool isSuperAdmin = User.IsInRole("SuperAdmin");
 }
 
-<div class="dashboard-stats">
-    <div class="stat-card">
-        @* @Model.Count(): Total number of stories in the list — @ runs C# code inside HTML *@
-        <div class="stat-number">@Model.Count()</div>
-        <div class="stat-label">إجمالي القصص</div>
-    </div>
-    <div class="stat-card">
-        @* .Select(s => s.Category): Extracts only Category values from each story
-           .Distinct(): Removes duplicates — .Count(): Counts unique categories *@
-        <div class="stat-number">@Model.Select(s => s.Category).Distinct().Count()</div>
-        <div class="stat-label">الفئات</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-number">@(avgRating != "—" ? $"⭐ {avgRating}" : "—")</div>
-        <div class="stat-label">متوسط التقييم</div>
-    </div>
-</div>
+<div class="container-fluid py-2" dir="rtl">
 
-<div class="section-header">
-    <h2>القصص</h2>
-    @* asp-action="Create": Tag Helper that generates /Admin/Create link automatically *@
-    <a asp-action="Create" class="btn-admin btn-admin-primary">
-        ➕ إضافة قصة جديدة
-    </a>
-</div>
+    <!-- 1. Header Overview -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1 text-light">لوحة القيادة الشاملة</h2>
+            <p class="text-secondary mb-0">نظرة عامة متكاملة على مؤشرات الأداء، المحتوى، والمستخدمين في منصة سوبر قيم</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="Stories" asp-action="Create" class="btn btn-primary fw-semibold px-3 py-2">
+                إضافة قصة جديدة
+            </a>
+            <a asp-controller="AdminArticles" asp-action="Create" class="btn btn-outline-info fw-semibold px-3 py-2">
+                كتابة مقال جديد
+            </a>
+        </div>
+    </div>
 
-<div class="table-responsive">
-    <table class="admin-table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>العنوان</th>
-                <th>الفئة</th>
-                <th>الفئة العمرية</th>
-                <th>السعر (EGP)</th>
-                <th>التقييم</th>
-                <th>الصفحات</th>
-                <th>PDF</th>
-                <th>الإجراءات</th>
-            </tr>
-        </thead>
-        <tbody>
-            @* foreach: repeats the HTML table row for each story in the collection *@
-            @foreach (var story in Model)
-            {
-                <tr>
-                    <td>@story.Id</td>
-                    <td class="story-title-cell">
-                        @* Render cover image only if present — avoids empty <img> tags *@
-                        @if (!string.IsNullOrEmpty(story.CoverImage))
+    <!-- 2. KPI Summary Cards -->
+    <div class="row g-3 mb-4">
+        <!-- KPI 1: Stories -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="Stories" asp-action="Index" class="text-decoration-none">
+                <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-3 shadow-sm h-100 hover-shadow transition">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="text-secondary small fw-bold">إجمالي القصص التفاعلية</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">المكتبة</span>
+                    </div>
+                    <div class="display-6 fw-bold text-light mb-1">@Model.TotalStories</div>
+                    <div class="text-secondary small">عرض وإدارة جميع قصص المنصة</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- KPI 2: Articles -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="AdminArticles" asp-action="Index" class="text-decoration-none">
+                <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-3 shadow-sm h-100 hover-shadow transition">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="text-secondary small fw-bold">إجمالي مقالات التوعية</span>
+                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">توعية الآباء</span>
+                    </div>
+                    <div class="display-6 fw-bold text-light mb-1">@Model.TotalArticles</div>
+                    <div class="text-secondary small">عرض وإدارة المقالات التربوية</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- KPI 3: Accounts & Children -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="Account" asp-action="AccountList" class="text-decoration-none">
+                <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-3 shadow-sm h-100 hover-shadow transition">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="text-secondary small fw-bold">حسابات الآباء والأطفال</span>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">المستخدمون</span>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2 mb-1">
+                        <span class="display-6 fw-bold text-light">@Model.TotalAccounts</span>
+                        <span class="text-secondary small">حساب / @Model.TotalChildren طفل</span>
+                    </div>
+                    <div class="text-secondary small">عرض بيانات العملاء والأطفال المسجلين</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- KPI 4: Admins & Requests -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a href="@(isSuperAdmin ? Url.Action("TeamRequests", "AdminAuth") : Url.Action("Profile", "AdminAuth"))" class="text-decoration-none">
+                <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-3 shadow-sm h-100 hover-shadow transition">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="text-secondary small fw-bold">فريق الإدارة والطلبات</span>
+                        @if (Model.PendingAdminRequests > 0)
                         {
-                            <img src="@story.CoverImage" alt="" class="story-thumb" />
-                        }
-                        <span>@story.Title</span>
-                    </td>
-                    <td><span class="category-badge">@story.Category</span></td>
-                    <td>@(story.TargetAge.HasValue ? $"{story.TargetAge.Value} سنوات" : "—")</td>
-                    @* .ToString("F0"): displays price without decimal places like "35" *@
-                    <td>@story.Price.ToString("F0")</td>
-                    <td>
-                        @if (story.Rating.HasValue)
-                        {
-                            <span class="rating-display">⭐ @story.Rating.Value.ToString("F1")</span>
+                            <span class="badge bg-danger rounded-pill">@Model.PendingAdminRequests طلب معلق</span>
                         }
                         else
                         {
-                            <span style="opacity: 0.5;">—</span>
+                            <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">فريق العمل</span>
                         }
-                    </td>
-                    <td>@story.PageCount</td>
-                    @* PDF indicator: shows link icon if a PDF was uploaded *@
-                    <td>
-                        @if (!string.IsNullOrEmpty(story.PdfUrl))
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2 mb-1">
+                        <span class="display-6 fw-bold text-light">@Model.TotalApprovedAdmins</span>
+                        <span class="text-secondary small">مشرف معتمد</span>
+                    </div>
+                    <div class="text-secondary small">
+                        @(isSuperAdmin ? "إدارة طلبات الانضمام وصلاحيات المشرفين" : "عرض وإدارة ملفك الشخصي")
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- 3. Section 1: Recent Stories Table -->
+    <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-4 shadow-sm mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2 border-bottom border-secondary border-opacity-25 pb-3">
+            <div>
+                <h5 class="fw-bold text-light mb-1">أحدث القصص المضافة إلى المنصة</h5>
+                <p class="text-secondary small mb-0">نظرة سريعة على آخر القصص المضافة ونوع المحتوى المصاحب لها</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-controller="Stories" asp-action="Index" class="btn btn-sm btn-outline-secondary">إدارة جميع القصص</a>
+                <a asp-controller="Stories" asp-action="Create" class="btn btn-sm btn-primary">إضافة قصة جديدة</a>
+            </div>
+        </div>
+
+        @if (!Model.RecentStories.Any())
+        {
+            <div class="text-center py-4 text-secondary small">
+                لا توجد قصص مضافة حالياً.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead class="table-dark text-secondary small border-bottom border-secondary border-opacity-25">
+                        <tr>
+                            <th style="width: 60px;">#</th>
+                            <th style="width: 80px;">الغلاف</th>
+                            <th>عنوان القصة</th>
+                            <th>القيمة الأخلاقية</th>
+                            <th>الفئة العمرية</th>
+                            <th>نوع المحتوى</th>
+                            <th>السعر</th>
+                            <th class="text-center" style="width: 140px;">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var story in Model.RecentStories)
                         {
-                            <a href="@story.PdfUrl" target="_blank" title="عرض الـ PDF">📄</a>
+                            <tr>
+                                <td class="text-secondary small">#@story.Id</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(story.CoverImage))
+                                    {
+                                        <img src="@story.CoverImage" alt="@story.Title" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-secondary bg-opacity-25 rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <span class="small text-secondary">بدون</span>
+                                        </div>
+                                    }
+                                </td>
+                                <td class="fw-bold text-light">@story.Title</td>
+                                <td><span class="badge bg-secondary bg-opacity-50 text-light">@story.Category</span></td>
+                                <td>@(story.TargetAge.HasValue ? $"{story.TargetAge.Value} سنوات" : "—")</td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(story.PdfUrl))
+                                    {
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">ملف PDF</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">صفحات نصية مصورة</span>
+                                    }
+                                </td>
+                                <td class="text-light">@story.Price.ToString("F0") EGP</td>
+                                <td class="text-center">
+                                    <div class="d-inline-flex gap-1">
+                                        <a asp-controller="Stories" asp-action="Details" asp-route-id="@story.Id" class="btn btn-sm btn-outline-light">تفاصيل</a>
+                                        <a asp-controller="Stories" asp-action="Edit" asp-route-id="@story.Id" class="btn btn-sm btn-outline-primary">تعديل</a>
+                                    </div>
+                                </td>
+                            </tr>
                         }
-                        else
-                        {
-                            <span style="opacity: 0.3;">—</span>
-                        }
-                    </td>
-                    <td class="actions-cell">
-                        @* asp-route-id: passes story Id as part of the URL like /Admin/Details/3 *@
-                        <a asp-action="Details" asp-route-id="@story.Id" class="btn-action btn-view" title="عرض">👁</a>
-                        <a asp-action="Edit" asp-route-id="@story.Id" class="btn-action btn-edit" title="تعديل">✏️</a>
-                        <a asp-action="Delete" asp-route-id="@story.Id" class="btn-action btn-delete" title="حذف">🗑️</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <!-- 4. Section 2 & 3 Side by Side -->
+    <div class="row g-4">
+        <!-- Section 2: Admin-Articles Relationship -->
+        <div class="col-12 col-lg-7">
+            <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-4 shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-secondary border-opacity-25 pb-3">
+                    <div>
+                        <h5 class="fw-bold text-light mb-1">ترابط المشرفين والمقالات المنشورة</h5>
+                        <p class="text-secondary small mb-0">حصر مساهمات كل مشرف في النشر التوعوي</p>
+                    </div>
+                    <a asp-controller="AdminArticles" asp-action="Index" class="btn btn-sm btn-outline-info">إدارة المقالات</a>
+                </div>
+
+                @if (!Model.AdminArticleStats.Any())
+                {
+                    <div class="text-center py-4 text-secondary small">
+                        لا توجد إحصائيات مقالات حالياً.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle mb-0">
+                            <thead class="table-dark text-secondary small border-bottom border-secondary border-opacity-25">
+                                <tr>
+                                    <th>المشرف</th>
+                                    <th>الدور</th>
+                                    <th>عدد المقالات</th>
+                                    <th>آخر مقال منشور</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var stat in Model.AdminArticleStats)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold text-light">@stat.FullName</div>
+                                            <div class="text-secondary small" dir="ltr" style="text-align: right;">@stat.Email</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(stat.Role == "SuperAdmin" ? "bg-primary" : "bg-secondary")">@stat.Role</span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-info fs-6">@stat.ArticlesCount</span>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(stat.LatestArticleTitle))
+                                            {
+                                                <div class="text-light text-truncate" style="max-width: 200px;" title="@stat.LatestArticleTitle">
+                                                    @stat.LatestArticleTitle
+                                                </div>
+                                                <small class="text-secondary">@(stat.LatestArticleDate?.ToString("yyyy-MM-dd") ?? "")</small>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-secondary small">لا توجد مقالات بعد</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Section 3: Age Group Distribution vs Registered Children -->
+        <div class="col-12 col-lg-5">
+            <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-4 shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-secondary border-opacity-25 pb-3">
+                    <div>
+                        <h5 class="fw-bold text-light mb-1">توزيع القصص مقارنة بأعمار الأطفال</h5>
+                        <p class="text-secondary small mb-0">تحليل فجوات المحتوى عبر مقارنة القصص المتاحة بالأطفال المسجلين</p>
+                    </div>
+                </div>
+
+                <div class="table-responsive mb-3">
+                    <table class="table table-dark table-hover align-middle mb-0">
+                        <thead class="table-dark text-secondary small border-bottom border-secondary border-opacity-25">
+                            <tr>
+                                <th>الفئة العمرية</th>
+                                <th>القصص المتاحة</th>
+                                <th>الأطفال المسجلون</th>
+                                <th>مؤشر التغطية</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.AgeGroupDistributions)
+                            {
+                                bool isAdequate = item.StoriesCount > 0 && item.StoriesCount >= (item.ChildrenCount / 2);
+                                <tr>
+                                    <td class="fw-bold text-warning">@item.AgeGroup سنوات</td>
+                                    <td>
+                                        <span class="fw-bold text-light">@item.StoriesCount</span>
+                                        <small class="text-secondary">قصة</small>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-info">@item.ChildrenCount</span>
+                                        <small class="text-secondary">طفل</small>
+                                    </td>
+                                    <td>
+                                        @if (item.StoriesCount == 0 && item.ChildrenCount > 0)
+                                        {
+                                            <span class="badge bg-danger">فجوة محتوى</span>
+                                        }
+                                        else if (item.StoriesCount > 0)
+                                        {
+                                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">مغطى</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">متوازن</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-secondary bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 p-3 text-secondary small mb-0">
+                    يساعد هذا الجدول فريق الإدارة على تحديد الفئات العمرية التي تحتاج إلى قصص جديدة لتلبية احتياجات الأطفال المسجلين في منصة سوبر قيم.
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>

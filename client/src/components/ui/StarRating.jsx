@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import '../../styles/StarRating.css';
@@ -13,8 +13,36 @@ export function StarRating({ storyId, currentRating, onRatingUpdated }) {
 
   const isOwned = isAuthenticated && ownsStory(storyId);
 
+  // Load existing user rating if already rated previously
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchExistingRating() {
+      if (!user?.id || !storyId) return;
+      try {
+        const res = await fetch(`/api/stories/${storyId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (cancelled) return;
+        const ratings = data.ratings || data.Ratings || [];
+        const existing = ratings.find((r) => (r.accountId ?? r.AccountId) === user.id);
+        if (existing) {
+          const score = existing.score ?? existing.Score;
+          if (score != null) {
+            setUserRating(score);
+          }
+        }
+      } catch {
+        // Ignore background fetch error
+      }
+    }
+    fetchExistingRating();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, storyId]);
+
   const handleRate = async (score) => {
-    if (!isAuthenticated || !user?.id || !isOwned) return;
+    if (!isAuthenticated || !user?.id) return;
     setSubmitting(true);
     setMessage('');
 
@@ -24,7 +52,9 @@ export function StarRating({ storyId, currentRating, onRatingUpdated }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           accountId: user.id,
+          accountName: `${user.firstName || user.name || ''} ${user.lastName || ''}`.trim() || 'قارئ سوبر قيم',
           rating: score,
+          score: score,
         }),
       });
 
@@ -35,7 +65,11 @@ export function StarRating({ storyId, currentRating, onRatingUpdated }) {
       }
 
       setUserRating(score);
-      setMessage('تم تسجيل تقييمك بنجاح! ⭐');
+      setMessage(data.message || 'تم تسجيل تقييمك بنجاح! ⭐');
+
+      if (!isOwned && ownStory) {
+        ownStory(storyId);
+      }
 
       if (onRatingUpdated && data.rating != null) {
         onRatingUpdated(data.rating);
@@ -66,25 +100,6 @@ export function StarRating({ storyId, currentRating, onRatingUpdated }) {
         <Link to="/login" className="btn btn-sm btn-outline-primary rounded-pill">
           سجل دخولك لتقييمها ⭐
         </Link>
-      </div>
-    );
-  }
-
-  if (!isOwned) {
-    return (
-      <div className="star-rating-box star-rating-box--not-owned">
-        <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 w-100">
-          <span className="star-rating-hint">امتلك القصة لتتمكن من تقييمها ومشاركتنا رأيك:</span>
-          <button
-            type="button"
-            className="btn btn-sm btn-success rounded-pill px-3 shadow-sm"
-            onClick={handleClaimOwnership}
-            disabled={owningLoading}
-          >
-            {owningLoading ? 'جارٍ الإضافة...' : '🎁 أضف إلى مكتبتي (امتلاك مجاني)'}
-          </button>
-        </div>
-        {message && <div className="star-rating-feedback mt-2 text-info">{message}</div>}
       </div>
     );
   }
@@ -125,6 +140,20 @@ export function StarRating({ storyId, currentRating, onRatingUpdated }) {
           })}
         </div>
       </div>
+
+      {!isOwned && (
+        <div className="d-flex align-items-center justify-content-between gap-2 mt-2 pt-2 border-top border-secondary border-opacity-25 w-100">
+          <small className="text-secondary">القصة ليست في مكتبتك بعد:</small>
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-success rounded-pill px-3"
+            onClick={handleClaimOwnership}
+            disabled={owningLoading}
+          >
+            {owningLoading ? 'جارٍ الإضافة...' : '🎁 أضف إلى مكتبتي'}
+          </button>
+        </div>
+      )}
 
       {submitting && <div className="star-rating-feedback text-secondary mt-1">جارٍ تسجيل التقييم...</div>}
       {message && <div className="star-rating-feedback text-success mt-1 fw-bold">{message}</div>}

@@ -1,0 +1,158 @@
+@model SuperKayyem.Models.Story
+
+@{
+    ViewData["Title"] = $"تفاصيل القصة: {Model.Title}";
+}
+
+<div class="container-fluid py-2" dir="rtl">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1 text-light">@Model.Title</h2>
+            <p class="text-secondary mb-0">عرض كافة بيانات القصة ومحتوى صفحاتها أو ملف الـ PDF</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="Stories" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning fw-semibold px-3">
+                تعديل القصة
+            </a>
+            <a asp-controller="Stories" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger px-3">
+                حذف القصة
+            </a>
+            <a asp-controller="Stories" asp-action="Index" class="btn btn-outline-secondary px-3">
+                العودة للقائمة
+            </a>
+        </div>
+    </div>
+
+    <!-- Overview Metadata Card -->
+    <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-4 mb-4 shadow-sm">
+        <div class="row g-4 align-items-center">
+            <div class="col-12 col-md-3 text-center">
+                @if (!string.IsNullOrEmpty(Model.CoverImage))
+                {
+                    <img src="@Model.CoverImage" alt="@Model.Title" class="rounded-3 shadow" style="max-width: 180px; max-height: 220px; object-fit: cover;" />
+                }
+                else
+                {
+                    <div class="bg-secondary bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center mx-auto" style="width: 180px; height: 220px;">
+                        <span class="text-secondary">بدون صورة غلاف</span>
+                    </div>
+                }
+            </div>
+            <div class="col-12 col-md-9">
+                <div class="row g-3">
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="text-secondary small d-block">المعرّف</label>
+                        <span class="fw-bold text-light">#@Model.Id</span>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="text-secondary small d-block">القيمة الأخلاقية</label>
+                        <span class="badge bg-secondary bg-opacity-50 text-light fs-6">@Model.Category</span>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="text-secondary small d-block">الفئة العمرية</label>
+                        <span class="fw-bold text-light">@(Model.TargetAge.HasValue ? $"{Model.TargetAge.Value} سنوات" : "—")</span>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="text-secondary small d-block">السعر</label>
+                        <span class="fw-bold text-warning fs-5">@Model.Price.ToString("F0") EGP</span>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="text-secondary small d-block">الرابط اللطيف (Slug)</label>
+                        <span dir="ltr" class="text-info font-monospace small">@Model.Slug</span>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="text-secondary small d-block">عدد الصفحات</label>
+                        <span class="fw-bold text-light">@Model.PageCount صفحة</span>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="text-secondary small d-block">نوع المحتوى</label>
+                        @if (!string.IsNullOrWhiteSpace(Model.PdfUrl))
+                        {
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">ملف PDF</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">صفحات نصية مصورة (@(Model.Pages?.Count ?? 0) صفحة)</span>
+                        }
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="text-secondary small d-block">تاريخ الإنشاء</label>
+                        <span class="text-secondary small">@Model.CreatedAt.ToString("yyyy-MM-dd")</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
+                    <label class="text-secondary small d-block mb-1">وصف القصة</label>
+                    <p class="text-light mb-0" style="line-height: 1.7;">@Model.Description</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Details: PDF vs Editor Pages -->
+    <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-4 shadow-sm mb-4">
+        @if (!string.IsNullOrWhiteSpace(Model.PdfUrl))
+        {
+            <h5 class="fw-bold text-info mb-3">ملف القصة الإلكتروني (PDF)</h5>
+            <div class="p-4 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="fw-bold text-light mb-1">تم إرفاق ملف PDF للقصة</div>
+                    <div class="text-secondary small font-monospace" dir="ltr">@Model.PdfUrl</div>
+                </div>
+                <a href="@Model.PdfUrl" target="_blank" class="btn btn-outline-info">
+                    عرض / تنزيل ملف الـ PDF
+                </a>
+            </div>
+        }
+        else if (Model.Pages != null && Model.Pages.Any())
+        {
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-warning mb-0">صفحات القصة المصورة (@Model.Pages.Count صفحة)</h5>
+                <span class="text-secondary small">تم تصميم الصفحات عبر محرر الصفحات التفاعلي</span>
+            </div>
+
+            <div class="row g-3">
+                @foreach (var pageItem in Model.Pages.OrderBy(p => p.PageNum))
+                {
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <div class="card bg-secondary bg-opacity-10 border-secondary border-opacity-25 rounded-3 p-3 h-100 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
+                                <span class="badge bg-primary">الصفحة @pageItem.PageNum</span>
+                                @if (pageItem.HasSeparator)
+                                {
+                                    <span class="badge bg-secondary bg-opacity-50 text-light small">فاصل زخرفي</span>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(pageItem.Headline))
+                            {
+                                <div class="fw-bold text-info mb-2">@pageItem.Headline</div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(pageItem.IllustrationUrl))
+                            {
+                                <div class="mb-3 text-center">
+                                    <img src="@pageItem.IllustrationUrl" alt="صورة الصفحة @pageItem.PageNum"
+                                         class="rounded-2 border border-secondary border-opacity-25 img-fluid"
+                                         style="max-height: 160px; object-fit: cover;" />
+                                </div>
+                            }
+
+                            <div class="text-light flex-grow-1 small" style="line-height: 1.8;">
+                                @pageItem.Content
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-4 text-secondary">
+                لا يتوفر محتوى نصي أو ملف PDF لهذه القصة حتى الآن.
+            </div>
+        }
+    </div>
+
+</div>

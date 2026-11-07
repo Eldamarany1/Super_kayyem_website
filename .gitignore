@@ -7,9 +7,12 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node / Client build artifacts
+**/node_modules/
 node_modules
 dist
 dist-ssr
+client/dist/
 *.local
 
 # Editor directories and files
@@ -27,8 +30,21 @@ dist-ssr
 **/bin/
 **/obj/
 uploads/
+server/out/
 
-# ── Secrets — never commit these ─────────────────
+# ── Secrets and Environment Settings ──────────────
 .env
 .env.*
 appsettings.Production.json
+server/appsettings.json
+server/appsettings.Development.json
+server/appsettings.*.json
+!server/appsettings.Example.json
+
+# ── AI Agents & Prompts ───────────────────────────
+.agents/
+agent/
+*prompt*.md
+super_kayyem_conversation_context.md
+server/CHANGES_AR.md
+!README.md

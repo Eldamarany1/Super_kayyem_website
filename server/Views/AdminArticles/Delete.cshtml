@@ -1,0 +1,59 @@
+@model SuperKayyem.Models.Article
+
+@{
+    ViewData["Title"] = $"حذف المقال: {Model.Title}";
+}
+
+<div class="container-fluid py-2" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+
+            <div class="card bg-dark border-danger border-opacity-50 rounded-3 p-4 shadow-sm mb-4">
+                <div class="text-center mb-4">
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 fs-6 mb-2">
+                        تأكيد الحذف النهائي
+                    </span>
+                    <h3 class="fw-bold text-light mb-1">هل أنت متأكد من حذف هذا المقال التوعوي؟</h3>
+                    <p class="text-secondary small mb-0">لا يمكن التراجع عن هذا الإجراء وسيتم حذف المقال نهائياً من الموقع.</p>
+                </div>
+
+                <div class="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25 mb-4">
+                    <div class="d-flex align-items-start gap-3">
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <img src="@Model.ImageUrl" alt="@Model.Title"
+                                 style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" />
+                        }
+                        <div class="flex-grow-1">
+                            <h5 class="fw-bold text-light mb-1">@Model.Title</h5>
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <span class="badge bg-info text-dark">@Model.Category</span>
+                                <span class="text-warning small">الكاتب: @Model.AuthorName</span>
+                                <span class="text-secondary small">@Model.PublishedAt.ToString("yyyy-MM-dd")</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.Introduction))
+                            {
+                                <p class="text-secondary small mb-0 line-clamp-2">
+                                    @(Model.Introduction.Length > 120 ? Model.Introduction.Substring(0, 120) + "..." : Model.Introduction)
+                                </p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <form asp-controller="AdminArticles" asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-controller="AdminArticles" asp-action="Index" class="btn btn-outline-secondary px-4 py-2">
+                            إلغاء والعودة
+                        </a>
+                        <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold">
+                            تأكيد الحذف النهائي
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>

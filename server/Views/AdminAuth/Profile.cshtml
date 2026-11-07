@@ -1,0 +1,108 @@
+@model SuperKayyem.ViewModels.AdminProfileViewModel
+
+@{
+    ViewData["Title"] = "الملف الشخصي وإدارة كلمة المرور";
+    bool isSuperAdmin = User.IsInRole("SuperAdmin");
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold text-light mb-1">الملف الشخصي للمشرف</h3>
+                    <p class="text-secondary small mb-0">عرض وتعديل بيانات حسابك وتحديث كلمة المرور</p>
+                </div>
+                <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary btn-sm">العودة للوحة القيادة</a>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success border-0 rounded-3 shadow-sm mb-4" style="background: rgba(16, 185, 129, 0.16); color: #6ee7b7;">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger border-0 rounded-3 shadow-sm mb-4" style="background: rgba(239, 68, 68, 0.16); color: #fca5a5;">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+
+            <div class="card bg-dark text-light border-secondary border-opacity-25 shadow-sm p-4 rounded-4 mb-4">
+                <!-- Account Summary Info -->
+                <div class="d-flex align-items-center gap-3 border-bottom border-secondary border-opacity-25 pb-3 mb-4">
+                    <div class="rounded-circle bg-secondary bg-opacity-25 text-info d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                        <span class="fs-4 fw-bold">@(string.IsNullOrEmpty(Model.FullName) ? "U" : Model.FullName.Substring(0, 1))</span>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">@Model.FullName</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge @(isSuperAdmin ? "bg-primary" : "bg-secondary")">@Model.Role</span>
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">@Model.Status</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form asp-controller="AdminAuth" asp-action="Profile" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="Role" />
+                    <input type="hidden" asp-for="Status" />
+
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label text-secondary small">الاسم الكامل</label>
+                        <input asp-for="FullName" class="form-control bg-dark text-light border-secondary border-opacity-50" required />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label text-secondary small">البريد الإلكتروني</label>
+                        @if (isSuperAdmin)
+                        {
+                            <input asp-for="Email" type="email" class="form-control bg-dark text-light border-secondary border-opacity-50" required />
+                            <small class="text-secondary" style="font-size: 0.78rem;">بصفتك قائد الفريق (SuperAdmin)، يحق لك تعديل البريد الإلكتروني.</small>
+                        }
+                        else
+                        {
+                            <input asp-for="Email" type="email" class="form-control bg-dark text-secondary border-secondary border-opacity-25" readonly />
+                            <small class="text-secondary" style="font-size: 0.78rem;">البريد الإلكتروني ثابت ولا يمكن تعديله إلا عبر قائد الفريق.</small>
+                        }
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Password" class="form-label text-secondary small">كلمة المرور الحالية / تعيين كلمة مرور جديدة</label>
+                        <div class="input-group">
+                            <input asp-for="Password" id="profilePasswordInput" type="password" value="@Model.Password" class="form-control bg-dark text-light border-secondary border-opacity-50" minlength="6" placeholder="أدخل كلمة مرور جديدة للتعديل..." />
+                            <button type="button" class="btn btn-outline-secondary" onclick="toggleInputPass('profilePasswordInput', this)">عرض</button>
+                        </div>
+                        <small class="text-secondary" style="font-size: 0.78rem;">اترك الحقل كما هو إذا كنت لا ترغب بتغيير كلمة المرور، أو اكتب كلمة المرور الجديدة (6 أحرف على الأقل).</small>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary px-4">إلغاء</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">حفظ التعديلات</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleInputPass(inputId, btn) {
+        var input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = 'إخفاء';
+        } else {
+            input.type = 'password';
+            btn.textContent = 'عرض';
+        }
+    }
+</script>

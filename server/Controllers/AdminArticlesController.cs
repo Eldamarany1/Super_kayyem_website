@@ -277,10 +277,29 @@ namespace SuperKayyem.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: /AdminArticles/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        // GET: /AdminArticles/Delete/5
+        [HttpGet]
         public async Task<IActionResult> Delete(int id, CancellationToken ct = default)
+        {
+            var article = await _context.Articles.FirstOrDefaultAsync(a => a.Id == id, ct);
+            if (article == null)
+            {
+                return NotFound();
+            }
+
+            if (!CanManageArticle(article))
+            {
+                TempData["ErrorMessage"] = "عذراً، لا تملك صلاحية حذف مقال لم تقم بنشره.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(article);
+        }
+
+        // POST: /AdminArticles/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id, CancellationToken ct = default)
         {
             var existing = await _context.Articles.FirstOrDefaultAsync(a => a.Id == id, ct);
             if (existing == null)
@@ -290,14 +309,14 @@ namespace SuperKayyem.Controllers
 
             if (!CanManageArticle(existing))
             {
-                TempData["ErrorMessage"] = "⚠️ عذراً، لا تملك صلاحية حذف مقال لم تقم بنشره.";
+                TempData["ErrorMessage"] = "عذراً، لا تملك صلاحية حذف مقال لم تقم بنشره.";
                 return RedirectToAction(nameof(Index));
             }
 
             _context.Articles.Remove(existing);
             await _context.SaveChangesAsync(ct);
 
-            TempData["SuccessMessage"] = $"🗑️ تم حذف المقال «{existing.Title}» بنجاح.";
+            TempData["SuccessMessage"] = $"تم حذف المقال «{existing.Title}» بنجاح.";
             return RedirectToAction(nameof(Index));
         }
     }

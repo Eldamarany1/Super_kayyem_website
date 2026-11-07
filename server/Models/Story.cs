@@ -83,7 +83,15 @@ public class StoryPageItem
 {
     public int PageNum { get; set; }
 
+    public string? Headline { get; set; }
+
+    public bool HasSeparator { get; set; }
+
+    [Required(ErrorMessage = "يجب إدخال نص الصفحة")]
+    [MaxLength(280, ErrorMessage = "تجاوز نص الصفحة الحد الأقصى المسموح به لمنع خروج النص عن إطار الصفحة")]
     public string Content { get; set; } = string.Empty;
+
+    public string? IllustrationUrl { get; set; }
 }
 
 // Owned entity configuration for user ratings embedded inside Story
