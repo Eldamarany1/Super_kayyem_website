@@ -1544,5 +1544,117 @@ namespace SuperKayyem.Tests
             var resMissing = await controller.RateStory(999, new RateStoryDto { AccountId = 1, Rating = 4 });
             Assert.IsType<NotFoundObjectResult>(resMissing);
         }
+
+        [Fact]
+        public async Task AdminController_Index_Should_Populate_Analytics_And_Sales()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(AdminController_Index_Should_Populate_Analytics_And_Sales));
+            var controller = new AdminController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<AdminController>>());
+            SetupController(controller);
+
+            // Act
+            var result = await controller.Index();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsType<AdminDashboardViewModel>(viewResult.Model);
+
+            Assert.NotNull(model.Analytics);
+            Assert.NotNull(model.Analytics.MonthlySalesChart);
+            Assert.NotEmpty(model.Analytics.MonthlySalesChart.Labels);
+            Assert.NotEmpty(model.Analytics.MonthlySalesChart.StoriesSoldCounts);
+            Assert.True(model.Analytics.MonthlySalesChart.CurrentMonthTotalSalesCount > 0);
+            Assert.True(model.Analytics.MonthlySalesChart.CurrentMonthTotalRevenue >= 0);
+
+            Assert.NotNull(model.Analytics.CategoryPieChart);
+            Assert.NotEmpty(model.Analytics.CategoryPieChart.Labels);
+            Assert.NotEmpty(model.Analytics.CategoryPieChart.Counts);
+
+            Assert.NotNull(model.Analytics.AgeGroupComparisonChart);
+            Assert.NotEmpty(model.Analytics.AgeGroupComparisonChart.Labels);
+            Assert.NotEmpty(model.Analytics.AgeGroupComparisonChart.StoryCounts);
+            Assert.NotEmpty(model.Analytics.AgeGroupComparisonChart.ChildCounts);
+
+            Assert.NotNull(model.Analytics.ChildrenInterestsChart);
+            Assert.NotEmpty(model.Analytics.ChildrenInterestsChart.Labels);
+
+            Assert.NotNull(model.StoryCurrentMonthSalesCount);
+            Assert.NotEmpty(model.AllStories);
+            Assert.NotEmpty(model.AllArticles);
+        }
+
+        [Fact]
+        public async Task AdminController_AnalyticsData_Should_Return_Valid_Json()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(AdminController_AnalyticsData_Should_Return_Valid_Json));
+            var controller = new AdminController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<AdminController>>());
+            SetupController(controller);
+
+            // Act
+            var result = await controller.AnalyticsData();
+
+            // Assert
+            var jsonResult = Assert.IsType<JsonResult>(result);
+            var dto = Assert.IsType<DashboardAnalyticsDto>(jsonResult.Value);
+
+            Assert.NotNull(dto.MonthlySalesChart);
+            Assert.NotEmpty(dto.MonthlySalesChart.Labels);
+            Assert.True(dto.MonthlySalesChart.CurrentMonthTotalSalesCount > 0);
+
+            Assert.NotNull(dto.CategoryPieChart);
+            Assert.NotEmpty(dto.CategoryPieChart.Labels);
+
+            Assert.NotNull(dto.AgeGroupComparisonChart);
+            Assert.NotEmpty(dto.AgeGroupComparisonChart.Labels);
+
+            Assert.NotNull(dto.ChildrenInterestsChart);
+            Assert.NotEmpty(dto.ChildrenInterestsChart.Labels);
+
+            Assert.False(string.IsNullOrWhiteSpace(dto.LastUpdatedFormatted));
+        }
+
+        [Fact]
+        public async Task AdminController_Index_Should_Handle_Legacy_Accounts_Without_Interests_Or_PurchasedStories()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(AdminController_Index_Should_Handle_Legacy_Accounts_Without_Interests_Or_PurchasedStories));
+
+            // Add legacy account representing MongoDB documents before Interests and PurchasedStories were added
+            var legacyAccount = new Account
+            {
+                Id = 99,
+                FirstName = "أحمد",
+                LastName = "محمود",
+                Email = "legacy@example.com",
+                Password = "hash",
+                Gender = "ذكر",
+                PurchasedStories = null,
+                Children = new List<Child>
+                {
+                    new Child { Id = 901, Name = "كريم", Age = 6, Gender = "ذكر", Interests = null }
+                }
+            };
+            context.Accounts.Add(legacyAccount);
+            context.Stories.Add(new Story { Id = 10, Title = "قصة تجريبية", TargetAge = 6, Price = 25m, Category = "الصدق" });
+            await context.SaveChangesAsync();
+
+            var controller = new AdminController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<AdminController>>());
+            SetupController(controller);
+
+            // Act: Should execute without throwing InvalidOperationException
+            var result = await controller.Index();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsType<AdminDashboardViewModel>(viewResult.Model);
+
+            Assert.Equal(1, model.TotalAccounts);
+            Assert.Equal(1, model.TotalChildren);
+            Assert.NotNull(model.Analytics);
+            Assert.NotNull(model.Analytics.ChildrenInterestsChart);
+            Assert.NotNull(model.Analytics.MonthlySalesChart);
+        }
     }
 }

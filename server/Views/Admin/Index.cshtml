@@ -1,29 +1,54 @@
 @model SuperKayyem.ViewModels.AdminDashboardViewModel
 
 @{
-    ViewData["Title"] = "لوحة القيادة الشاملة";
+    ViewData["Title"] = "لوحة القيادة والتحليلات الشاملة";
     bool isSuperAdmin = User.IsInRole("SuperAdmin");
 }
 
+<!-- CDN Libraries for Visual Analytics & PDF Export -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <div class="container-fluid py-2" dir="rtl">
 
-    <!-- 1. Header Overview -->
+    <!-- 1. Header Overview & Live Action Bar -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h2 class="fw-bold mb-1 text-light">لوحة القيادة الشاملة</h2>
-            <p class="text-secondary mb-0">نظرة عامة متكاملة على مؤشرات الأداء، المحتوى، والمستخدمين في منصة سوبر قيم</p>
+            <h2 class="fw-bold mb-1 text-light">لوحة القيادة والتحليلات الشاملة</h2>
+            <p class="text-secondary mb-0">مؤشرات الأداء التفاعلية، رصد المبيعات الحية، ومتابعة المحتوى التربوي في منصة سوبر قيم</p>
         </div>
-        <div class="d-flex gap-2">
-            <a asp-controller="Stories" asp-action="Create" class="btn btn-primary fw-semibold px-3 py-2">
-                إضافة قصة جديدة
-            </a>
-            <a asp-controller="AdminArticles" asp-action="Create" class="btn btn-outline-info fw-semibold px-3 py-2">
-                كتابة مقال جديد
-            </a>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <!-- Live Auto-refresh Indicator -->
+            <div class="d-inline-flex align-items-center gap-2 px-3 py-2 bg-dark border border-secondary border-opacity-25 rounded-3 text-secondary small">
+                <span class="pulse-dot"></span>
+                <span>تحديث تلقائي كل 30 ثانية</span>
+                <span class="text-secondary opacity-50">|</span>
+                <span>آخر تحديث: <span id="lastUpdatedBadge" class="text-info font-monospace">@Model.Analytics.LastUpdatedFormatted</span></span>
+            </div>
+
+            <!-- Manual Refresh Button -->
+            <button type="button" id="btnRefreshAnalytics" onclick="fetchLiveAnalytics()" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 px-3 py-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                </svg>
+                <span>تحديث الرسوم البيانية</span>
+            </button>
+
+            <!-- Export as PDF Button -->
+            <button type="button" id="btnExportPdf" onclick="exportOfficialPdfReport()" class="btn btn-warning text-dark fw-bold d-inline-flex align-items-center gap-2 px-3 py-2 shadow-sm">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                <span>تصدير تقرير حالة المنصة (PDF)</span>
+            </button>
         </div>
     </div>
 
-    <!-- 2. KPI Summary Cards -->
+    <!-- 2. Primary KPI Summary Cards -->
     <div class="row g-3 mb-4">
         <!-- KPI 1: Stories -->
         <div class="col-12 col-sm-6 col-xl-3">
@@ -33,8 +58,8 @@
                         <span class="text-secondary small fw-bold">إجمالي القصص التفاعلية</span>
                         <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">المكتبة</span>
                     </div>
-                    <div class="display-6 fw-bold text-light mb-1">@Model.TotalStories</div>
-                    <div class="text-secondary small">عرض وإدارة جميع قصص المنصة</div>
+                    <div class="display-6 fw-bold text-light mb-1" id="kpiTotalStories">@Model.TotalStories</div>
+                    <div class="text-secondary small">@Model.Analytics.TotalPdfStories ملف PDF / @Model.Analytics.TotalEditorStories محرر صفحات</div>
                 </div>
             </a>
         </div>
@@ -44,11 +69,11 @@
             <a asp-controller="AdminArticles" asp-action="Index" class="text-decoration-none">
                 <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-3 shadow-sm h-100 hover-shadow transition">
                     <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="text-secondary small fw-bold">إجمالي مقالات التوعية</span>
-                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">توعية الآباء</span>
+                        <span class="text-secondary small fw-bold">مقالات توعية الآباء</span>
+                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">التوعية</span>
                     </div>
-                    <div class="display-6 fw-bold text-light mb-1">@Model.TotalArticles</div>
-                    <div class="text-secondary small">عرض وإدارة المقالات التربوية</div>
+                    <div class="display-6 fw-bold text-light mb-1" id="kpiTotalArticles">@Model.TotalArticles</div>
+                    <div class="text-secondary small">عرض وإدارة المقالات التوجيهية للأسرة</div>
                 </div>
             </a>
         </div>
@@ -58,46 +83,132 @@
             <a asp-controller="Account" asp-action="AccountList" class="text-decoration-none">
                 <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-3 shadow-sm h-100 hover-shadow transition">
                     <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="text-secondary small fw-bold">حسابات الآباء والأطفال</span>
+                        <span class="text-secondary small fw-bold">حسابات أولياء الأمور والأطفال</span>
                         <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">المستخدمون</span>
                     </div>
                     <div class="d-flex align-items-baseline gap-2 mb-1">
-                        <span class="display-6 fw-bold text-light">@Model.TotalAccounts</span>
-                        <span class="text-secondary small">حساب / @Model.TotalChildren طفل</span>
+                        <span class="display-6 fw-bold text-light" id="kpiTotalAccounts">@Model.TotalAccounts</span>
+                        <span class="text-secondary small">أسرة / <span id="kpiTotalChildren">@Model.TotalChildren</span> طفل</span>
                     </div>
-                    <div class="text-secondary small">عرض بيانات العملاء والأطفال المسجلين</div>
+                    <div class="text-secondary small">متوسط @Model.Analytics.AverageChildrenPerAccount طفل لكل أسرة مسجلة</div>
                 </div>
             </a>
         </div>
 
-        <!-- KPI 4: Admins & Requests -->
+        <!-- KPI 4: Monthly Sales & Revenue -->
         <div class="col-12 col-sm-6 col-xl-3">
-            <a href="@(isSuperAdmin ? Url.Action("TeamRequests", "AdminAuth") : Url.Action("Profile", "AdminAuth"))" class="text-decoration-none">
-                <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-3 shadow-sm h-100 hover-shadow transition">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="text-secondary small fw-bold">فريق الإدارة والطلبات</span>
-                        @if (Model.PendingAdminRequests > 0)
-                        {
-                            <span class="badge bg-danger rounded-pill">@Model.PendingAdminRequests طلب معلق</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">فريق العمل</span>
-                        }
-                    </div>
-                    <div class="d-flex align-items-baseline gap-2 mb-1">
-                        <span class="display-6 fw-bold text-light">@Model.TotalApprovedAdmins</span>
-                        <span class="text-secondary small">مشرف معتمد</span>
-                    </div>
-                    <div class="text-secondary small">
-                        @(isSuperAdmin ? "إدارة طلبات الانضمام وصلاحيات المشرفين" : "عرض وإدارة ملفك الشخصي")
-                    </div>
+            <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-3 shadow-sm h-100 hover-shadow transition">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="text-secondary small fw-bold">مبيعات الشهر الحالي (@Model.Analytics.CurrentMonthName)</span>
+                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">المبيعات</span>
                 </div>
-            </a>
+                <div class="d-flex align-items-baseline gap-2 mb-1">
+                    <span class="display-6 fw-bold text-warning" id="kpiMonthSales">@Model.Analytics.MonthlySalesChart.CurrentMonthTotalSalesCount</span>
+                    <span class="text-secondary small">قصة / <span id="kpiMonthRevenue" class="text-light fw-bold">@Model.Analytics.MonthlySalesChart.CurrentMonthTotalRevenue.ToString("F0")</span> ج.م</span>
+                </div>
+                <div class="text-secondary small">إجمالي الإيرادات المتحققة خلال الشهر</div>
+            </div>
         </div>
     </div>
 
-    <!-- 3. Section 1: Recent Stories Table -->
+    <!-- 3. Dedicated Visual Analytics Section (2x2 Grid) -->
+    <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-4 shadow-sm mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary border-opacity-25 gap-2">
+            <div>
+                <h5 class="fw-bold text-light mb-1 d-flex align-items-center gap-2">
+                    <span class="title-accent-bar"></span>
+                    <span>التحليلات البيانية ومؤشرات الأداء</span>
+                </h5>
+                <p class="text-secondary small mb-0">رصد حي وتفاعلي لمبيعات القصص، توازن القيم الأخلاقية، ومواءمة الفئات العمرية واهتمامات الأطفال</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25 px-3 py-2 small">
+                    فترة التحليل: @Model.Analytics.CurrentMonthName
+                </span>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Chart 1: Monthly Story Sales Line Chart -->
+            <div class="col-12 col-xl-6">
+                <div class="chart-card bg-secondary bg-opacity-10 border border-secondary border-opacity-25 rounded-3 p-3 h-100">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                        <div>
+                            <h6 class="fw-bold text-light mb-0">منحنى مبيعات القصص خلال الشهر الحالي</h6>
+                            <small class="text-secondary">تتبع أسبوعي لعدد النسخ المباعة والإيرادات المالية</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">
+                                المباع: <strong id="chartBadgeSales">@Model.Analytics.MonthlySalesChart.CurrentMonthTotalSalesCount</strong>
+                            </span>
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">
+                                الإيراد: <strong id="chartBadgeRevenue">@Model.Analytics.MonthlySalesChart.CurrentMonthTotalRevenue.ToString("F0") ج.م</strong>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper" style="position: relative; height: 260px;">
+                        <canvas id="monthlySalesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart 2: Stories by Educational Value (Doughnut Chart) -->
+            <div class="col-12 col-xl-6">
+                <div class="chart-card bg-secondary bg-opacity-10 border border-secondary border-opacity-25 rounded-3 p-3 h-100">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                        <div>
+                            <h6 class="fw-bold text-light mb-0">توزيع القصص حسب القيم التربوية</h6>
+                            <small class="text-secondary">توازن المحتوى الأخلاقي المعروض في مكتبة المنصة</small>
+                        </div>
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                            @Model.TotalStories قصة منشورة
+                        </span>
+                    </div>
+                    <div class="chart-wrapper" style="position: relative; height: 260px;">
+                        <canvas id="categoryPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart 3: Age Group Alignment Histogram / Grouped Bar -->
+            <div class="col-12 col-xl-6">
+                <div class="chart-card bg-secondary bg-opacity-10 border border-secondary border-opacity-25 rounded-3 p-3 h-100">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                        <div>
+                            <h6 class="fw-bold text-light mb-0">توافق الفئات العمرية: القصص المتاحة مقابل الأطفال</h6>
+                            <small class="text-secondary">مقارنة حجم المعروض من القصص بالطلب الفعلي لكل فئة عمرية</small>
+                        </div>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                            الفئة الأكثر نشاطاً: <strong id="kpiPopulatedAge">@Model.Analytics.MostPopulatedAgeGroup</strong>
+                        </span>
+                    </div>
+                    <div class="chart-wrapper" style="position: relative; height: 260px;">
+                        <canvas id="ageGroupComparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart 4: Children Interests & Demand (Horizontal Bar) -->
+            <div class="col-12 col-xl-6">
+                <div class="chart-card bg-secondary bg-opacity-10 border border-secondary border-opacity-25 rounded-3 p-3 h-100">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                        <div>
+                            <h6 class="fw-bold text-light mb-0">توزيع اهتمامات الأطفال وتغطية المحتوى</h6>
+                            <small class="text-secondary">القيم والموضوعات الأكثر تفضيلاً لدى الأطفال المسجلين</small>
+                        </div>
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                            الأعلى تفضيلاً: <strong id="kpiTopInterest">@Model.Analytics.MostPopularChildInterest</strong>
+                        </span>
+                    </div>
+                    <div class="chart-wrapper" style="position: relative; height: 260px;">
+                        <canvas id="childrenInterestsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Section 1: Recent Stories Table -->
     <div class="card bg-dark border-secondary border-opacity-25 rounded-3 p-4 shadow-sm mb-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2 border-bottom border-secondary border-opacity-25 pb-3">
             <div>
@@ -159,7 +270,7 @@
                                     }
                                     else
                                     {
-                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">صفحات نصية مصورة</span>
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">صفحات تفاعلية</span>
                                     }
                                 </td>
                                 <td class="text-light">@story.Price.ToString("F0") EGP</td>
@@ -177,7 +288,7 @@
         }
     </div>
 
-    <!-- 4. Section 2 & 3 Side by Side -->
+    <!-- 5. Section 2 & 3 Side by Side -->
     <div class="row g-4">
         <!-- Section 2: Admin-Articles Relationship -->
         <div class="col-12 col-lg-7">
@@ -267,7 +378,6 @@
                         <tbody>
                             @foreach (var item in Model.AgeGroupDistributions)
                             {
-                                bool isAdequate = item.StoriesCount > 0 && item.StoriesCount >= (item.ChildrenCount / 2);
                                 <tr>
                                     <td class="fw-bold text-warning">@item.AgeGroup سنوات</td>
                                     <td>
@@ -306,3 +416,804 @@
     </div>
 
 </div>
+
+<!-- ============================================================ -->
+<!-- 6. Dedicated Official Light-Theme PDF Report Template Container -->
+<!-- Formatted strictly for official high-resolution PDF generation -->
+<!-- ============================================================ -->
+<div id="pdfReportContainer" dir="rtl" style="display: none; background: #ffffff; color: #0f172a; font-family: 'Tajawal', 'Cairo', Arial, sans-serif; padding: 24px; width: 100%; box-sizing: border-box;">
+
+    <!-- Official Header -->
+    <div style="border-bottom: 3px solid #0f172a; padding-bottom: 16px; margin-bottom: 20px;" class="pdf-avoid-break">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h2 style="margin: 0 0 6px 0; color: #0f172a; font-size: 24px; font-weight: 800;">
+                    منصة سوبر قيم التربوية — التقرير التحليلي الشامل لحالة المنصة
+                </h2>
+                <div style="color: #475569; font-size: 13px; line-height: 1.5;">
+                    تقرير إداري تحليلي رسمي معتمد لرصد الأداء، مؤشرات المبيعات، ومواءمة المحتوى للأطفال
+                </div>
+            </div>
+            <div style="text-align: left; font-size: 12px; color: #64748b; direction: ltr;">
+                <div style="font-weight: 700; color: #0f172a;">SUPER KAYYEM PLATFORM</div>
+                <div>Status Report</div>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #334155;">
+            <div><strong>تاريخ استخراج التقرير:</strong> <span id="pdfGenDate">@DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm UTC")</span></div>
+            <div><strong>شهر التقرير المالي والتحليلي:</strong> <span style="color: #b45309; font-weight: 700;">@Model.Analytics.CurrentMonthName</span></div>
+            <div><strong>حالة النظام:</strong> <span style="color: #047857; font-weight: 700;">نشط ومحدث</span></div>
+        </div>
+        <div style="height: 4px; background: linear-gradient(90deg, #b45309, #f59e0b, #0f172a); margin-top: 10px; border-radius: 2px;"></div>
+    </div>
+
+    <!-- Section 1: Executive KPI Grid -->
+    <div style="margin-bottom: 24px;" class="pdf-avoid-break">
+        <h4 style="margin: 0 0 12px 0; color: #0f172a; font-size: 16px; font-weight: 800; border-right: 4px solid #b45309; padding-right: 8px;">
+            اولاً: الملخص التنفيذي ومؤشرات الأداء العامة
+        </h4>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+            <!-- KPI 1 -->
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-top: 3px solid #0f172a; padding: 12px; border-radius: 6px;">
+                <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 4px;">إجمالي القصص المنشورة</div>
+                <div style="font-size: 20px; font-weight: 800; color: #0f172a;">@Model.TotalStories قصة</div>
+                <div style="font-size: 10px; color: #475569; margin-top: 4px;">@Model.Analytics.TotalPdfStories ملف PDF / @Model.Analytics.TotalEditorStories محرر تفاعلي</div>
+            </div>
+            <!-- KPI 2 -->
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-top: 3px solid #b45309; padding: 12px; border-radius: 6px;">
+                <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 4px;">مبيعات الشهر الحالي (@Model.Analytics.CurrentMonthName)</div>
+                <div style="font-size: 20px; font-weight: 800; color: #b45309;">@Model.Analytics.MonthlySalesChart.CurrentMonthTotalSalesCount قصة</div>
+                <div style="font-size: 10px; color: #475569; margin-top: 4px;">إجمالي الإيراد: @Model.Analytics.MonthlySalesChart.CurrentMonthTotalRevenue.ToString("F2") ج.م</div>
+            </div>
+            <!-- KPI 3 -->
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-top: 3px solid #0284c7; padding: 12px; border-radius: 6px;">
+                <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 4px;">مقالات التوعية التربوية</div>
+                <div style="font-size: 20px; font-weight: 800; color: #0284c7;">@Model.TotalArticles مقالاً</div>
+                <div style="font-size: 10px; color: #475569; margin-top: 4px;">موجهة لأولياء الأمور والمربين</div>
+            </div>
+            <!-- KPI 4 -->
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-top: 3px solid #059669; padding: 12px; border-radius: 6px;">
+                <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 4px;">إحصائيات الجمهور المجمعة</div>
+                <div style="font-size: 20px; font-weight: 800; color: #059669;">@Model.TotalAccounts أسرة</div>
+                <div style="font-size: 10px; color: #475569; margin-top: 4px;">@Model.TotalChildren طفلاً (متوسط @Model.Analytics.AverageChildrenPerAccount طفل/أسرة)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Visual Analytics Charts Snapshot -->
+    <div style="margin-bottom: 24px;" class="pdf-avoid-break">
+        <h4 style="margin: 0 0 12px 0; color: #0f172a; font-size: 16px; font-weight: 800; border-right: 4px solid #b45309; padding-right: 8px;">
+            ثانياً: المخططات البيانية التحليلية لحالة المنصة
+        </h4>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+            <!-- Chart Snapshot 1 -->
+            <div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #ffffff;" class="pdf-avoid-break">
+                <div style="font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">
+                    منحنى مبيعات القصص خلال الشهر الحالي
+                </div>
+                <img id="pdfImgSales" src="" style="width: 100%; height: auto; display: block; border-radius: 4px; min-height: 140px; background: #f8fafc;" alt="مبيعات القصص" />
+                <div style="font-size: 10px; color: #64748b; margin-top: 4px; text-align: justify;">
+                    تتبع زمني يوضح أداء المبيعات الأسبوعية وقيمة الإيرادات بالجنيه المصري لشهر @Model.Analytics.CurrentMonthName.
+                </div>
+            </div>
+            <!-- Chart Snapshot 2 -->
+            <div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #ffffff;" class="pdf-avoid-break">
+                <div style="font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">
+                    توزيع القصص حسب القيم التربوية
+                </div>
+                <img id="pdfImgCat" src="" style="width: 100%; height: auto; display: block; border-radius: 4px; min-height: 140px; background: #f8fafc;" alt="القيم التربوية" />
+                <div style="font-size: 10px; color: #64748b; margin-top: 4px; text-align: justify;">
+                    نسبة تمثيل كل قيمة أخلاقية (التعاون، الصدق، الشجاعة، المسؤولية...) في مكتبة القصص المنشورة.
+                </div>
+            </div>
+            <!-- Chart Snapshot 3 -->
+            <div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #ffffff;" class="pdf-avoid-break">
+                <div style="font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">
+                    توافق الفئات العمرية: القصص المتاحة مقابل الأطفال
+                </div>
+                <img id="pdfImgAge" src="" style="width: 100%; height: auto; display: block; border-radius: 4px; min-height: 140px; background: #f8fafc;" alt="الفئات العمرية" />
+                <div style="font-size: 10px; color: #64748b; margin-top: 4px; text-align: justify;">
+                    رصد التوافق بين عدد القصص المعروضة وعدد الأطفال المسجلين في كل فئة عمرية لاكتشاف فجوات المحتوى.
+                </div>
+            </div>
+            <!-- Chart Snapshot 4 -->
+            <div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #ffffff;" class="pdf-avoid-break">
+                <div style="font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">
+                    توزيع اهتمامات الأطفال وتغطية المحتوى
+                </div>
+                <img id="pdfImgInt" src="" style="width: 100%; height: auto; display: block; border-radius: 4px; min-height: 140px; background: #f8fafc;" alt="اهتمامات الأطفال" />
+                <div style="font-size: 10px; color: #64748b; margin-top: 4px; text-align: justify;">
+                    حصر تفضيلات واهتمامات الأطفال الأكثر تسجيلاً ومقارنتها بتوافر القصص التي تغطي تلك الموضوعات.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Aggregated Audience Statistics -->
+    <div style="margin-bottom: 24px;" class="pdf-avoid-break">
+        <h4 style="margin: 0 0 12px 0; color: #0f172a; font-size: 16px; font-weight: 800; border-right: 4px solid #b45309; padding-right: 8px;">
+            ثالثاً: إحصائيات الجمهور المجمعة (تحليل الفئات العمرية)
+        </h4>
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: right;">
+            <thead>
+                <tr style="background: #0f172a; color: #ffffff;">
+                    <th style="padding: 8px 10px; border: 1px solid #0f172a;">الفئة العمرية</th>
+                    <th style="padding: 8px 10px; border: 1px solid #0f172a;">عدد الأطفال المسجلين</th>
+                    <th style="padding: 8px 10px; border: 1px solid #0f172a;">النسبة من إجمالي الأطفال</th>
+                    <th style="padding: 8px 10px; border: 1px solid #0f172a;">عدد القصص المتاحة</th>
+                    <th style="padding: 8px 10px; border: 1px solid #0f172a;">حالة التغطية التربوية</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.AgeGroupDistributions)
+                {
+                    double pct = Model.TotalChildren > 0 ? Math.Round((double)item.ChildrenCount / Model.TotalChildren * 100, 1) : 0;
+                    <tr style="border-bottom: 1px solid #cbd5e1; background: #ffffff;">
+                        <td style="padding: 8px 10px; font-weight: 700; color: #0f172a; border: 1px solid #e2e8f0;">@item.AgeGroup سنوات</td>
+                        <td style="padding: 8px 10px; border: 1px solid #e2e8f0; color: #0284c7; font-weight: 700;">@item.ChildrenCount طفل</td>
+                        <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">@pct %</td>
+                        <td style="padding: 8px 10px; border: 1px solid #e2e8f0; font-weight: 700;">@item.StoriesCount قصة</td>
+                        <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">
+                            @if (item.StoriesCount > 0 && item.StoriesCount >= item.ChildrenCount / 2)
+                            {
+                                <span style="color: #047857; font-weight: 700;">مغطى بشكل متوازن</span>
+                            }
+                            else if (item.StoriesCount > 0)
+                            {
+                                <span style="color: #b45309; font-weight: 700;">يحتاج تعزيز المحتوى</span>
+                            }
+                            else
+                            {
+                                <span style="color: #b91c1c; font-weight: 700;">فجوة محتوى</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div style="font-size: 11px; color: #64748b; margin-top: 6px; font-style: italic;">
+            * ملاحظة: يقتصر هذا القسم على الإحصائيات المجمعة التراكمية دون الكشف عن أي أسماء، عناوين بريد، أو بيانات شخصية خاصة بأولياء الأمور.
+        </div>
+    </div>
+
+    <!-- Section 4: Published Stories Catalog -->
+    <div style="margin-bottom: 24px;" class="pdf-avoid-break">
+        <h4 style="margin: 0 0 12px 0; color: #0f172a; font-size: 16px; font-weight: 800; border-right: 4px solid #b45309; padding-right: 8px;">
+            رابعاً: بيان القصص المنشورة بالمكتبة
+        </h4>
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right;">
+            <thead>
+                <tr style="background: #0f172a; color: #ffffff;">
+                    <th style="padding: 7px 8px; border: 1px solid #0f172a; width: 45px;">#</th>
+                    <th style="padding: 7px 8px; border: 1px solid #0f172a;">عنوان القصة</th>
+                    <th style="padding: 7px 8px; border: 1px solid #0f172a;">القيمة التربوية</th>
+                    <th style="padding: 7px 8px; border: 1px solid #0f172a;">الفئة العمرية</th>
+                    <th style="padding: 7px 8px; border: 1px solid #0f172a;">نوع المحتوى</th>
+                    <th style="padding: 7px 8px; border: 1px solid #0f172a;">السعر</th>
+                    <th style="padding: 7px 8px; border: 1px solid #0f172a;">مبيعات الشهر</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var story in Model.AllStories)
+                {
+                    int salesCount = Model.StoryCurrentMonthSalesCount.TryGetValue(story.Id, out int sc) ? sc : 0;
+                    <tr style="border-bottom: 1px solid #cbd5e1; background: #ffffff;">
+                        <td style="padding: 6px 8px; border: 1px solid #e2e8f0; color: #64748b;">#@story.Id</td>
+                        <td style="padding: 6px 8px; border: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">@story.Title</td>
+                        <td style="padding: 6px 8px; border: 1px solid #e2e8f0;">@story.Category</td>
+                        <td style="padding: 6px 8px; border: 1px solid #e2e8f0;">@(story.TargetAge.HasValue ? $"{story.TargetAge.Value} سنوات" : "—")</td>
+                        <td style="padding: 6px 8px; border: 1px solid #e2e8f0;">
+                            @(!string.IsNullOrWhiteSpace(story.PdfUrl) ? "ملف PDF" : "محرر تفاعلي")
+                        </td>
+                        <td style="padding: 6px 8px; border: 1px solid #e2e8f0; font-weight: 700;">@story.Price.ToString("F0") ج.م</td>
+                        <td style="padding: 6px 8px; border: 1px solid #e2e8f0; color: #b45309; font-weight: 700;">@salesCount نسخة</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Section 5: Published Articles Catalog -->
+    <div style="margin-bottom: 24px;" class="pdf-avoid-break">
+        <h4 style="margin: 0 0 12px 0; color: #0f172a; font-size: 16px; font-weight: 800; border-right: 4px solid #b45309; padding-right: 8px;">
+            خامساً: بيان المقالات التوعوية المنشورة للآباء
+        </h4>
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right;">
+            <thead>
+                <tr style="background: #0f172a; color: #ffffff;">
+                    <th style="padding: 7px 8px; border: 1px solid #0f172a; width: 45px;">#</th>
+                    <th style="padding: 7px 8px; border: 1px solid #0f172a;">عنوان المقال</th>
+                    <th style="padding: 7px 8px; border: 1px solid #0f172a;">الكاتب</th>
+                    <th style="padding: 7px 8px; border: 1px solid #0f172a;">تاريخ النشر</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var article in Model.AllArticles.Take(15))
+                {
+                    <tr style="border-bottom: 1px solid #cbd5e1; background: #ffffff;">
+                        <td style="padding: 6px 8px; border: 1px solid #e2e8f0; color: #64748b;">#@article.Id</td>
+                        <td style="padding: 6px 8px; border: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">@article.Title</td>
+                        <td style="padding: 6px 8px; border: 1px solid #e2e8f0;">@article.AuthorName</td>
+                        <td style="padding: 6px 8px; border: 1px solid #e2e8f0; color: #475569;">@article.PublishedAt.ToString("yyyy-MM-dd")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Official Report Footer -->
+    <div style="border-top: 2px solid #0f172a; padding-top: 12px; margin-top: 24px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #64748b;" class="pdf-avoid-break">
+        <div>منصة سوبر قيم التربوية — تقرير تحليلي رسمي معتمد صادر إلكترونياً.</div>
+        <div>سري ومخصص لأغراض المتابعة الإدارية والتطوير التربوي المستمر.</div>
+        <div style="direction: ltr; font-weight: 700;">Super Kayyem 2026</div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 7. Dashboard Styles and High-Contrast Analytics Theme -->
+<!-- ============================================================ -->
+<style>
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #10b981;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        animation: pulseAnimation 2s infinite;
+    }
+
+    @@keyframes pulseAnimation {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        }
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+        }
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        }
+    }
+
+    .title-accent-bar {
+        display: inline-block;
+        width: 4px;
+        height: 20px;
+        background: #f59e0b;
+        border-radius: 2px;
+    }
+
+    .chart-card {
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .chart-card:hover {
+        border-color: rgba(245, 158, 11, 0.4) !important;
+    }
+
+    .pdf-avoid-break {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+</style>
+
+<!-- ============================================================ -->
+<!-- 8. Interactive Chart.js & Live Periodic Refresh Script -->
+<!-- ============================================================ -->
+<script>
+    // Safe normalization helper to seamlessly handle both camelCase and PascalCase
+    function normalizeAnalytics(raw) {
+        if (!raw) raw = {};
+        const sales = raw.monthlySalesChart || raw.MonthlySalesChart || {};
+        const cat = raw.categoryPieChart || raw.CategoryPieChart || {};
+        const age = raw.ageGroupComparisonChart || raw.AgeGroupComparisonChart || {};
+        const interests = raw.childrenInterestsChart || raw.ChildrenInterestsChart || {};
+
+        return {
+            totalStories: raw.totalStories ?? raw.TotalStories ?? 0,
+            totalArticles: raw.totalArticles ?? raw.TotalArticles ?? 0,
+            totalParentAccounts: raw.totalParentAccounts ?? raw.TotalParentAccounts ?? 0,
+            totalRegisteredChildren: raw.totalRegisteredChildren ?? raw.TotalRegisteredChildren ?? 0,
+            lastUpdatedFormatted: raw.lastUpdatedFormatted || raw.LastUpdatedFormatted || '',
+            mostPopularChildInterest: raw.mostPopularChildInterest || raw.MostPopularChildInterest || '',
+            mostPopulatedAgeGroup: raw.mostPopulatedAgeGroup || raw.MostPopulatedAgeGroup || '',
+            monthlySalesChart: {
+                labels: sales.labels || sales.Labels || [],
+                storiesSoldCounts: sales.storiesSoldCounts || sales.StoriesSoldCounts || [],
+                revenueAmounts: sales.revenueAmounts || sales.RevenueAmounts || [],
+                currentMonthTotalSalesCount: sales.currentMonthTotalSalesCount ?? sales.CurrentMonthTotalSalesCount ?? 0,
+                currentMonthTotalRevenue: sales.currentMonthTotalRevenue ?? sales.CurrentMonthTotalRevenue ?? 0
+            },
+            categoryPieChart: {
+                labels: cat.labels || cat.Labels || [],
+                counts: cat.counts || cat.Counts || []
+            },
+            ageGroupComparisonChart: {
+                labels: age.labels || age.Labels || ['4 - 6 سنوات', '6 - 8 سنوات', '8 - 10 سنوات'],
+                storyCounts: age.storyCounts || age.StoryCounts || [],
+                childCounts: age.childCounts || age.ChildCounts || []
+            },
+            childrenInterestsChart: {
+                labels: interests.labels || interests.Labels || [],
+                childInterestCounts: interests.childInterestCounts || interests.ChildInterestCounts || [],
+                availableStoriesCounts: interests.availableStoriesCounts || interests.AvailableStoriesCounts || []
+            }
+        };
+    }
+
+    // Initial server-rendered datasets safely serialized in camelCase and normalized
+    const rawServerAnalytics = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Analytics, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+    let analyticsData = normalizeAnalytics(rawServerAnalytics);
+
+    // Global reference to active Chart.js instances
+    window.superKayyemCharts = {
+        salesChart: null,
+        categoryChart: null,
+        ageChart: null,
+        interestsChart: null
+    };
+
+    const CHART_FONT = {
+        family: "'Tajawal', 'Cairo', sans-serif",
+        size: 12
+    };
+
+    function initCharts(rawData) {
+        if (typeof Chart === 'undefined') {
+            console.warn('Chart.js library is not loaded yet');
+            return;
+        }
+
+        const data = normalizeAnalytics(rawData);
+        analyticsData = data;
+
+        // 1. Chart 1: Monthly Story Sales Line Chart
+        try {
+            const ctxSales = document.getElementById('monthlySalesChart');
+            if (ctxSales) {
+                if (window.superKayyemCharts.salesChart) window.superKayyemCharts.salesChart.destroy();
+                window.superKayyemCharts.salesChart = new Chart(ctxSales, {
+                    type: 'line',
+                    data: {
+                        labels: data.monthlySalesChart.labels,
+                        datasets: [
+                            {
+                                label: 'عدد القصص المباعة',
+                                data: data.monthlySalesChart.storiesSoldCounts,
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                                fill: true,
+                                tension: 0.35,
+                                borderWidth: 3,
+                                pointBackgroundColor: '#f59e0b',
+                                pointBorderColor: '#ffffff',
+                                pointHoverRadius: 7,
+                                pointRadius: 5,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'الإيرادات (ج.م)',
+                                data: data.monthlySalesChart.revenueAmounts,
+                                borderColor: '#0ea5e9',
+                                backgroundColor: 'rgba(14, 165, 233, 0.08)',
+                                borderDash: [5, 5],
+                                fill: false,
+                                tension: 0.35,
+                                borderWidth: 2,
+                                pointBackgroundColor: '#0ea5e9',
+                                pointBorderColor: '#ffffff',
+                                pointHoverRadius: 6,
+                                pointRadius: 4,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: CHART_FONT
+                                }
+                            },
+                            tooltip: {
+                                rtl: true,
+                                backgroundColor: '#0f172a',
+                                borderColor: '#334155',
+                                borderWidth: 1,
+                                titleFont: CHART_FONT,
+                                bodyFont: CHART_FONT
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#94a3b8', font: CHART_FONT },
+                                grid: { color: 'rgba(148, 163, 184, 0.08)' }
+                            },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: { display: true, text: 'القصص المباعة', color: '#f59e0b', font: CHART_FONT },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    font: CHART_FONT,
+                                    stepSize: 1
+                                },
+                                grid: { color: 'rgba(148, 163, 184, 0.08)' }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: { display: true, text: 'الإيراد (ج.م)', color: '#0ea5e9', font: CHART_FONT },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    font: CHART_FONT,
+                                    callback: val => val + ' ج.م'
+                                },
+                                grid: { drawOnChartArea: false }
+                            }
+                        }
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Failed to init sales chart:', err);
+        }
+
+        // 2. Chart 2: Category Pie / Doughnut Chart
+        try {
+            const ctxCat = document.getElementById('categoryPieChart');
+            if (ctxCat) {
+                if (window.superKayyemCharts.categoryChart) window.superKayyemCharts.categoryChart.destroy();
+                window.superKayyemCharts.categoryChart = new Chart(ctxCat, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.categoryPieChart.labels,
+                        datasets: [{
+                            data: data.categoryPieChart.counts,
+                            backgroundColor: [
+                                '#f59e0b', '#0ea5e9', '#10b981', '#6366f1',
+                                '#f43f5e', '#8b5cf6', '#14b8a6', '#ec4899'
+                            ],
+                            borderColor: '#1e293b',
+                            borderWidth: 2,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                rtl: true,
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: CHART_FONT,
+                                    boxWidth: 14,
+                                    padding: 12
+                                }
+                            },
+                            tooltip: {
+                                rtl: true,
+                                backgroundColor: '#0f172a',
+                                borderColor: '#334155',
+                                borderWidth: 1,
+                                titleFont: CHART_FONT,
+                                bodyFont: CHART_FONT,
+                                callbacks: {
+                                    label: ctx => ` ${ctx.label}: ${ctx.raw} قصة (${((ctx.raw / (data.totalStories || 1)) * 100).toFixed(0)}%)`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Failed to init category chart:', err);
+        }
+
+        // 3. Chart 3: Age Group Alignment Histogram / Grouped Bar
+        try {
+            const ctxAge = document.getElementById('ageGroupComparisonChart');
+            if (ctxAge) {
+                if (window.superKayyemCharts.ageChart) window.superKayyemCharts.ageChart.destroy();
+                window.superKayyemCharts.ageChart = new Chart(ctxAge, {
+                    type: 'bar',
+                    data: {
+                        labels: data.ageGroupComparisonChart.labels,
+                        datasets: [
+                            {
+                                label: 'القصص المتوفرة',
+                                data: data.ageGroupComparisonChart.storyCounts,
+                                backgroundColor: '#10b981',
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'الأطفال المسجلون',
+                                data: data.ageGroupComparisonChart.childCounts,
+                                backgroundColor: '#6366f1',
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#e2e8f0', font: CHART_FONT }
+                            },
+                            tooltip: {
+                                rtl: true,
+                                backgroundColor: '#0f172a',
+                                borderColor: '#334155',
+                                borderWidth: 1,
+                                titleFont: CHART_FONT,
+                                bodyFont: CHART_FONT
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#94a3b8', font: CHART_FONT },
+                                grid: { display: false }
+                            },
+                            y: {
+                                ticks: { color: '#94a3b8', font: CHART_FONT, stepSize: 1 },
+                                grid: { color: 'rgba(148, 163, 184, 0.08)' }
+                            }
+                        }
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Failed to init age chart:', err);
+        }
+
+        // 4. Chart 4: Children Interests Horizontal Bar Chart
+        try {
+            const ctxInt = document.getElementById('childrenInterestsChart');
+            if (ctxInt) {
+                if (window.superKayyemCharts.interestsChart) window.superKayyemCharts.interestsChart.destroy();
+                window.superKayyemCharts.interestsChart = new Chart(ctxInt, {
+                    type: 'bar',
+                    data: {
+                        labels: data.childrenInterestsChart.labels,
+                        datasets: [
+                            {
+                                label: 'اهتمامات الأطفال',
+                                data: data.childrenInterestsChart.childInterestCounts,
+                                backgroundColor: '#f43f5e',
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'القصص المتاحة',
+                                data: data.childrenInterestsChart.availableStoriesCounts,
+                                backgroundColor: '#0ea5e9',
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#e2e8f0', font: CHART_FONT }
+                            },
+                            tooltip: {
+                                rtl: true,
+                                backgroundColor: '#0f172a',
+                                borderColor: '#334155',
+                                borderWidth: 1,
+                                titleFont: CHART_FONT,
+                                bodyFont: CHART_FONT
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#94a3b8', font: CHART_FONT, stepSize: 1 },
+                                grid: { color: 'rgba(148, 163, 184, 0.08)' }
+                            },
+                            y: {
+                                ticks: { color: '#94a3b8', font: CHART_FONT },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Failed to init interests chart:', err);
+        }
+    }
+
+    // Function to smoothly update charts and badges from new JSON data
+    function updateDashboardData(rawNewData) {
+        const newData = normalizeAnalytics(rawNewData);
+        analyticsData = newData;
+
+        // Update Text Badges & KPIs
+        const elLastUpdated = document.getElementById('lastUpdatedBadge');
+        if (elLastUpdated) elLastUpdated.textContent = newData.lastUpdatedFormatted;
+
+        const elMonthSales = document.getElementById('kpiMonthSales');
+        if (elMonthSales) elMonthSales.textContent = newData.monthlySalesChart.currentMonthTotalSalesCount;
+
+        const elMonthRevenue = document.getElementById('kpiMonthRevenue');
+        if (elMonthRevenue) elMonthRevenue.textContent = Number(newData.monthlySalesChart.currentMonthTotalRevenue).toFixed(0);
+
+        const elBadgeSales = document.getElementById('chartBadgeSales');
+        if (elBadgeSales) elBadgeSales.textContent = newData.monthlySalesChart.currentMonthTotalSalesCount;
+
+        const elBadgeRevenue = document.getElementById('chartBadgeRevenue');
+        if (elBadgeRevenue) elBadgeRevenue.textContent = Number(newData.monthlySalesChart.currentMonthTotalRevenue).toFixed(0) + ' ج.م';
+
+        const elTopInterest = document.getElementById('kpiTopInterest');
+        if (elTopInterest) elTopInterest.textContent = newData.mostPopularChildInterest;
+
+        const elPopulatedAge = document.getElementById('kpiPopulatedAge');
+        if (elPopulatedAge) elPopulatedAge.textContent = newData.mostPopulatedAgeGroup;
+
+        // Update Chart 1 (Sales)
+        if (window.superKayyemCharts.salesChart) {
+            window.superKayyemCharts.salesChart.data.labels = newData.monthlySalesChart.labels;
+            window.superKayyemCharts.salesChart.data.datasets[0].data = newData.monthlySalesChart.storiesSoldCounts;
+            window.superKayyemCharts.salesChart.data.datasets[1].data = newData.monthlySalesChart.revenueAmounts;
+            window.superKayyemCharts.salesChart.update();
+        }
+
+        // Update Chart 2 (Categories)
+        if (window.superKayyemCharts.categoryChart) {
+            window.superKayyemCharts.categoryChart.data.labels = newData.categoryPieChart.labels;
+            window.superKayyemCharts.categoryChart.data.datasets[0].data = newData.categoryPieChart.counts;
+            window.superKayyemCharts.categoryChart.update();
+        }
+
+        // Update Chart 3 (Age)
+        if (window.superKayyemCharts.ageChart) {
+            window.superKayyemCharts.ageChart.data.labels = newData.ageGroupComparisonChart.labels;
+            window.superKayyemCharts.ageChart.data.datasets[0].data = newData.ageGroupComparisonChart.storyCounts;
+            window.superKayyemCharts.ageChart.data.datasets[1].data = newData.ageGroupComparisonChart.childCounts;
+            window.superKayyemCharts.ageChart.update();
+        }
+
+        // Update Chart 4 (Interests)
+        if (window.superKayyemCharts.interestsChart) {
+            window.superKayyemCharts.interestsChart.data.labels = newData.childrenInterestsChart.labels;
+            window.superKayyemCharts.interestsChart.data.datasets[0].data = newData.childrenInterestsChart.childInterestCounts;
+            window.superKayyemCharts.interestsChart.data.datasets[1].data = newData.childrenInterestsChart.availableStoriesCounts;
+            window.superKayyemCharts.interestsChart.update();
+        }
+    }
+
+    // Live Periodic Polling Function (every 30 seconds)
+    async function fetchLiveAnalytics() {
+        const btn = document.getElementById('btnRefreshAnalytics');
+        if (btn) btn.classList.add('opacity-50');
+
+        try {
+            const res = await fetch('/Admin/AnalyticsData');
+            if (res.ok) {
+                const json = await res.json();
+                updateDashboardData(json);
+            }
+        } catch (err) {
+            console.warn('Could not auto-refresh analytics data:', err);
+        } finally {
+            if (btn) btn.classList.remove('opacity-50');
+        }
+    }
+
+    // PDF Export Function
+    async function exportOfficialPdfReport() {
+        const btn = document.getElementById('btnExportPdf');
+        if (!btn) return;
+        const originalText = btn.innerHTML;
+
+        if (typeof html2pdf === 'undefined') {
+            console.error('html2pdf is not defined');
+            alert('تعذر تحميل مكتبة استخراج ملفات PDF. يرجى التأكد من اتصال الإنترنت أو تحديث الصفحة.');
+            return;
+        }
+
+        btn.innerHTML = '<span>جارٍ تجهيز التقرير...</span>';
+        btn.disabled = true;
+
+        const reportElement = document.getElementById('pdfReportContainer');
+        if (!reportElement) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+
+        try {
+            // 1. Capture crisp base64 images from the 4 rendered Chart.js canvases
+            try {
+                if (window.superKayyemCharts.salesChart && typeof window.superKayyemCharts.salesChart.toBase64Image === 'function') {
+                    const img = document.getElementById('pdfImgSales');
+                    if (img) img.src = window.superKayyemCharts.salesChart.toBase64Image();
+                }
+                if (window.superKayyemCharts.categoryChart && typeof window.superKayyemCharts.categoryChart.toBase64Image === 'function') {
+                    const img = document.getElementById('pdfImgCat');
+                    if (img) img.src = window.superKayyemCharts.categoryChart.toBase64Image();
+                }
+                if (window.superKayyemCharts.ageChart && typeof window.superKayyemCharts.ageChart.toBase64Image === 'function') {
+                    const img = document.getElementById('pdfImgAge');
+                    if (img) img.src = window.superKayyemCharts.ageChart.toBase64Image();
+                }
+                if (window.superKayyemCharts.interestsChart && typeof window.superKayyemCharts.interestsChart.toBase64Image === 'function') {
+                    const img = document.getElementById('pdfImgInt');
+                    if (img) img.src = window.superKayyemCharts.interestsChart.toBase64Image();
+                }
+            } catch (e) {
+                console.warn('Could not export chart base64 image:', e);
+            }
+
+            // 2. Set current date & time
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const elDate = document.getElementById('pdfGenDate');
+            if (elDate) elDate.textContent = dateStr;
+
+            // 3. Render PDF via html2pdf
+            reportElement.style.display = 'block';
+
+            // Allow layout and images to paint
+            await new Promise(r => setTimeout(r, 200));
+
+            const opt = {
+                margin: [8, 8, 8, 8],
+                filename: `SuperKayyem_Status_Report_${now.toISOString().slice(0, 10).replace(/-/g, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            await html2pdf().set(opt).from(reportElement).save();
+        } catch (err) {
+            console.error('PDF export error:', err);
+            alert('حدث خطأ أثناء استخراج التقرير بصيغة PDF. يرجى إعادة المحاولة.');
+        } finally {
+            reportElement.style.display = 'none';
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // DOM Ready: Initialize charts and attach event listeners
+    document.addEventListener('DOMContentLoaded', function () {
+        try {
+            initCharts(analyticsData);
+        } catch (e) {
+            console.error('Error during initCharts:', e);
+        }
+
+        // Attach Manual Refresh
+        const refreshBtn = document.getElementById('btnRefreshAnalytics');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', fetchLiveAnalytics);
+        }
+
+        // Attach Export PDF
+        const exportBtn = document.getElementById('btnExportPdf');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', exportOfficialPdfReport);
+        }
+
+        // Periodic Polling: every 30 seconds
+        setInterval(fetchLiveAnalytics, 30000);
+    });
+</script>
