@@ -91,16 +91,12 @@
                                     <div class="d-inline-flex gap-2">
                                         <a asp-controller="AdminArticles" asp-action="Edit" asp-route-id="@item.Id"
                                            class="btn btn-sm btn-outline-info fw-bold px-3">
-                                            ✏️ تعديل
+                                            تعديل
                                         </a>
-                                        <form asp-controller="AdminArticles" asp-action="Delete" asp-route-id="@item.Id"
-                                              method="post" class="d-inline"
-                                              onsubmit="return confirm('هل أنت متأكد من حذف هذا المقال نهائياً؟');">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-sm btn-outline-danger fw-bold px-3">
-                                                🗑️ حذف
-                                            </button>
-                                        </form>
+                                        <a asp-controller="AdminArticles" asp-action="Delete" asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-danger fw-bold px-3">
+                                            حذف
+                                        </a>
                                     </div>
                                 }
                                 else

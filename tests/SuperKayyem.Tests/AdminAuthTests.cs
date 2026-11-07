@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
@@ -378,6 +379,134 @@ namespace SuperKayyem.Tests
         }
 
         [Fact]
+        public async Task Login_Should_SignIn_Specifically_To_AdminCookie_Scheme_And_Not_Duplicate()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(Login_Should_SignIn_Specifically_To_AdminCookie_Scheme_And_Not_Duplicate));
+            var authServiceMock = new Mock<IAuthenticationService>();
+            authServiceMock
+                .Setup(a => a.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
+                .Returns(Task.CompletedTask);
+
+            var services = new ServiceCollection();
+            services.AddMvc();
+            services.AddSingleton(authServiceMock.Object);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpContext = new DefaultHttpContext
+            {
+                RequestServices = serviceProvider
+            };
+
+            var controller = new AdminAuthController(context);
+            controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
+            controller.TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
+            var urlHelperMock = new Mock<IUrlHelper>();
+            urlHelperMock.Setup(u => u.IsLocalUrl(It.IsAny<string>())).Returns(true);
+            controller.Url = urlHelperMock.Object;
+
+            var model = new AdminLoginViewModel
+            {
+                Email = AdminUserSeedData.SuperAdminEmail,
+                Password = AdminUserSeedData.SuperAdminPassword
+            };
+
+            // Act
+            var result = await controller.Login(model);
+
+            // Assert
+            Assert.IsType<RedirectToActionResult>(result);
+            authServiceMock.Verify(a => a.SignInAsync(It.IsAny<HttpContext>(), "AdminCookie", It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()), Times.Once);
+            authServiceMock.Verify(a => a.SignInAsync(It.IsAny<HttpContext>(), CookieAuthenticationDefaults.AuthenticationScheme, It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Test_Create_ModelBinding_From_FormData()
+        {
+            using var context = CreateInMemoryContext(nameof(Test_Create_ModelBinding_From_FormData));
+            var cloudinary = new CloudinaryDotNet.Cloudinary(new CloudinaryDotNet.Account("test", "test", "test"));
+            var controller = new StoriesController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<StoriesController>>(), cloudinary);
+            SetupController(controller);
+
+            // Test if ExtractPagesFromForm or story.Pages works
+            var story = new Story
+            {
+                Title = "قصة تجريبية",
+                Category = "الصدق",
+                TargetAge = 6,
+                Price = 25m,
+                Description = "وصف تجريبي"
+            };
+
+            // If story.Pages was empty, simulate what happens in controller
+            var formCollection = new FormCollection(new Dictionary<string, Microsoft.Extensions.Primitives.StringValues>
+            {
+                { "Pages[0].PageNum", "1" },
+                { "Pages[0].Headline", "عنوان" },
+                { "Pages[0].HasSeparator", "true" },
+                { "Pages[0].Content", "محتوى الصفحة الأولى" }
+            });
+
+            controller.ControllerContext.HttpContext.Request.Form = formCollection;
+
+            var result = await controller.Create(story, "editor", null, null, null);
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal(nameof(StoriesController.Index), redirectResult.ActionName);
+
+            var savedInDb = await context.Stories.FirstOrDefaultAsync(s => s.Title == "قصة تجريبية");
+            Assert.NotNull(savedInDb);
+            Assert.Equal(1, savedInDb.PageCount);
+            Assert.Single(savedInDb.Pages);
+            Assert.Equal("محتوى الصفحة الأولى", savedInDb.Pages[0].Content);
+            Assert.Equal("/images/covers/story1.svg", savedInDb.CoverImage);
+        }
+
+        [Fact]
+        public async Task Test_Real_Mongo_Story_Save()
+        {
+            var jsonPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "server", "appsettings.json");
+            if (!File.Exists(jsonPath)) return;
+            var json = await File.ReadAllTextAsync(jsonPath);
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            var uri = doc.RootElement.GetProperty("MongoDBSettings").GetProperty("AtlasURI").GetString();
+            var dbName = doc.RootElement.GetProperty("MongoDBSettings").GetProperty("DatabaseName").GetString();
+
+            if (string.IsNullOrEmpty(uri)) return;
+
+            var options = new DbContextOptionsBuilder<SuperKayyemDbContext>()
+                .UseMongoDB(uri, dbName ?? "SuperKayyemDb")
+                .Options;
+
+            using var db = new SuperKayyemDbContext(options);
+
+            var stories = await db.Stories.AsNoTracking().Take(5).ToListAsync();
+            Assert.NotNull(stories);
+
+            int nextId = (await db.Stories.MaxAsync(s => (int?)s.Id) ?? 0) + 1;
+            var testStory = new Story
+            {
+                Id = nextId,
+                Title = "قصة فحص MongoDB",
+                Category = "الصدق",
+                TargetAge = 7,
+                Price = 15m,
+                Description = "قصة فحص",
+                CoverImage = "/images/covers/story1.svg",
+                Pages = new List<StoryPageItem>
+                {
+                    new StoryPageItem { PageNum = 1, Headline = "ع 1", HasSeparator = true, Content = "نص صفحة فحص" }
+                }
+            };
+
+            await db.Stories.AddAsync(testStory);
+            await db.SaveChangesAsync();
+
+            // Clean up
+            db.Stories.Remove(testStory);
+            await db.SaveChangesAsync();
+        }
+
+        [Fact]
         public async Task Authenticated_User_Visiting_Login_Or_JoinTeam_Should_Redirect_To_Admin()
         {
             // Arrange
@@ -437,10 +566,10 @@ namespace SuperKayyem.Tests
         }
 
         [Fact]
-        public async Task AdminController_SuperAdmin_Actions_Should_Approve_Reject_Revoke_And_Restore()
+        public async Task AdminAuthController_SuperAdmin_Actions_Should_Approve_Reject_Revoke_And_Restore()
         {
             // Arrange
-            using var context = CreateInMemoryContext(nameof(AdminController_SuperAdmin_Actions_Should_Approve_Reject_Revoke_And_Restore));
+            using var context = CreateInMemoryContext(nameof(AdminAuthController_SuperAdmin_Actions_Should_Approve_Reject_Revoke_And_Restore));
             context.AdminUsers.Add(new AdminUser
             {
                 Id = 10,
@@ -452,7 +581,7 @@ namespace SuperKayyem.Tests
             });
             await context.SaveChangesAsync();
 
-            var controller = new AdminController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<AdminController>>(), null!);
+            var controller = new AdminAuthController(context);
             SetupController(controller);
 
             // 1. Approve
@@ -480,10 +609,10 @@ namespace SuperKayyem.Tests
         }
 
         [Fact]
-        public async Task AdminController_TeamRequests_Should_Return_All_Users_And_Set_Badge()
+        public async Task AdminAuthController_TeamRequests_Should_Return_All_Users_And_Set_Badge()
         {
             // Arrange
-            using var context = CreateInMemoryContext(nameof(AdminController_TeamRequests_Should_Return_All_Users_And_Set_Badge));
+            using var context = CreateInMemoryContext(nameof(AdminAuthController_TeamRequests_Should_Return_All_Users_And_Set_Badge));
             context.AdminUsers.Add(new AdminUser
             {
                 Id = 20,
@@ -504,7 +633,7 @@ namespace SuperKayyem.Tests
             });
             await context.SaveChangesAsync();
 
-            var controller = new AdminController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<AdminController>>(), null!);
+            var controller = new AdminAuthController(context);
             SetupController(controller);
 
             // Act
@@ -519,14 +648,14 @@ namespace SuperKayyem.Tests
         }
 
         [Fact]
-        public async Task AdminController_Should_Not_Allow_Revoking_SuperAdmin()
+        public async Task AdminAuthController_Should_Not_Allow_Revoking_SuperAdmin()
         {
             // Arrange
-            using var context = CreateInMemoryContext(nameof(AdminController_Should_Not_Allow_Revoking_SuperAdmin));
+            using var context = CreateInMemoryContext(nameof(AdminAuthController_Should_Not_Allow_Revoking_SuperAdmin));
             await AdminUserSeedData.EnsureSuperAdminSeededAsync(context);
             var superAdmin = await context.AdminUsers.FirstAsync(u => u.Role == "SuperAdmin");
 
-            var controller = new AdminController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<AdminController>>(), null!);
+            var controller = new AdminAuthController(context);
             SetupController(controller);
 
             // Act - try to revoke SuperAdmin
@@ -586,20 +715,33 @@ namespace SuperKayyem.Tests
             Assert.NotNull(accountAuthAttr);
             Assert.Equal("SuperAdmin,Admin", accountAuthAttr.Roles);
 
-            // 3. SuperAdmin exclusive actions in AdminController
-            var teamRequestsAttr = typeof(AdminController).GetMethod(nameof(AdminController.TeamRequests))?.GetCustomAttribute<AuthorizeAttribute>();
+            // 3. SuperAdmin exclusive actions in AdminAuthController
+            var teamRequestsAttr = typeof(AdminAuthController).GetMethod(nameof(AdminAuthController.TeamRequests))?.GetCustomAttribute<AuthorizeAttribute>();
             Assert.NotNull(teamRequestsAttr);
             Assert.Equal("SuperAdmin", teamRequestsAttr.Roles);
 
-            var approveAttr = typeof(AdminController).GetMethod(nameof(AdminController.ApproveRequest))?.GetCustomAttribute<AuthorizeAttribute>();
+            var approveAttr = typeof(AdminAuthController).GetMethod(nameof(AdminAuthController.ApproveRequest))?.GetCustomAttribute<AuthorizeAttribute>();
             Assert.NotNull(approveAttr);
             Assert.Equal("SuperAdmin", approveAttr.Roles);
 
-            var revokeAttr = typeof(AdminController).GetMethod(nameof(AdminController.RevokeAccess))?.GetCustomAttribute<AuthorizeAttribute>();
+            var revokeAttr = typeof(AdminAuthController).GetMethod(nameof(AdminAuthController.RevokeAccess))?.GetCustomAttribute<AuthorizeAttribute>();
             Assert.NotNull(revokeAttr);
             Assert.Equal("SuperAdmin", revokeAttr.Roles);
 
-            // 4. API controllers must NOT have Authorize attribute (to keep public React frontend working!)
+            var updatePassAttr = typeof(AdminAuthController).GetMethod(nameof(AdminAuthController.UpdateAdminPassword))?.GetCustomAttribute<AuthorizeAttribute>();
+            Assert.NotNull(updatePassAttr);
+            Assert.Equal("SuperAdmin", updatePassAttr.Roles);
+
+            // 4. AdminCookie AuthenticationSchemes enforcement
+            var profileAttr = typeof(AdminAuthController).GetMethod(nameof(AdminAuthController.Profile), new[] { typeof(CancellationToken) })?.GetCustomAttribute<AuthorizeAttribute>();
+            Assert.NotNull(profileAttr);
+            Assert.Equal("AdminCookie", profileAttr.AuthenticationSchemes);
+
+            var storiesIndexAttr = typeof(StoriesController).GetMethod(nameof(StoriesController.Index))?.GetCustomAttribute<AuthorizeAttribute>();
+            Assert.NotNull(storiesIndexAttr);
+            Assert.Equal("AdminCookie", storiesIndexAttr.AuthenticationSchemes);
+
+            // 5. API controllers must NOT have Authorize attribute (to keep public React frontend working!)
             var storiesApiAuthAttr = typeof(StoriesController).GetCustomAttribute<AuthorizeAttribute>();
             Assert.Null(storiesApiAuthAttr);
 
@@ -699,14 +841,14 @@ namespace SuperKayyem.Tests
         }
 
         [Fact]
-        public async Task AdminController_RevokeAccess_Should_Set_ErrorMessage_When_Target_Is_SuperAdmin()
+        public async Task AdminAuthController_RevokeAccess_Should_Set_ErrorMessage_When_Target_Is_SuperAdmin()
         {
             // Arrange
-            using var context = CreateInMemoryContext(nameof(AdminController_RevokeAccess_Should_Set_ErrorMessage_When_Target_Is_SuperAdmin));
+            using var context = CreateInMemoryContext(nameof(AdminAuthController_RevokeAccess_Should_Set_ErrorMessage_When_Target_Is_SuperAdmin));
             await AdminUserSeedData.EnsureSuperAdminSeededAsync(context);
             var superAdmin = await context.AdminUsers.FirstAsync(u => u.Role == "SuperAdmin");
 
-            var controller = new AdminController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<AdminController>>(), null!);
+            var controller = new AdminAuthController(context);
             SetupController(controller);
 
             // Act
@@ -714,20 +856,20 @@ namespace SuperKayyem.Tests
 
             // Assert
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal(nameof(AdminController.TeamRequests), redirectResult.ActionName);
+            Assert.Equal(nameof(AdminAuthController.TeamRequests), redirectResult.ActionName);
             Assert.NotNull(controller.TempData["ErrorMessage"]);
             Assert.Contains("لا يمكن سحب صلاحية قائد الفريق", controller.TempData["ErrorMessage"]?.ToString() ?? "");
         }
 
         [Fact]
-        public async Task AdminController_RejectRequest_Should_Set_ErrorMessage_When_Target_Is_SuperAdmin()
+        public async Task AdminAuthController_RejectRequest_Should_Set_ErrorMessage_When_Target_Is_SuperAdmin()
         {
             // Arrange
-            using var context = CreateInMemoryContext(nameof(AdminController_RejectRequest_Should_Set_ErrorMessage_When_Target_Is_SuperAdmin));
+            using var context = CreateInMemoryContext(nameof(AdminAuthController_RejectRequest_Should_Set_ErrorMessage_When_Target_Is_SuperAdmin));
             await AdminUserSeedData.EnsureSuperAdminSeededAsync(context);
             var superAdmin = await context.AdminUsers.FirstAsync(u => u.Role == "SuperAdmin");
 
-            var controller = new AdminController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<AdminController>>(), null!);
+            var controller = new AdminAuthController(context);
             SetupController(controller);
 
             // Act
@@ -735,7 +877,7 @@ namespace SuperKayyem.Tests
 
             // Assert
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal(nameof(AdminController.TeamRequests), redirectResult.ActionName);
+            Assert.Equal(nameof(AdminAuthController.TeamRequests), redirectResult.ActionName);
             Assert.NotNull(controller.TempData["ErrorMessage"]);
             Assert.Contains("لا يمكن رفض حساب قائد الفريق", controller.TempData["ErrorMessage"]?.ToString() ?? "");
         }
@@ -815,6 +957,592 @@ namespace SuperKayyem.Tests
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);
             Assert.Equal("Admin", redirectResult.ControllerName);
+        }
+
+        [Fact]
+        public async Task AdminController_Index_Should_Return_AdminDashboardViewModel_With_Accurate_Counts()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(AdminController_Index_Should_Return_AdminDashboardViewModel_With_Accurate_Counts));
+            
+            // Seed Stories
+            context.Stories.Add(new Story { Id = 1, Title = "قصة 1", TargetAge = 5, Price = 30m, Category = "التعاون" });
+            context.Stories.Add(new Story { Id = 2, Title = "قصة 2", TargetAge = 7, Price = 40m, Category = "الشجاعة", PdfUrl = "https://example.com/story.pdf" });
+            context.Stories.Add(new Story { Id = 3, Title = "قصة 3", TargetAge = 9, Price = 50m, Category = "الصدق" });
+
+            // Seed Articles
+            context.Articles.Add(new Article
+            {
+                Id = 1,
+                Title = "مقال 1",
+                AuthorName = "المشرف الأول",
+                AuthorEmail = "admin1@example.com",
+                Introduction = "intro",
+                BodyContent = "body",
+                Conclusion = "conc"
+            });
+
+            // Seed Accounts with Children
+            context.Accounts.Add(new Account
+            {
+                Id = 1,
+                FirstName = "علي",
+                LastName = "حسن",
+                Email = "ali@example.com",
+                Password = "pass",
+                Gender = "ذكر",
+                Children = new List<Child>
+                {
+                    new Child { Id = 101, Name = "سالم", Age = 5, Gender = "ذكر" },
+                    new Child { Id = 102, Name = "ريم", Age = 7, Gender = "أنثى" }
+                }
+            });
+
+            // Seed Admin Users
+            context.AdminUsers.Add(new AdminUser
+            {
+                Id = 10,
+                FullName = "المشرف الأول",
+                Email = "admin1@example.com",
+                Password = "P1",
+                Role = "Admin",
+                Status = "Approved"
+            });
+            context.AdminUsers.Add(new AdminUser
+            {
+                Id = 11,
+                FullName = "متقدم جديد",
+                Email = "pending@example.com",
+                Password = "P2",
+                Role = "Admin",
+                Status = "Pending"
+            });
+
+            await context.SaveChangesAsync();
+
+            var controller = new AdminController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<AdminController>>());
+            SetupController(controller);
+
+            // Act
+            var result = await controller.Index();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsType<AdminDashboardViewModel>(viewResult.Model);
+
+            Assert.Equal(3, model.TotalStories);
+            Assert.Equal(1, model.TotalArticles);
+            Assert.Equal(1, model.TotalAccounts);
+            Assert.Equal(2, model.TotalChildren);
+            Assert.True(model.TotalApprovedAdmins >= 1);
+            Assert.Equal(1, model.PendingAdminRequests);
+
+            Assert.Equal(3, model.AgeGroupDistributions.Count);
+            var group46 = model.AgeGroupDistributions.First(g => g.AgeGroup == "4-6");
+            Assert.Equal(1, group46.StoriesCount);
+            Assert.Equal(1, group46.ChildrenCount);
+
+            var group68 = model.AgeGroupDistributions.First(g => g.AgeGroup == "6-8");
+            Assert.Equal(1, group68.StoriesCount);
+            Assert.Equal(1, group68.ChildrenCount);
+
+            var group810 = model.AgeGroupDistributions.First(g => g.AgeGroup == "8-10");
+            Assert.Equal(1, group810.StoriesCount);
+            Assert.Equal(0, group810.ChildrenCount);
+
+            Assert.NotEmpty(model.RecentStories);
+            Assert.NotEmpty(model.AdminArticleStats);
+        }
+
+        [Fact]
+        public async Task StoriesController_Should_Serve_Both_Public_Api_And_Mvc_Views()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(StoriesController_Should_Serve_Both_Public_Api_And_Mvc_Views));
+            context.Stories.Add(new Story
+            {
+                Id = 1,
+                Title = "قصة تجريبية",
+                Category = "الصدق",
+                TargetAge = 6,
+                Price = 25m,
+                PdfUrl = "https://example.com/test.pdf"
+            });
+            await context.SaveChangesAsync();
+
+            var cloudinary = new CloudinaryDotNet.Cloudinary(new CloudinaryDotNet.Account("test", "test", "test"));
+            var controller = new StoriesController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<StoriesController>>(), cloudinary);
+            SetupController(controller);
+
+            // 1. Test Public API GetAll
+            var apiGetAll = await controller.GetAll();
+            var okResult = Assert.IsType<OkObjectResult>(apiGetAll.Result);
+            var apiStories = Assert.IsAssignableFrom<IEnumerable<Story>>(okResult.Value);
+            Assert.Single(apiStories);
+
+            // 2. Test Public API GetById
+            var apiGetById = await controller.GetById(1);
+            var okByIdResult = Assert.IsType<OkObjectResult>(apiGetById);
+            var singleStory = Assert.IsType<Story>(okByIdResult.Value);
+            Assert.Equal(1, singleStory.Id);
+
+            // 3. Test MVC View Index
+            var mvcIndex = await controller.Index();
+            var viewResult = Assert.IsType<ViewResult>(mvcIndex);
+            var mvcStories = Assert.IsAssignableFrom<IEnumerable<Story>>(viewResult.Model);
+            Assert.Single(mvcStories);
+
+            // 4. Test MVC View Create in Editor Mode
+            var newEditorStory = new Story
+            {
+                Title = "قصة بالمحرر",
+                Category = "التعاون",
+                TargetAge = 5,
+                Price = 30m,
+                Pages = new List<StoryPageItem>
+                {
+                    new StoryPageItem { Headline = "مقدمة", HasSeparator = true, Content = "نص الصفحة الأولى" },
+                    new StoryPageItem { Headline = "نهاية", HasSeparator = false, Content = "نص الصفحة الثانية" }
+                }
+            };
+            var createResult = await controller.Create(newEditorStory, "editor", null, null, null);
+            var redirectCreate = Assert.IsType<RedirectToActionResult>(createResult);
+            Assert.Equal(nameof(StoriesController.Index), redirectCreate.ActionName);
+
+            var createdInDb = await context.Stories.FirstOrDefaultAsync(s => s.Title == "قصة بالمحرر");
+            Assert.NotNull(createdInDb);
+            Assert.Null(createdInDb.PdfUrl);
+            Assert.Equal(2, createdInDb.PageCount);
+            Assert.Equal(2, createdInDb.Pages.Count);
+            Assert.Equal(1, createdInDb.Pages[0].PageNum);
+            Assert.Equal(2, createdInDb.Pages[1].PageNum);
+        }
+
+        [Fact]
+        public async Task AdminAuthController_SuperAdmin_Should_Update_Any_Admin_Password()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(AdminAuthController_SuperAdmin_Should_Update_Any_Admin_Password));
+            context.AdminUsers.Add(new AdminUser
+            {
+                Id = 30,
+                FullName = "مشرف المستهدف",
+                Email = "target@example.com",
+                Password = "OldPassword1",
+                Role = "Admin",
+                Status = "Approved"
+            });
+            await context.SaveChangesAsync();
+
+            var controller = new AdminAuthController(context);
+            SetupController(controller);
+
+            // Act - SuperAdmin updates password of admin #30
+            var result = await controller.UpdateAdminPassword(30, "BrandNewPassword123");
+
+            // Assert
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal(nameof(AdminAuthController.TeamRequests), redirectResult.ActionName);
+
+            var updatedUser = await context.AdminUsers.FirstAsync(u => u.Id == 30);
+            Assert.Equal("BrandNewPassword123", updatedUser.Password);
+            Assert.NotNull(controller.TempData["SuccessMessage"]);
+        }
+
+        [Fact]
+        public async Task AdminAuthController_Profile_Should_Allow_Admin_To_Update_Own_Password()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(AdminAuthController_Profile_Should_Allow_Admin_To_Update_Own_Password));
+            context.AdminUsers.Add(new AdminUser
+            {
+                Id = 55,
+                FullName = "مشرف عادي",
+                Email = "regular@example.com",
+                Password = "OldPassword2",
+                Role = "Admin",
+                Status = "Approved"
+            });
+            await context.SaveChangesAsync();
+
+            var principal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "55"),
+                new Claim(ClaimTypes.Name, "مشرف عادي"),
+                new Claim(ClaimTypes.Email, "regular@example.com"),
+                new Claim(ClaimTypes.Role, "Admin")
+            }, CookieAuthenticationDefaults.AuthenticationScheme));
+
+            var controller = new AdminAuthController(context);
+            SetupController(controller, principal);
+
+            // 1. GET Profile
+            var getProfileResult = await controller.Profile();
+            var viewResult = Assert.IsType<ViewResult>(getProfileResult);
+            var profileModel = Assert.IsType<AdminProfileViewModel>(viewResult.Model);
+            Assert.Equal(55, profileModel.Id);
+            Assert.Equal("OldPassword2", profileModel.Password);
+
+            // 2. POST Profile with new password and updated name
+            var updateModel = new AdminProfileViewModel
+            {
+                Id = 55,
+                FullName = "مشرف عادي محدث",
+                Email = "regular@example.com",
+                Password = "SuperSecureNewPassword456"
+            };
+
+            var postProfileResult = await controller.Profile(updateModel);
+            var postViewResult = Assert.IsType<ViewResult>(postProfileResult);
+            var resultModel = Assert.IsType<AdminProfileViewModel>(postViewResult.Model);
+
+            var userInDb = await context.AdminUsers.FirstAsync(u => u.Id == 55);
+            Assert.Equal("مشرف عادي محدث", userInDb.FullName);
+            Assert.Equal("SuperSecureNewPassword456", userInDb.Password);
+        }
+
+        [Fact]
+        public async Task AccountController_Update_Should_Save_Password_When_Provided()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(AccountController_Update_Should_Save_Password_When_Provided));
+            context.Accounts.Add(new Account
+            {
+                Id = 77,
+                FirstName = "محمد",
+                LastName = "خالد",
+                Email = "mohamed@example.com",
+                Password = "OriginalPassword777",
+                DateOfBirth = new DateTime(1990, 1, 1),
+                Gender = "ذكر"
+            });
+            await context.SaveChangesAsync();
+
+            var cloudinary = new CloudinaryDotNet.Cloudinary(new CloudinaryDotNet.Account("test", "test", "test"));
+            var controller = new AccountController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<AccountController>>(), cloudinary);
+            SetupController(controller);
+
+            var updatedModel = new Account
+            {
+                Id = 77,
+                FirstName = "محمد",
+                LastName = "خالد",
+                Email = "mohamed@example.com",
+                DateOfBirth = new DateTime(1990, 1, 1),
+                Gender = "ذكر",
+                Password = "NewUpdatedPassword888"
+            };
+
+            // Act
+            var result = await controller.Update(77, updatedModel, null);
+
+            // Assert
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal(nameof(AccountController.AccountList), redirectResult.ActionName);
+
+            var accountInDb = await context.Accounts.FirstAsync(a => a.Id == 77);
+            Assert.Equal("NewUpdatedPassword888", accountInDb.Password);
+        }
+
+        [Fact]
+        public async Task StoriesController_Create_Should_Reject_When_ContentMode_Missing_Or_Invalid()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(StoriesController_Create_Should_Reject_When_ContentMode_Missing_Or_Invalid));
+            var cloudinary = new CloudinaryDotNet.Cloudinary(new CloudinaryDotNet.Account("test", "test", "test"));
+            var controller = new StoriesController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<StoriesController>>(), cloudinary);
+            SetupController(controller);
+
+            var story = new Story { Title = "قصة بدون نمط" };
+
+            // Act 1: empty contentMode
+            var resultEmpty = await controller.Create(story, "", null, null, null);
+            var viewResult = Assert.IsType<ViewResult>(resultEmpty);
+            Assert.False(controller.ModelState.IsValid);
+            Assert.True(controller.ModelState.ContainsKey("ContentMode"));
+
+            // Act 2: editor mode with 0 pages
+            controller.ModelState.Clear();
+            var resultNoPages = await controller.Create(story, "editor", null, null, null);
+            var viewResult2 = Assert.IsType<ViewResult>(resultNoPages);
+            Assert.False(controller.ModelState.IsValid);
+            Assert.True(controller.ModelState.ContainsKey("Pages"));
+        }
+
+        [Fact]
+        public async Task StoriesController_Delete_And_DeleteConfirmed_Should_Remove_Story()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(StoriesController_Delete_And_DeleteConfirmed_Should_Remove_Story));
+            context.Stories.Add(new Story { Id = 88, Title = "قصة للحذف", Price = 20m, Category = "التعاون" });
+            await context.SaveChangesAsync();
+
+            var cloudinary = new CloudinaryDotNet.Cloudinary(new CloudinaryDotNet.Account("test", "test", "test"));
+            var controller = new StoriesController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<StoriesController>>(), cloudinary);
+            SetupController(controller);
+
+            // 1. GET Delete
+            var getDelete = await controller.Delete(88);
+            var viewResult = Assert.IsType<ViewResult>(getDelete);
+            var storyModel = Assert.IsType<Story>(viewResult.Model);
+            Assert.Equal(88, storyModel.Id);
+
+            // 2. POST DeleteConfirmed
+            var postDelete = await controller.DeleteConfirmed(88);
+            var redirectResult = Assert.IsType<RedirectToActionResult>(postDelete);
+            Assert.Equal(nameof(StoriesController.Index), redirectResult.ActionName);
+
+            var inDb = await context.Stories.FirstOrDefaultAsync(s => s.Id == 88);
+            Assert.Null(inDb);
+        }
+
+        [Fact]
+        public async Task AdminAuthController_Profile_Should_Prevent_Regular_Admin_From_Changing_Email()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(AdminAuthController_Profile_Should_Prevent_Regular_Admin_From_Changing_Email));
+            context.AdminUsers.Add(new AdminUser
+            {
+                Id = 60,
+                FullName = "مشرف منتظم",
+                Email = "fixed@example.com",
+                Password = "Pass",
+                Role = "Admin",
+                Status = "Approved"
+            });
+            await context.SaveChangesAsync();
+
+            // Principal with Admin role (NOT SuperAdmin)
+            var principal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "60"),
+                new Claim(ClaimTypes.Name, "مشرف منتظم"),
+                new Claim(ClaimTypes.Email, "fixed@example.com"),
+                new Claim(ClaimTypes.Role, "Admin")
+            }, CookieAuthenticationDefaults.AuthenticationScheme));
+
+            var controller = new AdminAuthController(context);
+            SetupController(controller, principal);
+
+            var model = new AdminProfileViewModel
+            {
+                Id = 60,
+                FullName = "مشرف منتظم جديد",
+                Email = "hacked_email@example.com",
+                Password = "NewPass123"
+            };
+
+            // Act
+            await controller.Profile(model);
+
+            // Assert: Email in DB was NOT changed because user is not SuperAdmin
+            var userInDb = await context.AdminUsers.FirstAsync(u => u.Id == 60);
+            Assert.Equal("fixed@example.com", userInDb.Email);
+            Assert.Equal("مشرف منتظم جديد", userInDb.FullName);
+            Assert.Equal("NewPass123", userInDb.Password);
+        }
+
+        [Fact]
+        public async Task StoriesController_Edit_Should_Reject_When_Editor_Mode_Has_Zero_Pages()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(StoriesController_Edit_Should_Reject_When_Editor_Mode_Has_Zero_Pages));
+            context.Stories.Add(new Story
+            {
+                Id = 101,
+                Title = "قصة للتعديل",
+                Category = "الصدق",
+                TargetAge = 6,
+                Price = 25m,
+                Pages = new List<StoryPageItem>
+                {
+                    new StoryPageItem { PageNum = 1, Content = "محتوى أصلي" }
+                }
+            });
+            await context.SaveChangesAsync();
+
+            var cloudinary = new CloudinaryDotNet.Cloudinary(new CloudinaryDotNet.Account("test", "test", "test"));
+            var controller = new StoriesController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<StoriesController>>(), cloudinary);
+            SetupController(controller);
+
+            var editStory = new Story
+            {
+                Id = 101,
+                Title = "قصة للتعديل",
+                Category = "الصدق",
+                TargetAge = 6,
+                Price = 25m,
+                Pages = new List<StoryPageItem>() // Empty pages
+            };
+
+            // Act
+            var result = await controller.Edit(101, editStory, "editor", null, null, null);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.False(controller.ModelState.IsValid);
+            Assert.True(controller.ModelState.ContainsKey("Pages"));
+        }
+
+        [Fact]
+        public async Task StoriesController_Create_And_Edit_Should_Reject_Page_With_Image_Exceeding_160_Chars()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(StoriesController_Create_And_Edit_Should_Reject_Page_With_Image_Exceeding_160_Chars));
+            var cloudinary = new CloudinaryDotNet.Cloudinary(new CloudinaryDotNet.Account("test", "test", "test"));
+            var controller = new StoriesController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<StoriesController>>(), cloudinary);
+            SetupController(controller);
+
+            var invalidStory = new Story
+            {
+                Title = "قصة نصها طويل مع صورة",
+                Category = "الشجاعة",
+                TargetAge = 7,
+                Price = 30m,
+                Pages = new List<StoryPageItem>
+                {
+                    new StoryPageItem
+                    {
+                        PageNum = 1,
+                        IllustrationUrl = "https://example.com/illustration.png",
+                        // 170 characters (> 160 safe limit)
+                        Content = new string('أ', 170)
+                    }
+                }
+            };
+
+            // Act
+            var result = await controller.Create(invalidStory, "editor", null, null, null);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.False(controller.ModelState.IsValid);
+            Assert.True(controller.ModelState.ContainsKey("Pages[0].Content"));
+        }
+
+        [Fact]
+        public async Task AdminAuthController_UpdateAdminPassword_Should_Reject_Short_Password()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(AdminAuthController_UpdateAdminPassword_Should_Reject_Short_Password));
+            context.AdminUsers.Add(new AdminUser
+            {
+                Id = 88,
+                FullName = "مشرف كلمة مرور قصيرة",
+                Email = "short@example.com",
+                Password = "ExistingPassword123",
+                Role = "Admin",
+                Status = "Approved"
+            });
+            await context.SaveChangesAsync();
+
+            var controller = new AdminAuthController(context);
+            SetupController(controller);
+
+            // Act: try setting password shorter than 6 chars
+            var result = await controller.UpdateAdminPassword(88, "12345");
+
+            // Assert: Redirects to TeamRequests with ErrorMessage, password NOT changed in DB
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal(nameof(AdminAuthController.TeamRequests), redirectResult.ActionName);
+            Assert.NotNull(controller.TempData["ErrorMessage"]);
+
+            var userInDb = await context.AdminUsers.FirstAsync(u => u.Id == 88);
+            Assert.Equal("ExistingPassword123", userInDb.Password);
+        }
+
+        [Fact]
+        public async Task StoriesController_RateStory_Should_Add_Rating_And_Calculate_Average()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(StoriesController_RateStory_Should_Add_Rating_And_Calculate_Average));
+            context.Stories.Add(new Story
+            {
+                Id = 50,
+                Title = "قصة تقييم",
+                Category = "الصدق",
+                Price = 20m,
+                Pages = new List<StoryPageItem> { new() { PageNum = 1, Content = "صفحة" } }
+            });
+            context.Accounts.Add(new SuperKayyem.Models.Account
+            {
+                Id = 10,
+                FirstName = "أحمد",
+                LastName = "محمود",
+                Email = "ahmed@example.com",
+                Password = "hashedpassword",
+                Gender = "ذكر",
+                OwnedStoryIds = new List<int>()
+            });
+            await context.SaveChangesAsync();
+
+            var cloudinary = new CloudinaryDotNet.Cloudinary(new CloudinaryDotNet.Account("test", "test", "test"));
+            var controller = new StoriesController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<StoriesController>>(), cloudinary);
+            SetupController(controller);
+
+            // Act 1: Initial rating of 5 stars
+            var result1 = await controller.RateStory(50, new RateStoryDto { AccountId = 10, Rating = 5 });
+            var okResult1 = Assert.IsType<OkObjectResult>(result1);
+            using (var doc1 = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(okResult1.Value)))
+            {
+                Assert.Equal(5.0, doc1.RootElement.GetProperty("rating").GetDouble());
+                Assert.Equal(1, doc1.RootElement.GetProperty("ratingsCount").GetInt32());
+            }
+
+            // Verify account now owns story
+            var account = await context.Accounts.FirstAsync(a => a.Id == 10);
+            Assert.Contains(50, account.OwnedStoryIds!);
+
+            // Act 2: Update existing rating to 4 stars
+            var result2 = await controller.RateStory(50, new RateStoryDto { AccountId = 10, Score = 4 });
+            var okResult2 = Assert.IsType<OkObjectResult>(result2);
+            using (var doc2 = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(okResult2.Value)))
+            {
+                Assert.Equal(4.0, doc2.RootElement.GetProperty("rating").GetDouble());
+                Assert.Equal(1, doc2.RootElement.GetProperty("ratingsCount").GetInt32());
+            }
+
+            // Act 3: Another account rates 2 stars
+            var result3 = await controller.RateStory(50, new RateStoryDto { AccountId = 20, Score = 2 });
+            var okResult3 = Assert.IsType<OkObjectResult>(result3);
+            using (var doc3 = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(okResult3.Value)))
+            {
+                Assert.Equal(3.0, doc3.RootElement.GetProperty("rating").GetDouble());
+                Assert.Equal(2, doc3.RootElement.GetProperty("ratingsCount").GetInt32());
+            }
+
+            var storyInDb = await context.Stories.FirstAsync(s => s.Id == 50);
+            Assert.Equal(3.0, storyInDb.Rating);
+            Assert.Equal(2, storyInDb.Ratings.Count);
+        }
+
+        [Fact]
+        public async Task StoriesController_RateStory_Should_Reject_Invalid_Scores()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(StoriesController_RateStory_Should_Reject_Invalid_Scores));
+            context.Stories.Add(new Story { Id = 60, Title = "قصة فحص" });
+            await context.SaveChangesAsync();
+
+            var cloudinary = new CloudinaryDotNet.Cloudinary(new CloudinaryDotNet.Account("test", "test", "test"));
+            var controller = new StoriesController(context, Mock.Of<Microsoft.Extensions.Logging.ILogger<StoriesController>>(), cloudinary);
+            SetupController(controller);
+
+            // Act & Assert: score 0
+            var res0 = await controller.RateStory(60, new RateStoryDto { AccountId = 1, Rating = 0 });
+            Assert.IsType<BadRequestObjectResult>(res0);
+
+            // Act & Assert: score 6
+            var res6 = await controller.RateStory(60, new RateStoryDto { AccountId = 1, Rating = 6 });
+            Assert.IsType<BadRequestObjectResult>(res6);
+
+            // Act & Assert: null DTO
+            var resNull = await controller.RateStory(60, null);
+            Assert.IsType<BadRequestObjectResult>(resNull);
+
+            // Act & Assert: non-existent story
+            var resMissing = await controller.RateStory(999, new RateStoryDto { AccountId = 1, Rating = 4 });
+            Assert.IsType<NotFoundObjectResult>(resMissing);
         }
     }
 }

@@ -1,0 +1,325 @@
+@model IEnumerable<SuperKayyem.Models.AdminUser>
+
+@{
+    ViewData["Title"] = "إدارة فريق المشرفين وطلبات الانضمام";
+    var pendingUsers = Model.Where(u => u.Status == "Pending").ToList();
+    var approvedUsers = Model.Where(u => u.Status == "Approved").ToList();
+    var inactiveUsers = Model.Where(u => u.Status == "Revoked" || u.Status == "Rejected").ToList();
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div>
+        <h2 class="fw-bold mb-1">إدارة فريق المشرفين وطلبات الدخول</h2>
+        <p class="text-secondary mb-0">لوحة تحكم حصرية لقائد الفريق لإدارة الصلاحيات وكلمات المرور</p>
+    </div>
+    <div class="d-flex gap-2">
+        <span class="badge bg-warning text-dark px-3 py-2 fs-6">
+            طلبات معلقة: @pendingUsers.Count
+        </span>
+        <span class="badge bg-success px-3 py-2 fs-6">
+            مشرفون مفعلون: @approvedUsers.Count
+        </span>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success border-0 rounded-3 shadow-sm mb-4" style="background: rgba(16, 185, 129, 0.16); color: #6ee7b7;">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger border-0 rounded-3 shadow-sm mb-4" style="background: rgba(239, 68, 68, 0.16); color: #fca5a5;">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<!-- 1. Pending Join Requests -->
+<div class="sk-card p-4 mb-4">
+    <h5 class="fw-bold text-warning mb-3">طلبات الانضمام قيد المراجعة (@pendingUsers.Count)</h5>
+
+    @if (!pendingUsers.Any())
+    {
+        <div class="text-center py-4 text-secondary">
+            لا توجد طلبات انضمام معلقة في الوقت الحالي.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table sk-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>الاسم الكامل</th>
+                        <th>البريد الإلكتروني</th>
+                        <th>كلمة المرور</th>
+                        <th>تاريخ الطلب</th>
+                        <th class="text-center">قرار قائد الفريق</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var req in pendingUsers)
+                    {
+                        <tr>
+                            <td class="fw-bold">#@req.Id</td>
+                            <td class="fw-semibold">@req.FullName</td>
+                            <td dir="ltr" class="text-end text-info">@req.Email</td>
+                            <td>
+                                <span id="pass-pending-@req.Id" class="font-monospace text-light">••••••••</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 ms-2"
+                                        onclick="toggleAdminPassword('pass-pending-@req.Id', '@req.Password', this)">
+                                    عرض
+                                </button>
+                            </td>
+                            <td class="text-secondary small">@req.RequestedAt.ToString("yyyy-MM-dd hh:mm tt")</td>
+                            <td class="text-center">
+                                <div class="d-inline-flex gap-2">
+                                    <form asp-controller="AdminAuth" asp-action="ApproveRequest" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@req.Id" />
+                                        <button type="submit" class="btn btn-sm btn-success fw-bold px-3">
+                                            قبول ومنح الصلاحية
+                                        </button>
+                                    </form>
+
+                                    <form asp-controller="AdminAuth" asp-action="RejectRequest" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@req.Id" />
+                                        <button type="submit" class="btn btn-sm btn-danger fw-bold px-3">
+                                            رفض الطلب
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- 2. Approved Active Admins -->
+<div class="sk-card p-4 mb-4">
+    <h5 class="fw-bold text-success mb-3">الحسابات المصرح لها بالدخول حالياً (@approvedUsers.Count)</h5>
+
+    <div class="table-responsive">
+        <table class="table sk-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>الاسم الكامل</th>
+                    <th>البريد الإلكتروني</th>
+                    <th>الدور</th>
+                    <th>كلمة المرور</th>
+                    <th>تاريخ الاعتماد</th>
+                    <th class="text-center">إدارة الصلاحية وكلمة المرور</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in approvedUsers)
+                {
+                    <tr>
+                        <td class="fw-bold">#@user.Id</td>
+                        <td class="fw-semibold">@user.FullName</td>
+                        <td dir="ltr" class="text-end text-info">@user.Email</td>
+                        <td>
+                            @if (user.Role == "SuperAdmin")
+                            {
+                                <span class="badge bg-primary">قائد الفريق (SuperAdmin)</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">مشرف (Admin)</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="d-inline-flex align-items-center gap-1">
+                                <span id="pass-approved-@user.Id" class="font-monospace text-light">••••••••</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1"
+                                        onclick="toggleAdminPassword('pass-approved-@user.Id', '@user.Password', this)">
+                                    عرض
+                                </button>
+                            </div>
+                        </td>
+                        <td class="text-secondary small">
+                            @(user.ReviewedAt?.ToString("yyyy-MM-dd hh:mm tt") ?? user.RequestedAt.ToString("yyyy-MM-dd hh:mm tt"))
+                        </td>
+                        <td class="text-center">
+                            <div class="d-inline-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-warning fw-semibold px-2"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#changePassModal"
+                                        data-admin-id="@user.Id"
+                                        data-admin-name="@user.FullName">
+                                    تغيير كلمة المرور
+                                </button>
+
+                                @if (user.Role == "SuperAdmin")
+                                {
+                                    <span class="badge bg-dark border border-primary text-primary px-3 py-1">قائد الفريق (محمي)</span>
+                                }
+                                else
+                                {
+                                    <form asp-controller="AdminAuth" asp-action="RevokeAccess" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@user.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger fw-bold px-3"
+                                                onclick="return confirm('هل أنت متأكد من سحب صلاحية الدخول من هذا المشرف؟ لن يتمكن من تسجيل الدخول بعد ذلك.');">
+                                            سحب الصلاحية
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 3. Inactive (Revoked / Rejected) Accounts -->
+<div class="sk-card p-4 mb-4">
+    <h5 class="fw-bold text-secondary mb-3">الحسابات المسحوبة أو المرفوضة (@inactiveUsers.Count)</h5>
+
+    @if (!inactiveUsers.Any())
+    {
+        <div class="text-center py-4 text-secondary">
+            لا توجد حسابات مسحوبة أو مرفوضة الصلاحية حالياً.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table sk-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>الاسم الكامل</th>
+                        <th>البريد الإلكتروني</th>
+                        <th>الدور</th>
+                        <th>كلمة المرور</th>
+                        <th>الحالة</th>
+                        <th>تاريخ الإجراء</th>
+                        <th class="text-center">إعادة التفعيل</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in inactiveUsers)
+                    {
+                        <tr>
+                            <td class="fw-bold">#@user.Id</td>
+                            <td class="fw-semibold">@user.FullName</td>
+                            <td dir="ltr" class="text-end text-info">@user.Email</td>
+                            <td><span class="badge bg-secondary">@user.Role</span></td>
+                            <td>
+                                <span id="pass-inactive-@user.Id" class="font-monospace text-light">••••••••</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1"
+                                        onclick="toggleAdminPassword('pass-inactive-@user.Id', '@user.Password', this)">
+                                    عرض
+                                </button>
+                            </td>
+                            <td>
+                                @if (user.Status == "Revoked")
+                                {
+                                    <span class="badge bg-danger">تم سحب الصلاحية</span>
+                                }
+                                else if (user.Status == "Rejected")
+                                {
+                                    <span class="badge bg-dark border border-danger text-danger">تم الرفض</span>
+                                }
+                            </td>
+                            <td class="text-secondary small">
+                                @(user.ReviewedAt?.ToString("yyyy-MM-dd hh:mm tt") ?? "-")
+                            </td>
+                            <td class="text-center">
+                                <form asp-controller="AdminAuth" asp-action="RestoreAccess" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@user.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-success fw-bold px-3">
+                                        إعادة تفعيل الصلاحية
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Modal: Update Admin Password -->
+<div class="modal fade" id="changePassModal" tabindex="-1" aria-labelledby="changePassModalLabel" aria-hidden="true" dir="rtl">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-light border-secondary">
+            <div class="modal-header border-secondary border-opacity-25">
+                <h5 class="modal-title fw-bold" id="changePassModalLabel">تغيير كلمة مرور المشرف</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+            </div>
+            <form asp-controller="AdminAuth" asp-action="UpdateAdminPassword" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" id="modalAdminId" name="id" value="" />
+                    <p class="text-secondary small mb-3">
+                        تعيين كلمة مرور جديدة للمشرف: <strong id="modalAdminName" class="text-light"></strong>
+                    </p>
+                    <div class="mb-3">
+                        <label for="modalNewPassword" class="form-label small text-secondary">كلمة المرور الجديدة (6 أحرف على الأقل)</label>
+                        <div class="input-group">
+                            <input type="password" id="modalNewPassword" name="newPassword" class="form-control bg-dark text-light border-secondary" required minlength="6" />
+                            <button class="btn btn-outline-secondary" type="button" onclick="toggleInputVisibility('modalNewPassword', this)">عرض</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary border-opacity-25">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-warning fw-semibold px-4">حفظ كلمة المرور</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleAdminPassword(elementId, realPassword, btn) {
+        var el = document.getElementById(elementId);
+        if (el.textContent === '••••••••') {
+            el.textContent = realPassword;
+            btn.textContent = 'إخفاء';
+        } else {
+            el.textContent = '••••••••';
+            btn.textContent = 'عرض';
+        }
+    }
+
+    function toggleInputVisibility(inputId, btn) {
+        var input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = 'إخفاء';
+        } else {
+            input.type = 'password';
+            btn.textContent = 'عرض';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var modal = document.getElementById('changePassModal');
+        if (modal) {
+            modal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var adminId = button.getAttribute('data-admin-id');
+                var adminName = button.getAttribute('data-admin-name');
+
+                document.getElementById('modalAdminId').value = adminId;
+                document.getElementById('modalAdminName').textContent = adminName;
+                document.getElementById('modalNewPassword').value = '';
+            });
+        }
+    });
+</script>

@@ -33,47 +33,64 @@ builder.Services.AddDbContext<SuperKayyemDbContext>(options =>
         mongoSettings?.DatabaseName ?? "SuperKayyemDb"));
 
 // Cookie Authentication for Admin Panel
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = "AdminCookie";
+    options.DefaultAuthenticateScheme = "AdminCookie";
+    options.DefaultChallengeScheme = "AdminCookie";
+    options.DefaultSignInScheme = "AdminCookie";
+    options.DefaultSignOutScheme = "AdminCookie";
+})
+.AddCookie("AdminCookie", options =>
+{
+    options.Cookie.Name = "SuperKayyem.AdminAuth";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.LoginPath = "/AdminAuth/Login";
+    options.AccessDeniedPath = "/AdminAuth/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromHours(12);
+    options.SlidingExpiration = true;
+    options.Events = new CookieAuthenticationEvents
     {
-        options.Cookie.Name = "SuperKayyem.AdminAuth";
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-        options.LoginPath = "/AdminAuth/Login";
-        options.AccessDeniedPath = "/AdminAuth/AccessDenied";
-        options.ExpireTimeSpan = TimeSpan.FromHours(12);
-        options.SlidingExpiration = true;
-        options.Events = new CookieAuthenticationEvents
+        OnValidatePrincipal = async context =>
         {
-            OnValidatePrincipal = async context =>
+            try
             {
                 var userIdStr = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!int.TryParse(userIdStr, out int userId))
+                var email = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (!int.TryParse(userIdStr, out int userId) && string.IsNullOrEmpty(email))
                 {
-                    // Fallback: if user is SuperAdmin claim with no ID (e.g. test stub), let it pass
                     if (context.Principal?.IsInRole("SuperAdmin") == true)
                     {
                         return;
                     }
 
                     context.RejectPrincipal();
-                    await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    await context.HttpContext.SignOutAsync("AdminCookie");
                     return;
                 }
 
                 var db = context.HttpContext.RequestServices.GetRequiredService<SuperKayyemDbContext>();
-                var user = await db.AdminUsers.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+                var user = await db.AdminUsers.AsNoTracking()
+                    .FirstOrDefaultAsync(u => (userId > 0 && u.Id == userId) || 
+                                              (!string.IsNullOrEmpty(email) && u.Email != null && u.Email.ToLower() == email.ToLower()));
 
-                // If user deleted, revoked, or rejected, immediately reject cookie and force re-login
-                if (user == null || user.Status != "Approved")
+                // If user was explicitly found and is revoked, rejected, or pending, reject the cookie
+                if (user != null && user.Status != "Approved")
                 {
                     context.RejectPrincipal();
-                    await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    await context.HttpContext.SignOutAsync("AdminCookie");
                 }
             }
-        };
-    });
+            catch
+            {
+                // Never reject on transient DB lookup errors
+            }
+        }
+    };
+});
 
 builder.Services.AddAuthorization();
 

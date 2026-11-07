@@ -36,33 +36,31 @@
         <!-- Sidebar -->
         <aside class="admin-sidebar">
             <div class="sidebar-brand">
-                <span class="brand-icon">📚</span>
-                <span class="brand-text">سوبر قيّم</span>
+                <span class="brand-text fw-bold">سوبر قيّم</span>
             </div>
             <nav class="sidebar-nav">
-                <a href="@Url.Action("Index", "Admin")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
-                    <span class="link-icon">🏠</span>
-                    <span>لوحة التحكم</span>
+                <a asp-controller="Admin" asp-action="Index" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                    <span>لوحة القيادة الشاملة</span>
                 </a>
-                <a href="@Url.Action("AccountList", "Account")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Account" ? "active" : "")">
-                    <span class="link-icon">👥</span>
-                    <span>عرض حسابات العملاء</span>
+                <a asp-controller="Stories" asp-action="Index" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Stories" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                    <span>إدارة القصص</span>
                 </a>
-                <a href="@Url.Action("Create", "Admin")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Create" ? "active" : "")">
-                    <span class="link-icon">➕</span>
+                <a asp-controller="Stories" asp-action="Create" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Stories" && ViewContext.RouteData.Values["action"]?.ToString() == "Create" ? "active" : "")">
                     <span>إضافة قصة</span>
                 </a>
-                <a href="@Url.Action("Index", "AdminArticles")" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminArticles" ? "active" : "")">
-                    <span class="link-icon">📝</span>
-                    <span>مقالات توعوية للآباء</span>
+                <a asp-controller="AdminArticles" asp-action="Index" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminArticles" ? "active" : "")">
+                    <span>مقالات الآباء</span>
+                </a>
+                <a asp-controller="Account" asp-action="AccountList" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Account" ? "active" : "")">
+                    <span>إدارة الحسابات</span>
+                </a>
+                <a asp-controller="AdminAuth" asp-action="Profile" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminAuth" && ViewContext.RouteData.Values["action"]?.ToString() == "Profile" ? "active" : "")">
+                    <span>ملفي الشخصي</span>
                 </a>
                 @if (User.IsInRole("SuperAdmin"))
                 {
-                    <a href="@Url.Action("TeamRequests", "Admin")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "TeamRequests" ? "active" : "") d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="link-icon">🛡️</span>
-                            <span>فريق الإدارة والطلبات</span>
-                        </div>
+                    <a asp-controller="AdminAuth" asp-action="TeamRequests" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "TeamRequests" ? "active" : "") d-flex justify-content-between align-items-center">
+                        <span>إدارة الفريق وطلبات الانضمام</span>
                         @if (pendingRequestsCount > 0)
                         {
                             <span class="badge bg-danger rounded-pill">@pendingRequestsCount</span>
@@ -75,7 +73,7 @@
                 {
                     <div class="mb-2 pb-2 border-bottom border-secondary border-opacity-25 text-start">
                         <div class="small fw-bold text-light text-truncate">@(User.Identity.Name ?? "مشرف")</div>
-                        <div class="text-secondary small">@(User.IsInRole("SuperAdmin") ? "👑 قائد الفريق (SuperAdmin)" : "مشرف (Admin)")</div>
+                        <div class="text-secondary small">@(User.IsInRole("SuperAdmin") ? "قائد الفريق (SuperAdmin)" : "مشرف (Admin)")</div>
                     </div>
                 }
                 <small>© @DateTime.Now.Year سوبر قيّم</small>
@@ -87,7 +85,7 @@
             <header class="admin-header d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-2">
                     <button class="sidebar-toggle d-lg-none" onclick="document.querySelector('.admin-sidebar').classList.toggle('show')">
-                        ☰
+                        القائمة
                     </button>
                     <h1 class="header-title mb-0">@ViewData["Title"]</h1>
                 </div>
@@ -97,14 +95,18 @@
                     <div class="d-flex align-items-center gap-3">
                         @if (User.IsInRole("SuperAdmin"))
                         {
-                            <a href="@Url.Action("TeamRequests", "Admin")" class="btn btn-sm btn-outline-warning d-none d-md-inline-flex align-items-center gap-1 position-relative" title="طلبات الانضمام">
-                                <span>🛡️ الطلبات</span>
+                            <a asp-controller="AdminAuth" asp-action="TeamRequests" class="btn btn-sm btn-outline-warning d-none d-md-inline-flex align-items-center gap-1 position-relative" title="طلبات الانضمام">
+                                <span>الطلبات</span>
                                 @if (pendingRequestsCount > 0)
                                 {
                                     <span class="badge bg-danger rounded-pill">@pendingRequestsCount</span>
                                 }
                             </a>
                         }
+
+                        <a asp-controller="AdminAuth" asp-action="Profile" class="btn btn-sm btn-outline-secondary d-none d-sm-inline-flex align-items-center gap-1" title="ملفي الشخصي">
+                            <span>الملف الشخصي</span>
+                        </a>
 
                         <div class="d-flex align-items-center gap-2">
                             <div class="d-none d-sm-block text-end">
@@ -118,7 +120,6 @@
                         <form asp-controller="AdminAuth" asp-action="Logout" method="post" class="d-inline m-0">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1 px-3 py-1 fw-bold" title="تسجيل الخروج">
-                                <span>🚪</span>
                                 <span class="d-none d-md-inline">تسجيل الخروج</span>
                             </button>
                         </form>

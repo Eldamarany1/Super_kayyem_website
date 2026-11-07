@@ -152,6 +152,17 @@
                             <label class="text-secondary small d-block mb-1">معرّف الحساب (ID)</label>
                             <div class="fw-semibold text-secondary">#@Model.Id</div>
                         </div>
+
+                        <div class="col-12 col-sm-6">
+                            <label class="text-secondary small d-block mb-1">كلمة المرور</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <span id="cust-pass-read" class="fw-semibold text-light font-monospace">••••••••</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2"
+                                        onclick="toggleReadPass('@Model.Password', this)">
+                                    عرض
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -225,3 +236,16 @@
         </div>
     </div>
 </div>
+
+<script>
+    function toggleReadPass(pass, btn) {
+        var el = document.getElementById('cust-pass-read');
+        if (el.textContent === '••••••••') {
+            el.textContent = pass;
+            btn.textContent = 'إخفاء';
+        } else {
+            el.textContent = '••••••••';
+            btn.textContent = 'عرض';
+        }
+    }
+</script>

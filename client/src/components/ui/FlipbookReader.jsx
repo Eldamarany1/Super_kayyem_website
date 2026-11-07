@@ -107,12 +107,135 @@ function wrapArabicCanvasText(ctx, text, rightX, y, maxWidth, lineHeight) {
   return y;
 }
 
-function generateCanvasesFromStoryPages(story) {
-  const width = 900;
-  const height = 1240;
+function wrapArabicCanvasTextLines(ctx, text, maxWidth) {
+  if (!text) return [];
+  const paragraphs = text.split(/\r?\n/);
+  const lines = [];
+
+  for (const para of paragraphs) {
+    if (!para.trim()) {
+      continue;
+    }
+    const words = para.trim().split(/\s+/);
+    let currentLine = '';
+    for (let n = 0; n < words.length; n++) {
+      const testLine = currentLine ? currentLine + ' ' + words[n] : words[n];
+      if (ctx.measureText(testLine).width > maxWidth && n > 0) {
+        lines.push(currentLine.trim());
+        currentLine = words[n];
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) {
+      lines.push(currentLine.trim());
+    }
+  }
+  return lines;
+}
+
+function loadImageAsync(url) {
+  return new Promise((resolve) => {
+    if (!url) return resolve(null);
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+function drawOrnamentalDivider(ctx, y, width) {
+  const startX = 140;
+  const endX = width - 140;
+  const midX = width / 2;
+
+  ctx.strokeStyle = '#d97706';
+  ctx.lineWidth = 1.5;
+
+  ctx.beginPath();
+  ctx.moveTo(startX, y);
+  ctx.lineTo(midX - 16, y);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(midX + 16, y);
+  ctx.lineTo(endX, y);
+  ctx.stroke();
+
+  // Center diamond
+  ctx.save();
+  ctx.fillStyle = '#d97706';
+  ctx.translate(midX, y);
+  ctx.rotate(Math.PI / 4);
+  ctx.fillRect(-6, -6, 12, 12);
+  ctx.restore();
+}
+
+function drawRoundedImage(ctx, img, x, y, w, h, radius) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + w - radius, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+  ctx.lineTo(x + w, y + h - radius);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+  ctx.lineTo(x + radius, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  ctx.clip();
+
+  // Cover aspect ratio center-cropped
+  const imgAspect = img.naturalWidth / img.naturalHeight;
+  const targetAspect = w / h;
+  let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+
+  if (imgAspect > targetAspect) {
+    sw = img.naturalHeight * targetAspect;
+    sx = (img.naturalWidth - sw) / 2;
+  } else {
+    sh = img.naturalWidth / targetAspect;
+    sy = (img.naturalHeight - sh) / 2;
+  }
+
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+  ctx.restore();
+
+  // Frame border
+  ctx.save();
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + w - radius, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+  ctx.lineTo(x + w, y + h - radius);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+  ctx.lineTo(x + radius, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.restore();
+}
+
+async function renderStoryPagesToCanvases(story) {
+  const width = 800;
+  const height = 1000;
   const rawPages = Array.isArray(story?.pages) && story.pages.length > 0
     ? story.pages
     : [{ pageNum: 1, content: story?.description || 'محتوى القصة متاح قريباً!' }];
+
+  // Pre-load images asynchronously
+  const loadedImages = await Promise.all(
+    rawPages.map((p) => {
+      const imgUrl = p.illustrationUrl || p.IllustrationUrl;
+      return imgUrl ? loadImageAsync(imgUrl) : Promise.resolve(null);
+    })
+  );
 
   return rawPages.map((p, idx) => {
     const canvas = document.createElement('canvas');
@@ -120,55 +243,102 @@ function generateCanvasesFromStoryPages(story) {
     canvas.height = height;
     const ctx = canvas.getContext('2d');
 
-    // Warm cream storybook page background
+    // Warm cream storybook background
     ctx.fillStyle = '#fdfbf7';
     ctx.fillRect(0, 0, width, height);
 
-    // Child-friendly decorative frame in Super Kayyem Blue & Gold
-    ctx.strokeStyle = '#2563eb';
+    // Decorative frame (Super Kayyem Navy & Gold)
+    ctx.strokeStyle = '#1e3a8a';
     ctx.lineWidth = 4;
+    ctx.strokeRect(36, 36, width - 72, height - 72);
+
+    ctx.strokeStyle = '#d97706';
+    ctx.lineWidth = 2;
     ctx.strokeRect(48, 48, width - 96, height - 96);
 
-    ctx.strokeStyle = '#fbbf24';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(62, 62, width - 124, height - 124);
-
     ctx.direction = 'rtl';
-    ctx.textAlign = 'right';
+    const headline = p.headline || p.Headline;
+    const hasSeparator = p.hasSeparator || p.HasSeparator;
+    const img = loadedImages[idx];
+    const contentText = p.content || p.Content || '';
 
-    // Story header badge
-    ctx.fillStyle = '#2563eb';
-    ctx.font = '700 24px Tahoma, "Noto Sans Arabic", sans-serif';
-    ctx.fillText(story?.title || 'قصة سوبر قيم', width - 96, 120);
+    let curY = 85;
 
-    if (story?.category || story?.valueLearned) {
-      ctx.fillStyle = '#d97706';
-      ctx.font = '700 20px Tahoma, "Noto Sans Arabic", sans-serif';
-      ctx.fillText(`القيمة: ${story.category || story.valueLearned}`, width - 96, 158);
+    // Header: Headline or Story Title
+    if (headline) {
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#1e3a8a';
+      ctx.font = 'bold 30px "Tajawal", "Cairo", sans-serif';
+      ctx.fillText(headline, width / 2, curY);
+      curY += 25;
+    } else {
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#1e3a8a';
+      ctx.font = 'bold 22px "Tajawal", "Cairo", sans-serif';
+      ctx.fillText(story?.title || 'قصة سوبر قيم', width / 2, curY);
+      curY += 20;
     }
 
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(96, 182);
-    ctx.lineTo(width - 96, 182);
-    ctx.stroke();
+    // Ornamental Divider
+    if (hasSeparator) {
+      drawOrnamentalDivider(ctx, curY + 10, width);
+      curY += 35;
+    } else {
+      curY += 15;
+    }
 
-    // Story page content
-    const contentText = p.content || p.Content || '';
-    ctx.fillStyle = '#1e293b';
-    ctx.font = '500 34px Tahoma, "Noto Sans Arabic", sans-serif';
-    wrapArabicCanvasText(ctx, contentText, width - 100, 290, width - 200, 64);
+    if (img) {
+      // Upper half illustration: 360px height (space reserved only when image is uploaded)
+      const imgX = 70;
+      const imgY = curY + 10;
+      const imgW = width - 140; // 660px
+      const imgH = 360;
+
+      drawRoundedImage(ctx, img, imgX, imgY, imgW, imgH, 12);
+
+      // Lower half text: font 25px, lineHeight 42px
+      const textStartY = imgY + imgH + 50;
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#1e293b';
+      ctx.font = '500 25px "Tajawal", "Cairo", sans-serif';
+
+      const maxTextWidth = width - 140;
+      const lines = wrapArabicCanvasTextLines(ctx, contentText, maxTextWidth);
+
+      let textY = textStartY;
+      for (const line of lines) {
+        ctx.fillText(line, width - 70, textY);
+        textY += 42;
+      }
+    } else {
+      // No illustration: Start directly from the top/start of the page body without reserving space for an image
+      const textStartY = curY + 25;
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#1e293b';
+      ctx.font = '500 28px "Tajawal", "Cairo", sans-serif';
+
+      const maxTextWidth = width - 140;
+      const lines = wrapArabicCanvasTextLines(ctx, contentText, maxTextWidth);
+      const lineHeight = 48;
+
+      let textY = textStartY;
+      for (const line of lines) {
+        ctx.fillText(line, width - 70, textY);
+        textY += lineHeight;
+      }
+    }
 
     // Page number footer
     ctx.textAlign = 'center';
     ctx.fillStyle = '#64748b';
-    ctx.font = '700 24px Tahoma, "Noto Sans Arabic", sans-serif';
-    ctx.fillText(`— صفحة ${p.pageNum || idx + 1} —`, width / 2, height - 84);
+    ctx.font = '700 20px "Tajawal", "Cairo", sans-serif';
+    ctx.fillText(`— صفحة ${p.pageNum || p.PageNum || idx + 1} —`, width / 2, height - 60);
 
     return canvas;
   });
 }
+
+const generateCanvasesFromStoryPages = renderStoryPagesToCanvases;
 
 export function FlipbookReader({ story }) {
   const wrapperRef = useRef(null);
@@ -275,10 +445,12 @@ export function FlipbookReader({ story }) {
 
       // Fallback: Render story.pages onto 3D canvases
       if (!cancelled) {
-        const fallbackCanvases = generateCanvasesFromStoryPages(story);
-        setPageAspect(fallbackCanvases[0].width / fallbackCanvases[0].height);
-        setPageCanvases(fallbackCanvases);
-        setLoading(false);
+        const fallbackCanvases = await renderStoryPagesToCanvases(story);
+        if (!cancelled && fallbackCanvases && fallbackCanvases.length > 0) {
+          setPageAspect(fallbackCanvases[0].width / fallbackCanvases[0].height);
+          setPageCanvases(fallbackCanvases);
+          setLoading(false);
+        }
       }
     }
 

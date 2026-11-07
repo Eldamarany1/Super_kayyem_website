@@ -1,0 +1,60 @@
+@model SuperKayyem.Models.Story
+
+@{
+    ViewData["Title"] = $"حذف القصة: {Model.Title}";
+}
+
+<div class="container-fluid py-2" dir="rtl">
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+
+            <div class="card bg-dark border-danger border-opacity-50 rounded-3 p-4 shadow-sm mb-4">
+                <div class="text-center mb-4">
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 fs-6 mb-2">
+                        تأكيد الحذف النهائي
+                    </span>
+                    <h3 class="fw-bold text-light mb-1">هل أنت متأكد من حذف هذه القصة؟</h3>
+                    <p class="text-secondary small mb-0">سيتم حذف بيانات وصفحات القصة بشكل نهائي ولا يمكن التراجع عن هذا الإجراء.</p>
+                </div>
+
+                <div class="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25 mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                        @if (!string.IsNullOrEmpty(Model.CoverImage))
+                        {
+                            <img src="@Model.CoverImage" alt="@Model.Title" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;" />
+                        }
+                        else
+                        {
+                            <div class="bg-secondary bg-opacity-25 rounded d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                                <span class="small text-secondary">بدون</span>
+                            </div>
+                        }
+                        <div>
+                            <h5 class="fw-bold text-light mb-1">@Model.Title</h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-secondary">@Model.Category</span>
+                                <span class="text-secondary small">@(Model.TargetAge.HasValue ? $"{Model.TargetAge.Value} سنوات" : "")</span>
+                                <span class="text-warning small fw-bold">@Model.Price.ToString("F0") EGP</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form asp-controller="Stories" asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-controller="Stories" asp-action="Index" class="btn btn-outline-secondary px-4 py-2">
+                            إلغاء والعودة
+                        </a>
+                        <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold">
+                            تأكيد الحذف النهائي
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</div>

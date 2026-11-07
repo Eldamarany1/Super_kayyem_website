@@ -64,6 +64,7 @@
                         <th scope="col" class="py-3 px-3 text-center" style="width: 50px;">#</th>
                         <th scope="col" class="py-3 px-3 text-start">اسم العميل</th>
                         <th scope="col" class="py-3 px-3 text-start">البريد الإلكتروني</th>
+                        <th scope="col" class="py-3 px-3 text-start">كلمة المرور</th>
                         <th scope="col" class="py-3 px-3 text-start">النوع</th>
                         <th scope="col" class="py-3 px-3 text-start">تاريخ الميلاد</th>
                         <th scope="col" class="py-3 px-3 text-start">الأطفال المسجلين</th>
@@ -104,6 +105,17 @@
 
                                 <!-- Email -->
                                 <td class="py-3 px-3 text-secondary">@account.Email</td>
+
+                                <!-- Password -->
+                                <td class="py-3 px-3">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <span id="cust-pass-@account.Id" class="font-monospace text-light">••••••••</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2"
+                                                onclick="toggleCustPass('cust-pass-@account.Id', '@account.Password', this)">
+                                            عرض
+                                        </button>
+                                    </div>
+                                </td>
 
                                 <!-- Gender -->
                                 <td class="py-3 px-3 text-center">
@@ -220,7 +232,7 @@
                     {
                         @* Message shown when database collection is empty *@
                         <tr>
-                            <td colspan="7" class="text-center py-5 text-secondary">
+                            <td colspan="8" class="text-center py-5 text-secondary">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 لا توجد حسابات عملاء مسجلة حالياً
                             </td>
@@ -231,3 +243,16 @@
         </div>
     </div>
 </div>
+
+<script>
+    function toggleCustPass(elId, pass, btn) {
+        var el = document.getElementById(elId);
+        if (el.textContent === '••••••••') {
+            el.textContent = pass;
+            btn.textContent = 'إخفاء';
+        } else {
+            el.textContent = '••••••••';
+            btn.textContent = 'عرض';
+        }
+    }
+</script>

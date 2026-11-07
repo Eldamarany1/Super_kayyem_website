@@ -282,10 +282,22 @@ namespace SuperKayyem.Tests
             Assert.Equal(nameof(AdminArticlesController.Index), redirectReject.ActionName);
             Assert.NotNull(await context.Articles.FindAsync(15)); // Still in DB
 
-            // 2. Owner deletes
+            // Non-owner tries POST DeleteConfirmed
+            var rejectPostResult = await nonOwnerController.DeleteConfirmed(15);
+            var redirectPostReject = Assert.IsType<RedirectToActionResult>(rejectPostResult);
+            Assert.Equal(nameof(AdminArticlesController.Index), redirectPostReject.ActionName);
+            Assert.NotNull(await context.Articles.FindAsync(15)); // Still in DB
+
+            // 2. Owner accesses GET Delete confirmation view
             var ownerController = new AdminArticlesController(context, loggerMock.Object);
             SetupController(ownerController, CreateUserPrincipal("محمود", "mahmoud@superkayyem.com", "Admin"));
-            var allowResult = await ownerController.Delete(15);
+            var getDeleteResult = await ownerController.Delete(15);
+            var viewResult = Assert.IsType<ViewResult>(getDeleteResult);
+            var model = Assert.IsType<Article>(viewResult.Model);
+            Assert.Equal(15, model.Id);
+
+            // 3. Owner confirms deletion via POST DeleteConfirmed
+            var allowResult = await ownerController.DeleteConfirmed(15);
 
             var redirectAllow = Assert.IsType<RedirectToActionResult>(allowResult);
             Assert.Equal(nameof(AdminArticlesController.Index), redirectAllow.ActionName);
@@ -325,10 +337,16 @@ namespace SuperKayyem.Tests
             var postEditResult = await controller.Edit(20, new Article { Title = "تعديل غير مصرح" }, null);
             Assert.IsType<ForbidResult>(postEditResult);
 
-            // Act 3: POST Delete
+            // Act 3: GET Delete (non-matching email rejected)
             var deleteResult = await controller.Delete(20);
             var redirectDelete = Assert.IsType<RedirectToActionResult>(deleteResult);
             Assert.Equal(nameof(AdminArticlesController.Index), redirectDelete.ActionName);
+            Assert.NotNull(await context.Articles.FindAsync(20)); // Article not deleted
+
+            // Act 4: POST DeleteConfirmed (non-matching email rejected)
+            var postDeleteResult = await controller.DeleteConfirmed(20);
+            var redirectPostDelete = Assert.IsType<RedirectToActionResult>(postDeleteResult);
+            Assert.Equal(nameof(AdminArticlesController.Index), redirectPostDelete.ActionName);
             Assert.NotNull(await context.Articles.FindAsync(20)); // Article not deleted
         }
 
@@ -368,6 +386,24 @@ namespace SuperKayyem.Tests
             Assert.IsType<ForbidResult>(result);
             var inDb = await context.Articles.FindAsync(21);
             Assert.Equal("مقال أصلي", inDb!.Title);
+        }
+
+        [Fact]
+        public async Task AdminArticles_Delete_Should_Return_NotFound_When_Article_Does_Not_Exist()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext(nameof(AdminArticles_Delete_Should_Return_NotFound_When_Article_Does_Not_Exist));
+            var loggerMock = new Mock<ILogger<AdminArticlesController>>();
+            var controller = new AdminArticlesController(context, loggerMock.Object);
+            SetupController(controller, CreateUserPrincipal("سوبر أدمن", "superadmin@superkayyem.com", "SuperAdmin"));
+
+            // Act 1: GET Delete non-existent ID
+            var getResult = await controller.Delete(999);
+            Assert.IsType<NotFoundResult>(getResult);
+
+            // Act 2: POST DeleteConfirmed non-existent ID
+            var postResult = await controller.DeleteConfirmed(999);
+            Assert.IsType<NotFoundResult>(postResult);
         }
     }
 }
